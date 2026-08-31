@@ -1,0 +1,4 @@
+flask
+requests
+yt-dlp
+pytest
