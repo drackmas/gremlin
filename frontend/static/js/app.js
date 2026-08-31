@@ -246,26 +246,53 @@ function toolChip(name, status) {
   return chip;
 }
 
+function renderTimeline(bubble, timeline) {
+  for (const part of timeline) {
+    if (part.t === "thinking") {
+      const det = el("details", "thinking");
+      det.append(el("summary", "thinking-summary", "Thinking"), el("div", "thinking-body", part.text));
+      bubble.appendChild(det);
+    } else if (part.t === "text") {
+      bubble.appendChild(el("div", "msg-text", part.text));
+    } else if (part.t === "tool") {
+      let row = bubble.lastElementChild;
+      if (!row || !row.classList.contains("tool-chips")) {
+        row = el("div", "tool-chips");
+        bubble.appendChild(row);
+      }
+      row.appendChild(toolChip(part.name, part.status));
+    }
+  }
+}
+
 function appendMessage(msg, container) {
   const row = el("div", `msg ${msg.role === "user" ? "msg-user" : "msg-assistant"} d-flex`);
   const bubble = el("div", `bubble ${msg.role === "user" ? "bubble-user" : "bubble-assistant"}`);
 
+  let text = null;
   if (msg.role === "assistant") {
-    if (msg.thinking) {
-      const det = el("details", "thinking");
-      const sum = el("summary", "thinking-summary", "Thinking");
-      const body = el("div", "thinking-body", msg.thinking);
-      det.append(sum, body);
-      bubble.appendChild(det);
+    if (Array.isArray(msg.timeline) && msg.timeline.length) {
+      renderTimeline(bubble, msg.timeline);
+    } else {
+      if (msg.thinking) {
+        const det = el("details", "thinking");
+        const sum = el("summary", "thinking-summary", "Thinking");
+        const body = el("div", "thinking-body", msg.thinking);
+        det.append(sum, body);
+        bubble.appendChild(det);
+      }
+      if (Array.isArray(msg.tool_calls) && msg.tool_calls.length) {
+        const wrap = el("div", "tool-chips");
+        for (const tc of msg.tool_calls) wrap.appendChild(toolChip(tc.name, tc.status));
+        bubble.appendChild(wrap);
+      }
+      text = el("div", "msg-text", msg.content || "");
+      bubble.appendChild(text);
     }
-    if (Array.isArray(msg.tool_calls) && msg.tool_calls.length) {
-      const wrap = el("div", "tool-chips");
-      for (const tc of msg.tool_calls) wrap.appendChild(toolChip(tc.name, tc.status));
-      bubble.appendChild(wrap);
-    }
+  } else {
+    text = el("div", "msg-text", msg.content || "");
+    bubble.appendChild(text);
   }
-  const text = el("div", "msg-text", msg.content || "");
-  bubble.appendChild(text);
   row.appendChild(bubble);
   container.appendChild(row);
   return { row, bubble, text };
@@ -318,20 +345,16 @@ async function sendMessage() {
   input.placeholder = "Gremlin is thinking…";
 
   const refs = appendMessage({ role: "assistant", content: "" }, container);
-  let thinkingDet = null;
-  let toolWrap = null;
+  let pendingText = refs.text; // empty blinking placeholder, kept last until filled
+  let lastPart = null;
+  let lastKind = null;
 
-  const ensureThinking = () => {
-    if (thinkingDet) return;
-    thinkingDet = el("details", "thinking");
-    thinkingDet.open = true;
-    thinkingDet.append(el("summary", "thinking-summary", "Thinking"), el("div", "thinking-body"));
-    refs.bubble.insertBefore(thinkingDet, refs.bubble.firstChild);
-  };
-  const ensureTools = () => {
-    if (toolWrap) return;
-    toolWrap = el("div", "tool-chips");
-    refs.bubble.insertBefore(toolWrap, refs.text);
+  const place = (node) => {
+    if (pendingText && pendingText.textContent === "") {
+      refs.bubble.insertBefore(node, pendingText);
+    } else {
+      refs.bubble.appendChild(node);
+    }
   };
 
   try {
@@ -380,16 +403,44 @@ async function sendMessage() {
   function handleEvent(ev) {
     if (ev.type === "thinking") {
       if (!state.settings || !state.settings.show_thinking) return;
-      ensureThinking();
-      thinkingDet.querySelector(".thinking-body").textContent += ev.text;
+      if (lastKind === "thinking") {
+        lastPart.querySelector(".thinking-body").textContent += ev.text;
+      } else {
+        const det = el("details", "thinking");
+        det.open = true;
+        det.append(el("summary", "thinking-summary", "Thinking"), el("div", "thinking-body", ev.text));
+        place(det);
+        lastPart = det;
+        lastKind = "thinking";
+      }
     } else if (ev.type === "text") {
-      refs.text.textContent += ev.text;
+      if (lastKind === "text") {
+        lastPart.textContent += ev.text;
+      } else if (pendingText && pendingText.textContent === "") {
+        lastPart = pendingText;
+        pendingText = null;
+        lastKind = "text";
+        lastPart.textContent = ev.text;
+      } else {
+        lastPart = el("div", "msg-text", ev.text);
+        place(lastPart);
+        lastKind = "text";
+      }
     } else if (ev.type === "tool_call") {
-      ensureTools();
-      toolWrap.appendChild(toolChip(ev.name, ev.status));
+      if (lastKind === "tool") {
+        lastPart.appendChild(toolChip(ev.name, ev.status));
+      } else {
+        const row = el("div", "tool-chips");
+        row.appendChild(toolChip(ev.name, ev.status));
+        place(row);
+        lastPart = row;
+        lastKind = "tool";
+      }
     } else if (ev.type === "error") {
       const err = el("div", "msg-error text-danger small", ev.message);
       refs.bubble.appendChild(err);
+      lastPart = null;
+      lastKind = null;
     } else if (ev.type === "done") {
       refreshSessions().catch(() => {});
     }

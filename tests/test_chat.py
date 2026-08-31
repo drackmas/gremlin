@@ -67,7 +67,12 @@ def test_thinking_captured_and_filtered(cfg):
     s = sessions.create("t")
     events = list(manager.run(s["id"], "hi", SETTINGS))
     assert [e["type"] for e in events] == ["thinking", "text", "done"]
-    assert sessions.get(s["id"])["messages"][1]["thinking"] == "hmm..."
+    stored = sessions.get(s["id"])["messages"][1]
+    assert stored["timeline"] == [
+        {"t": "thinking", "text": "hmm..."},
+        {"t": "text", "text": "answer"},
+    ]
+    assert "thinking" not in stored
 
     # show_thinking off: no thinking events streamed, nothing persisted
     backend2 = FakeBackend(
@@ -78,7 +83,9 @@ def test_thinking_captured_and_filtered(cfg):
     s2 = sessions2.create("t")
     events2 = list(manager2.run(s2["id"], "hi", {**SETTINGS, "show_thinking": False}))
     assert all(e["type"] != "thinking" for e in events2)
-    assert "thinking" not in sessions2.get(s2["id"])["messages"][1]
+    stored2 = sessions2.get(s2["id"])["messages"][1]
+    assert "thinking" not in stored2
+    assert stored2["timeline"] == [{"t": "text", "text": "answer"}]
 
 
 def test_tool_loop_end_to_end(cfg):
@@ -118,6 +125,11 @@ def test_tool_loop_end_to_end(cfg):
     assert stored["content"] == "Let me read it.It says hi."
     assert stored["tool_calls"][0]["name"] == "read_file"
     assert stored["tool_calls"][0]["result"].startswith("hi from file")
+    assert stored["timeline"] == [
+        {"t": "text", "text": "Let me read it."},
+        {"t": "tool", "name": "read_file", "status": "ok"},
+        {"t": "text", "text": "It says hi."},
+    ]
 
 
 def test_failing_tool_reported_to_model_and_client(cfg):
@@ -157,6 +169,10 @@ def test_model_error_yields_error_event(cfg):
     assert "model exploded" in err["message"]
     stored = sessions.get(s["id"])["messages"][1]
     assert "error" in stored["content"]
+    last = stored["timeline"][-1]
+    assert last["t"] == "text"
+    assert last["text"].startswith("(error:")
+    assert "model exploded" in last["text"]
 
 
 def test_tool_loop_exhaustion(cfg):
@@ -171,3 +187,68 @@ def test_tool_loop_exhaustion(cfg):
     assert events[-1]["type"] == "done"
     # bounded by MAX_TOOL_ITERATIONS
     assert len(backend.calls) == cfg.MAX_TOOL_ITERATIONS
+    stored = sessions.get(s["id"])["messages"][1]
+    last = stored["timeline"][-1]
+    assert last["t"] == "text"
+    assert "maximum iterations" in last["text"]
+
+
+def test_timeline_interleaved_persisted(cfg):
+    (cfg.root / "hello.txt").write_text("hi from file")
+    backend = FakeBackend(
+        [
+            [
+                ModelEvent("thinking", text="plan"),
+                ModelEvent("text", text="Let me check."),
+                ModelEvent("tool_call", tool_call_id="call_1", name="read_file", arguments={"path": "hello.txt"}),
+                ModelEvent("done", finish_reason="tool_calls"),
+            ],
+            [
+                ModelEvent("thinking", text="now answer"),
+                ModelEvent("text", text="It says hi."),
+                ModelEvent("done"),
+            ],
+        ]
+    )
+    sessions, manager = make_manager(cfg, backend)
+    s = sessions.create("t")
+    events = list(manager.run(s["id"], "read hello.txt", SETTINGS))
+    assert [e["type"] for e in events] == [
+        "thinking", "text", "tool_call", "thinking", "text", "done",
+    ]
+    stored = sessions.get(s["id"])["messages"][1]
+    assert stored["timeline"] == [
+        {"t": "thinking", "text": "plan"},
+        {"t": "text", "text": "Let me check."},
+        {"t": "tool", "name": "read_file", "status": "ok"},
+        {"t": "thinking", "text": "now answer"},
+        {"t": "text", "text": "It says hi."},
+    ]
+    assert stored["content"] == "Let me check.It says hi."
+    assert stored["tool_calls"][0]["name"] == "read_file"
+    assert stored["tool_calls"][0]["result"].startswith("hi from file")
+
+
+def test_multiple_tools_one_response(cfg):
+    (cfg.root / "hello.txt").write_text("hi")
+    backend = FakeBackend(
+        [
+            [
+                ModelEvent("tool_call", tool_call_id="c1", name="list_directory", arguments={}),
+                ModelEvent("tool_call", tool_call_id="c2", name="read_file", arguments={"path": "hello.txt"}),
+                ModelEvent("done", finish_reason="tool_calls"),
+            ],
+            [ModelEvent("text", text="done"), ModelEvent("done")],
+        ]
+    )
+    sessions, manager = make_manager(cfg, backend)
+    s = sessions.create("t")
+    events = list(manager.run(s["id"], "go", SETTINGS))
+    assert [e["type"] for e in events] == ["tool_call", "tool_call", "text", "done"]
+    stored = sessions.get(s["id"])["messages"][1]
+    assert stored["timeline"] == [
+        {"t": "tool", "name": "list_directory", "status": "ok"},
+        {"t": "tool", "name": "read_file", "status": "ok"},
+        {"t": "text", "text": "done"},
+    ]
+    assert len(stored["tool_calls"]) == 2

@@ -95,6 +95,13 @@ class ChatManager:
         thinking_parts: list[str] = []
         tool_calls: list[dict] = []
         error: str | None = None
+        timeline: list[dict] = []
+
+        def _append(kind: str, text: str) -> None:
+            if timeline and timeline[-1]["t"] == kind:
+                timeline[-1]["text"] += text
+            else:
+                timeline.append({"t": kind, "text": text})
 
         for _ in range(self.cfg.MAX_TOOL_ITERATIONS):
             turn_content: list[str] = []
@@ -105,9 +112,11 @@ class ChatManager:
                     if ev.kind == "thinking":
                         turn_thinking.append(ev.text)
                         if show_thinking:
+                            _append("thinking", ev.text)
                             yield {"type": "thinking", "text": ev.text}
                     elif ev.kind == "text":
                         turn_content.append(ev.text)
+                        _append("text", ev.text)
                         yield {"type": "text", "text": ev.text}
                     elif ev.kind == "tool_call":
                         turn_tools.append(
@@ -158,22 +167,24 @@ class ChatManager:
                     "result": result,
                     "status": status,
                 }
+                timeline.append({"t": "tool", "name": t["name"], "status": status})
                 api_messages.append(
                     {"role": "tool", "tool_call_id": t["id"], "content": result}
                 )
         else:
             error = error or "stopped: tool loop exceeded maximum iterations"
 
+        if error and not "".join(content_parts):
+            timeline.append({"t": "text", "text": f"(error: {error})"})
         assistant_msg = {
             "id": uuid.uuid4().hex,
             "role": "assistant",
             "content": "".join(content_parts),
             "ts": _now(),
         }
-        if thinking_parts and show_thinking:
-            assistant_msg["thinking"] = "".join(thinking_parts)
         if tool_calls:
             assistant_msg["tool_calls"] = tool_calls
+        assistant_msg["timeline"] = timeline
         if error and not assistant_msg["content"]:
             assistant_msg["content"] = f"(error: {error})"
         self.sessions.add_message(session_id, assistant_msg)
