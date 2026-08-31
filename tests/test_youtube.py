@@ -172,12 +172,24 @@ def test_registry_validation(cfg):
     assert "bogus" in out
 
 
-def test_transcript_saved_to_files(stubbed, tmp_path):
+def test_upload_date_format():
+    from tools.youtube import _upload_date
+
+    assert _upload_date({"upload_date": "20050423"}) == "2005-04-23"
+    assert _upload_date({"upload_date": None}) == ""
+    assert _upload_date({}) == ""
+    assert _upload_date({"upload_date": "2005-04-23"}) == ""
+
+
+def test_transcript_saved_to_files(stubbed, tmp_path, monkeypatch):
     from config import AppConfig
 
+    monkeypatch.setattr(stubbed, "_extract", lambda url: _info(
+        manual={"en": _sub()}, auto={}, upload_date="20050423"))
     cfg = AppConfig(root=tmp_path)
     out = fetch_transcript("https://youtu.be/x", "en", cfg=cfg)
-    dest = tmp_path / "files" / "transcripts" / "tester" / "Test Video.txt"
+    dest = tmp_path / "files" / "transcripts" / "tester" / "2005-04-23_Test Video.txt"
     assert dest.is_file()
     assert dest.read_text(encoding="utf-8").startswith("Video: Test Video")
+    assert "Uploaded: 2005-04-23" in dest.read_text(encoding="utf-8")
     assert f"Saved to: {dest.relative_to(tmp_path)}" in out

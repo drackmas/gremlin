@@ -138,6 +138,16 @@ def _safe_name(name: str, fallback: str = "untitled", maxlen: int = 100) -> str:
         name = name[:maxlen].rstrip()
     return name or fallback
 
+def _upload_date(info: dict) -> str:
+    """Return the video's upload date as ``YYYY-MM-DD``, or ``""`` if unknown.
+
+    yt-dlp exposes ``upload_date`` as an ``YYYYMMDD`` string.
+    """
+    raw = str(info.get("upload_date") or "").strip()
+    if len(raw) == 8 and raw.isdigit():
+        return f"{raw[0:4]}-{raw[4:6]}-{raw[6:8]}"
+    return ""
+
 def fetch_transcript(url: str, lang: str = "en", limit: int = TRANSCRIPT_LIMIT, cfg=None) -> str:
     """Full pipeline: extract info, pick subtitles, download, parse, save.
 
@@ -156,16 +166,19 @@ def fetch_transcript(url: str, lang: str = "en", limit: int = TRANSCRIPT_LIMIT, 
         raise YoutubeError("subtitle file was empty after parsing")
     title = info.get("title", "?")
     channel = info.get("channel") or info.get("uploader") or "?"
-    file_header = f"Video: {title}\nChannel: {channel}\nSource: {source} ({lang})\nURL: {url}\n\n"
+    date = _upload_date(info)
+    date_line = f"\nUploaded: {date}" if date else ""
+    file_header = f"Video: {title}\nChannel: {channel}{date_line}\nSource: {source} ({lang})\nURL: {url}\n\n"
     out = file_header + text
     saved = None
     if cfg is not None:
         try:
             channel_name = _safe_name(channel, "unknown-channel", 60)
             title_name = _safe_name(title, "untitled", 100)
+            prefix = f"{date}_" if date else ""
             dest_dir = cfg.transcripts_dir / channel_name
             dest_dir.mkdir(parents=True, exist_ok=True)
-            dest = dest_dir / f"{title_name}.txt"
+            dest = dest_dir / f"{prefix}{title_name}.txt"
             dest.write_text(file_header + text + "\n", encoding="utf-8")
             saved = dest.relative_to(cfg.root)
         except OSError as e:

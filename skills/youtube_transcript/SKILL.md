@@ -23,7 +23,8 @@ what is said) using the `youtube_transcript` and `youtube_video_info` tools.
      auto-generated captions are used.
    - The result starts with the video title, transcript source, and a
      "Saved to:" path — the full transcript is also written to disk at
-     `files/transcripts/<channel>/<video name>.txt`.
+     `files/transcripts/<channel>/<YYYY-MM-DD>_<video name>.txt` (the date
+     prefix is the video's upload date).
 2. Long transcripts are truncated at ~24 KB in the tool result. If the answer
    depends on content beyond the truncation point, read the saved file
    (`Saved to:` path) with the filesystem tools instead of guessing.
