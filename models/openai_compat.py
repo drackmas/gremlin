@@ -12,6 +12,7 @@ import json
 import logging
 from typing import Iterator
 
+import json_repair
 import requests
 
 from .base import ModelBackend, ModelEvent, ModelError
@@ -19,7 +20,24 @@ from .base import ModelBackend, ModelEvent, ModelError
 log = logging.getLogger("gremlin.model")
 
 _CONNECT_TIMEOUT = 10
+
 _READ_TIMEOUT = 600  # local models can be slow to first token
+
+def parse_tool_args(args_raw: str) -> dict:
+    """Parse streamed tool-call arguments, repairing small JSON slips.
+
+    Non-dict results are wrapped as ``{"value": ...}``; unrecoverable input
+    comes back as ``{"_raw": ...}`` so the registry can ask the model to retry.
+    """
+    if not args_raw:
+        return {}
+    try:
+        args = json_repair.loads(args_raw)
+        if not isinstance(args, dict):
+            args = {"value": args}
+        return args
+    except Exception:
+        return {"_raw": args_raw}
 
 
 class OpenAICompatBackend(ModelBackend):
@@ -53,6 +71,11 @@ class OpenAICompatBackend(ModelBackend):
             log.error("model HTTP %s: %s", resp.status_code, detail)
             raise ModelError(f"model returned HTTP {resp.status_code}", resp.status_code, detail)
 
+        # The provider may omit a charset in Content-Type; requests then defaults to
+        # ISO-8859-1, which decodes UTF-8 em dashes/emoji into mojibake ("â\x80\x94").
+        # Force UTF-8 before iter_lines(decode_unicode=True) below.
+        resp.encoding = "utf-8"
+
         # Accumulate tool-call fragments per index until the stream ends.
         tool_fragments: dict[int, dict] = {}
 
@@ -61,12 +84,7 @@ class OpenAICompatBackend(ModelBackend):
             for idx in sorted(tool_fragments):
                 frag = tool_fragments[idx]
                 args_raw = frag.get("arguments", "")
-                try:
-                    args = json.loads(args_raw) if args_raw else {}
-                    if not isinstance(args, dict):
-                        args = {"value": args}
-                except json.JSONDecodeError:
-                    args = {"_raw": args_raw}
+                args = parse_tool_args(args_raw)
                 events.append(
                     ModelEvent(
                         kind="tool_call",

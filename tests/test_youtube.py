@@ -9,10 +9,12 @@ from __future__ import annotations
 import pytest
 
 from tools import build_registry
+from tools.sanitize import BANNER
 from tools.youtube import (
     YoutubeError,
     _pick_subtitle,
     _parse_vtt,
+    build_youtube_tools,
     fetch_transcript,
     fetch_video_info,
 )
@@ -129,14 +131,15 @@ def stubbed(monkeypatch):
 
 def test_transcript_header_and_body(stubbed):
     out = fetch_transcript("https://youtu.be/x", "en")
-    assert out.startswith("Video: Test Video\nTranscript source: manual (en)")
+    assert out.startswith(BANNER)
+    assert "Video: Test Video\nTranscript source: manual (en)" in out
     assert "Hello world." in out
 
 
 def test_transcript_truncation(stubbed):
     out = fetch_transcript("https://youtu.be/x", "en", limit=50)
     assert out.endswith("[truncated]")
-    assert len(out) <= 50 + len("\n[truncated]")
+    assert len(out) <= 50 + len("\n[truncated]") + len(BANNER) + 2
 
 
 def test_video_info(stubbed):
@@ -144,6 +147,11 @@ def test_video_info(stubbed):
     assert "Title: Test Video" in out
     assert "Duration: 2:05" in out
     assert "Views: 42" in out
+
+
+def test_tool_descriptions_flag_untrusted(cfg):
+    for t in build_youtube_tools(cfg):
+        assert "untrusted external source" in t.description
 
 
 def test_registry_error_strings(monkeypatch, cfg):

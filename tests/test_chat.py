@@ -252,3 +252,87 @@ def test_multiple_tools_one_response(cfg):
         {"t": "text", "text": "done"},
     ]
     assert len(stored["tool_calls"]) == 2
+
+
+def test_system_prompt_identity_and_time(cfg):
+    backend = FakeBackend([[ModelEvent("text", text="hi"), ModelEvent("done")]])
+    sessions, manager = make_manager(cfg, backend)
+    s = sessions.create("t")
+    list(manager.run(s["id"], "hello", {**SETTINGS, "identity": "You are a pirate."}))
+    system = backend.calls[0]["messages"][0]["content"]
+    assert "You are a pirate." in system
+    assert "# Time" in system
+    assert "Current time:" in system
+
+
+def test_system_prompt_no_identity_section_when_empty(cfg):
+    backend = FakeBackend([[ModelEvent("text", text="hi"), ModelEvent("done")]])
+    sessions, manager = make_manager(cfg, backend)
+    s = sessions.create("t")
+    list(manager.run(s["id"], "hello", SETTINGS))
+    system = backend.calls[0]["messages"][0]["content"]
+    assert "# Identity" not in system
+
+
+def test_compress_cuts_history(cfg):
+    backend = FakeBackend(
+        [
+            [ModelEvent("text", text="Summary: user loves tea."), ModelEvent("done")],  # compress
+            [ModelEvent("text", text="ok"), ModelEvent("done")],                        # next turn
+        ]
+    )
+    sessions, manager = make_manager(cfg, backend)
+    s = sessions.create("t")
+    sessions.add_message(s["id"], {"id": "u1", "role": "user", "content": "I love tea", "ts": "t"})
+    sessions.add_message(s["id"], {"id": "a1", "role": "assistant", "content": "Noted.", "ts": "t"})
+
+    msg = manager.compress(s["id"], SETTINGS)
+    assert msg["compression"] is True
+    assert sessions.get(s["id"])["messages"][-1]["compression"] is True
+
+    list(manager.run(s["id"], "more tea?", SETTINGS))
+    sent = backend.calls[1]["messages"]
+    assert sent[0]["role"] == "system"
+    assert sent[1] == {"role": "user", "content": "Summary: user loves tea."}
+    assert all(m.get("content") != "I love tea" for m in sent)
+    assert sent[-1] == {"role": "user", "content": "more tea?"}
+
+
+def test_compress_empty_session_raises(cfg):
+    backend = FakeBackend([[]])
+    sessions, manager = make_manager(cfg, backend)
+    s = sessions.create("empty")
+    with pytest.raises(ValueError):
+        manager.compress(s["id"], SETTINGS)
+def test_pinned_memory_in_prompt(cfg):
+    from memory.store import MemoryStore
+
+    backend = FakeBackend([[ModelEvent("text", text="ok"), ModelEvent("done")]])
+    sessions, manager = make_manager(cfg, backend)
+    store = MemoryStore(cfg.data_dir / "memory.json")
+    store.add("always answer in English", pin=True)
+    manager.memory = store
+    s = sessions.create("t")
+    list(manager.run(s["id"], "hi", SETTINGS))
+    system = backend.calls[0]["messages"][0]["content"]
+    assert "# Pinned memory" in system
+    assert "always answer in English" in system
+
+
+def test_parse_tool_args():
+    from models.openai_compat import parse_tool_args
+
+    assert parse_tool_args("") == {}
+    assert parse_tool_args('{"path": "a.txt",}') == {"path": "a.txt"}
+    assert parse_tool_args('{"n": 1') == {"n": 1}
+    assert parse_tool_args("[1, 2]") == {"value": [1, 2]}
+    assert parse_tool_args("null") == {"value": None}
+
+
+def test_registry_rejects_raw_malformed_args(cfg):
+    backend = FakeBackend([[]])
+    _, manager = make_manager(cfg, backend)
+    text, ok = manager.registry.execute("memory_add", {"_raw": '{"content": oops'})
+    assert ok is False
+    assert "malformed JSON arguments" in text
+    assert "Retry" in text

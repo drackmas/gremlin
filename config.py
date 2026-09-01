@@ -22,6 +22,12 @@ class AppConfig:
 
     root: Path = field(default_factory=_default_root)
 
+    # --- API bridge ----------------------------------------------------
+    bridge_enabled: bool = False
+    bridge_host: str = "127.0.0.1"
+    bridge_port: int = 8787
+    bridge_key: str = ""
+
     # --- derived paths -------------------------------------------------
     @property
     def sessions_dir(self) -> Path:
@@ -66,6 +72,7 @@ class AppConfig:
         "theme": "default",    # bootswatch theme slug or "default"
         "base_url": "http://127.0.0.1:8080/v1",
         "model": "/home/dracmas/Downloads/Qwen3.8-27B-UD-Q8_K_XL.gguf",
+        "identity": "",  # optional persona text injected into the system prompt
     }
 
     MAX_TOOL_ITERATIONS: ClassVar[int] = 8

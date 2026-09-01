@@ -15,7 +15,10 @@ from pathlib import Path
 from flask import Flask, Response, jsonify, render_template, request
 
 from chat.manager import ChatManager
+from models.base import ModelError
 from chat.settings import SettingsError, SettingsStore
+from memory.store import MemoryStore
+
 from config import AppConfig, ensure_dirs
 from sessions import SessionError, SessionManager
 from skills.loader import SkillLoader
@@ -52,12 +55,12 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
         static_url_path="/static",
     )
     app.config["JSON_SORT_KEYS"] = False
-
     sessions = SessionManager(cfg)
     settings = SettingsStore(cfg)
     skills = SkillLoader(cfg)
-    registry = build_registry(cfg, skills)
-    manager = ChatManager(cfg, sessions, registry, skills)
+    memory = MemoryStore(cfg.data_dir / "memory.json")
+    registry = build_registry(cfg, skills, memory)
+    manager = ChatManager(cfg, sessions, registry, skills, memory=memory)
 
     # --- pages ----------------------------------------------------------
     @app.get("/")
@@ -96,6 +99,20 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
         except SessionError as e:
             return jsonify({"error": str(e)}), 404
         return "", 204
+
+    @app.post("/api/sessions/<session_id>/compress")
+    def compress_session(session_id):
+        try:
+            sessions.get(session_id)
+        except SessionError as e:
+            return jsonify({"error": str(e)}), 404
+        try:
+            msg = manager.compress(session_id, settings.load())
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        except ModelError as e:
+            return jsonify({"error": str(e)}), 502
+        return jsonify({"ok": True, "chars": len(msg["content"])})
 
     # --- chat (SSE) -------------------------------------------------------
     @app.post("/api/sessions/<session_id>/chat")
@@ -149,6 +166,26 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
         return jsonify(out)
 
     log.info("gremlin app ready (root=%s, sessions=%d)", cfg.root, len(sessions.list()))
+    # --- API bridge (opt-in) ---------------------------------------------
+    if cfg.bridge_enabled or os.environ.get("GREMLIN_BRIDGE") == "1":
+        from bridge import BridgeServer
+
+        bridge = BridgeServer(
+            manager,
+            sessions,
+            settings.load,
+            host=cfg.bridge_host,
+            port=cfg.bridge_port,
+            api_key=os.environ.get("GREMLIN_BRIDGE_KEY") or cfg.bridge_key,
+        )
+        try:
+            bridge.start()
+            log.info("API bridge listening on %s:%d", cfg.bridge_host, bridge.bound_port)
+        except (OSError, ValueError) as e:
+            log.error("API bridge failed to start: %s", e)
+            bridge = None
+        app.extensions["gremlin_bridge"] = bridge
+
     return app
 
 

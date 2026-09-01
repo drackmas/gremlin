@@ -66,9 +66,11 @@ class SettingsStore:
                 if not isinstance(value, bool):
                     raise SettingsError(f"{key} must be a boolean")
             elif isinstance(default, str):
-                if not isinstance(value, str) or not value.strip():
-                    raise SettingsError(f"{key} must be a non-empty string")
+                if not isinstance(value, str):
+                    raise SettingsError(f"{key} must be a string")
                 value = value.strip()
+                if not value and key != "identity":
+                    raise SettingsError(f"{key} must be a non-empty string")
                 if key == "appearance" and value not in _APPEARANCES:
                     raise SettingsError("appearance must be 'light' or 'dark'")
             else:

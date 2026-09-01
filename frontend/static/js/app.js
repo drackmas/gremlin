@@ -52,6 +52,7 @@ function applySettings(s) {
   $("set-thinking").checked = !!s.show_thinking;
   $("set-base-url").value = s.base_url || "";
   $("set-model").value = s.model || "";
+  $("set-identity").value = s.identity || "";
   setAppearanceActive(s.appearance);
   const sel = $("set-theme");
   if (sel.value !== s.theme) sel.value = s.theme;
@@ -89,6 +90,7 @@ function collectSettings() {
     theme: $("set-theme").value,
     base_url: $("set-base-url").value.trim(),
     model: $("set-model").value.trim(),
+    identity: $("set-identity").value.trim(),
   };
 }
 
@@ -146,7 +148,17 @@ function renderSessions() {
       deleteSession(s.id, s.title);
     });
 
-    item.append(title, rename, del);
+    const compress = document.createElement("button");
+    compress.type = "button";
+    compress.className = "session-icon btn";
+    compress.title = "Compress history (summarize to save tokens)";
+    compress.innerHTML = '<i class="bi bi-box-seam"></i>';
+    compress.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      compressSession(s.id, compress);
+    });
+
+    item.append(title, rename, compress, del);
     list.appendChild(item);
   }
 }
@@ -227,6 +239,28 @@ async function deleteSession(id, title) {
     createSession();
   } else if (state.activeId === null) {
     selectSession(state.sessions[0].id);
+  }
+}
+
+async function compressSession(id, btn) {
+  if (state.streaming) return;
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("disabled");
+  }
+  toast("Compressing…");
+  try {
+    const res = await api(`/api/sessions/${id}/compress`, { method: "POST" });
+    toast(`Compressed: ${res.chars} chars of summary`);
+    await refreshSessions();
+    if (state.activeId === id) await selectSession(id);
+  } catch (e) {
+    toast(`Compress failed: ${e.message}`);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("disabled");
+    }
   }
 }
 

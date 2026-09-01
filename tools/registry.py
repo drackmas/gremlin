@@ -101,6 +101,12 @@ class ToolRegistry:
         """Run a tool; returns (result_text, ok). Never raises for tool-level
         failures -- those are returned as structured error strings so the
         model can recover."""
+        if isinstance(args, dict) and "_raw" in args:
+            log.warning("tool %s got malformed JSON args: %s", name, str(args["_raw"])[:200])
+            return (
+                f"ERROR: tool {name} received malformed JSON arguments ({str(args['_raw'])[:200]}). "
+                "Retry the call with valid JSON."
+            ), False
         try:
             tool = self.get(name)
             args = validate_args(name, tool.parameters, args)

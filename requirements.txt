@@ -1,4 +1,6 @@
+discord.py
 flask
+json_repair
 requests
 yt-dlp
 pytest
