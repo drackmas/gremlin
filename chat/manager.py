@@ -227,6 +227,8 @@ class ChatManager:
                                 "arguments": ev.arguments,
                             }
                         )
+                    elif ev.kind == "done" and ev.usage:
+                        state["last_usage"] = ev.usage
             except ModelError as e:
                 error = str(e)
                 stop_reason = "model_error"
@@ -306,6 +308,23 @@ class ChatManager:
             state["content_parts"], state["tool_calls"], timeline, state["error"]
         )
         self.sessions.add_message(session_id, assistant_msg)
+        if not state["error"] and state.get("last_usage"):
+            u = state["last_usage"]
+            self.sessions.set_last_usage(
+                session_id,
+                {
+                    "prompt_tokens": u.get("prompt_tokens", 0),
+                    "completion_tokens": u.get("completion_tokens", 0),
+                    "total_tokens": u.get("total_tokens", 0),
+                },
+            )
+            yield {
+                "type": "usage",
+                "session_id": session_id,
+                "prompt_tokens": u.get("prompt_tokens", 0),
+                "completion_tokens": u.get("completion_tokens", 0),
+                "total_tokens": u.get("total_tokens", 0),
+            }
 
         if state["error"]:
             yield {"type": "error", "message": state["error"]}

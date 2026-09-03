@@ -55,6 +55,9 @@ class OpenAICompatBackend(ModelBackend):
 
     def stream(self, messages, tools, model) -> Iterator[ModelEvent]:
         payload = {"model": model, "messages": messages, "stream": True}
+        # Ask the provider to report token usage; llama.cpp returns it in a
+        # final empty-choices chunk that is otherwise dropped below.
+        payload["stream_options"] = {"include_usage": True}
         if tools:
             payload["tools"] = tools
         try:
@@ -81,6 +84,12 @@ class OpenAICompatBackend(ModelBackend):
 
         # Accumulate tool-call fragments per index until the stream ends.
         tool_fragments: dict[int, dict] = {}
+        last_usage: dict = {}
+        # llama.cpp (and other OpenAI-compatible servers) may send the usage
+        # chunk AFTER the finish_reason chunk; buffer the finish reason and
+        # emit the terminal event only at [DONE]/EOF so the trailing usage
+        # is captured.
+        pending_finish: str | None = None
 
         def flush_tools() -> list[ModelEvent]:
             events: list[ModelEvent] = []
@@ -112,11 +121,17 @@ class OpenAICompatBackend(ModelBackend):
                     if data == "[DONE]":
                         for ev in flush_tools():
                             yield ev
-                        yield ModelEvent(kind="done", finish_reason="stop")
+                        yield ModelEvent(kind="done", finish_reason=pending_finish or "stop", usage=last_usage)
                         return
                     try:
                         chunk = json.loads(data)
                     except json.JSONDecodeError:
+                        continue
+                    if chunk.get("usage"):
+                        last_usage = chunk["usage"]
+                    if pending_finish is not None:
+                        # Nothing legitimate follows the finish chunk; only the
+                        # usage capture above still matters.
                         continue
                     choices = chunk.get("choices") or []
                     if not choices:
@@ -142,14 +157,12 @@ class OpenAICompatBackend(ModelBackend):
 
                     finish = choice.get("finish_reason")
                     if finish:
-                        for ev in flush_tools():
-                            yield ev
-                        yield ModelEvent(kind="done", finish_reason=finish)
-                        return
+                        pending_finish = finish
         finally:
             resp.close()
 
-        # Stream ended without an explicit finish_reason.
+        # Stream ended (possibly without an explicit finish reason); emit the
+        # single terminal event with whatever usage was captured.
         for ev in flush_tools():
             yield ev
-        yield ModelEvent(kind="done", finish_reason="stop")
+        yield ModelEvent(kind="done", finish_reason=pending_finish or "stop", usage=last_usage)

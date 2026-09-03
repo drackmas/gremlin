@@ -94,3 +94,48 @@ def test_backend_defaults_finish_reason_when_stream_has_none():
     assert [e.kind for e in events] == ["text", "done"]
     assert events[1].kind == "done"
     assert events[1].finish_reason == "stop"
+def test_backend_captures_stream_usage_and_requests_it():
+    """The payload must request usage (stream_options) and the terminal `done`
+    event must carry the provider usage from the empty-choices chunk that
+    llama.cpp sends AFTER the finish_reason chunk (real wire order:
+    text deltas -> finish_reason chunk -> usage chunk -> [DONE])."""
+    usage = {"prompt_tokens": 42, "completion_tokens": 7, "total_tokens": 49}
+    backend = OpenAICompatBackend("http://fake/v1")
+    resp = _sse_stream(
+        [
+            _sse_line({"choices": [{"delta": {"content": "hi"}}]}),
+            _sse_line({"choices": [{"delta": {}, "finish_reason": "stop"}]}),
+            _sse_line({"choices": [], "usage": usage}),
+            "data: [DONE]",
+        ]
+    )
+    with mock.patch.object(backend._session, "post", return_value=resp) as post:
+        events = list(backend.stream([], [], "fake"))
+
+    payload = post.call_args.kwargs["json"]
+    assert payload["stream_options"] == {"include_usage": True}
+    done = [e for e in events if e.kind == "done"]
+    assert len(done) == 1
+    assert done[0].finish_reason == "stop"
+    assert done[0].usage == usage
+
+
+def test_backend_carries_usage_on_fallback_done():
+    """A stream that ends without [DONE] must still carry the captured usage on
+    the fallback terminal `done` — the buffered finish reason survives, and the
+    trailing usage chunk (after the finish chunk) is captured before EOF."""
+    usage = {"prompt_tokens": 5, "completion_tokens": 1, "total_tokens": 6}
+    backend = OpenAICompatBackend("http://fake/v1")
+    resp = _sse_stream(
+        [
+            _sse_line({"choices": [{"delta": {"content": "x"}}]}),
+            _sse_line({"choices": [{"delta": {}, "finish_reason": "tool_calls"}]}),
+            _sse_line({"choices": [], "usage": usage}),
+        ]
+    )
+    with mock.patch.object(backend._session, "post", return_value=resp):
+        events = list(backend.stream([], [], "fake"))
+    done = [e for e in events if e.kind == "done"]
+    assert len(done) == 1
+    assert done[0].finish_reason == "tool_calls"
+    assert done[0].usage == usage

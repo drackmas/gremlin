@@ -13,6 +13,7 @@ import sys
 
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, render_template, request
+import requests
 
 from chat.manager import ChatManager
 from models.base import ModelError
@@ -184,6 +185,48 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
             discord_bot.stop()
             log.info("discord bot stopped from settings toggle")
         return jsonify(saved)
+    # --- model -------------------------------------------------------------
+    model_context_cache: dict[tuple[str, str], int] = {}
+
+    @app.get("/api/model/context")
+    def model_context():
+        """Effective context window for the configured model, from the server.
+
+        Cached per (base_url, model); changing either is a natural cache miss.
+        Never guesses: an unknown model or missing metadata degrades to
+        ``{"ok": false, ...}`` (HTTP 200) — no silent fallback to another
+        model's limit.
+        """
+        s = settings.load()
+        base_url = (s.get("base_url") or "").rstrip("/")
+        model = (s.get("model") or "").strip()
+        key = (base_url, model)
+        cached = model_context_cache.get(key)
+        if cached is not None:
+            return jsonify({"ok": True, "model": model, "n_ctx": cached})
+        if not base_url or not model:
+            return jsonify({"ok": False, "error": "base_url or model not configured"}), 200
+        url = base_url if base_url.endswith("/models") else base_url + "/models"
+        try:
+            resp = requests.get(url, timeout=3)
+            resp.raise_for_status()
+            data = resp.json().get("data") or []
+        except Exception as e:
+            log.warning("model context query failed: %s", e)
+            return jsonify({"ok": False, "error": f"cannot query models endpoint: {e}"}), 200
+        entry = next((m for m in data if isinstance(m, dict) and m.get("id") == model), None)
+        if entry is None:
+            return jsonify({"ok": False, "error": f"model '{model}' not found"}), 200
+        meta = entry.get("meta") or {}
+        n_ctx = meta.get("n_ctx")
+        if not isinstance(n_ctx, int) or n_ctx <= 0:
+            n_ctx = entry.get("max_context_length")
+        if not isinstance(n_ctx, int) or n_ctx <= 0:
+            n_ctx = entry.get("context_length")
+        if not isinstance(n_ctx, int) or n_ctx <= 0:
+            return jsonify({"ok": False, "error": f"no context length reported for model '{model}'"}), 200
+        model_context_cache[key] = n_ctx
+        return jsonify({"ok": True, "model": model, "n_ctx": n_ctx})
 
     # --- themes -----------------------------------------------------------
     @app.get("/api/themes")

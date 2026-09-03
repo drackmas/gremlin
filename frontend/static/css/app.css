@@ -309,3 +309,17 @@ body {
     padding: 0.5rem;
   }
 }
+
+/* ---------------- context indicator ---------------- */
+
+.context-indicator {
+  font-size: 0.72rem;
+  color: var(--bs-secondary-color, #888);
+  user-select: none;
+  cursor: default;
+}
+
+.context-indicator.warn {
+  color: var(--bs-warning, #ffc107);
+  font-weight: 600;
+}

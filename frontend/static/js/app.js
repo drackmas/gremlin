@@ -7,6 +7,8 @@ const state = {
   activeId: null,
   streaming: false,
   sidebar: null,
+  n_ctx: null,
+  lastPrompt: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -105,12 +107,55 @@ function collectSettings() {
 
 async function saveSettings() {
   const s = collectSettings();
+  const prev = state.settings || {};
+  const contextChanged = s.model !== prev.model || s.base_url !== prev.base_url;
   try {
     const saved = await api("/api/settings", { method: "POST", body: JSON.stringify(s) });
     applySettings(saved);
+    if (contextChanged) {
+      // A different model makes any previous count meaningless.
+      state.lastPrompt = null;
+      state.n_ctx = null;
+      loadContextLimit();
+    }
     toast("Settings saved");
   } catch (e) {
     toast(`Could not save settings: ${e.message}`);
+  }
+}
+
+/* ---------------- context indicator ---------------- */
+async function loadContextLimit() {
+  try {
+    const res = await api("/api/model/context");
+    if (res.ok && typeof res.n_ctx === "number" && res.n_ctx > 0) {
+      state.n_ctx = res.n_ctx;
+    } else {
+      state.n_ctx = null;
+    }
+  } catch (e) {
+    state.n_ctx = null;
+  }
+  renderContextIndicator();
+}
+
+function renderContextIndicator() {
+  const ind = $("context-indicator");
+  if (!ind) return;
+  const p = state.lastPrompt;
+  if (p != null && typeof state.n_ctx === "number" && state.n_ctx > 0) {
+    const pct = (p / state.n_ctx) * 100;
+    ind.textContent = `${Math.round(pct)}%`;
+    ind.title = `${p.toLocaleString()} / ${state.n_ctx.toLocaleString()} prompt tokens — last model request for this session`;
+    ind.classList.toggle("warn", pct >= 80);
+  } else if (p != null) {
+    ind.textContent = `${p.toLocaleString()} prompt tokens`;
+    ind.title = `${p.toLocaleString()} prompt tokens — last model request for this session (limit unknown)`;
+    ind.classList.remove("warn");
+  } else {
+    ind.textContent = "–";
+    ind.title = "";
+    ind.classList.remove("warn");
   }
 }
 
@@ -198,6 +243,10 @@ async function selectSession(id) {
     return;
   }
   renderMessages(session.messages || []);
+  state.lastPrompt = session.last_usage && typeof session.last_usage.prompt_tokens === "number"
+    ? session.last_usage.prompt_tokens
+    : null;
+  renderContextIndicator();
   if (state.sidebar && window.innerWidth < 992) state.sidebar.hide();
 }
 
@@ -484,6 +533,11 @@ async function sendMessage() {
       refs.bubble.appendChild(err);
       lastPart = null;
       lastKind = null;
+    } else if (ev.type === "usage") {
+      if (ev.session_id === state.activeId) {
+        state.lastPrompt = ev.prompt_tokens;
+        renderContextIndicator();
+      }
     } else if (ev.type === "done") {
       refreshSessions().catch(() => {});
     }
@@ -526,6 +580,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   await loadThemes();
   if (state.settings) applySettings(state.settings); // restore select value
+  loadContextLimit();
 
   try {
     state.sessions = await api("/api/sessions");

@@ -365,3 +365,150 @@ def test_discord_wiring_injects_pinned_memory(cfg):
     sys_msg = backend.calls[0]["messages"][0]
     assert sys_msg["role"] == "system"
     assert "user prefers terse answers" in sys_msg["content"]
+
+
+class UsageBackend(ModelBackend):
+    """Fake tokenizer (one token per character of message content): each
+    `done` carries the exact prompt size of the request Gremlin sent, so
+    per-session usage attribution is checkable end to end."""
+
+    def __init__(self):
+        self.calls = []
+
+    def stream(self, messages, tools, model):
+        self.calls.append(json.loads(json.dumps(messages)))
+        prompt_tokens = sum(len(str(m.get("content") or "")) for m in messages)
+        yield ModelEvent("text", text="ok")
+        yield ModelEvent(
+            "done",
+            usage={"prompt_tokens": prompt_tokens, "completion_tokens": 1, "total_tokens": prompt_tokens + 1},
+        )
+
+
+def test_usage_event_emitted_and_persisted(cfg):
+    """A successful turn yields exactly one `usage` event (after the text,
+    before `done`) and persists it as the session's `last_usage`."""
+    backend = UsageBackend()
+    sessions, manager = make_manager(cfg, backend)
+    s = sessions.create()
+    events = list(manager.run(s["id"], "hello world", SETTINGS))
+
+    usage_events = [e for e in events if e["type"] == "usage"]
+    assert len(usage_events) == 1
+    u = usage_events[0]
+    expected = sum(len(str(m.get("content") or "")) for m in backend.calls[0])
+    assert u["session_id"] == s["id"]
+    assert u["prompt_tokens"] == expected
+    assert events[-1] == {"type": "done", "stop_reason": "completed"}
+    assert events[-2] is u
+    assert sessions.get(s["id"])["last_usage"]["prompt_tokens"] == expected
+
+
+def test_last_usage_is_final_inference_not_max(cfg):
+    """Definition check: `last_usage` is the usage of the FINAL model request
+    of the turn, not the largest across the tool loop — a later, smaller
+    request must overwrite an earlier, larger one."""
+
+    class ShrinkingUsage(ModelBackend):
+        def __init__(self):
+            self.n = 0
+
+        def stream(self, messages, tools, model):
+            self.n += 1
+            if self.n == 1:
+                yield ModelEvent("tool_call", tool_call_id="c1", name="list_directory", arguments={})
+                yield ModelEvent("done", usage={"prompt_tokens": 100, "completion_tokens": 1, "total_tokens": 101})
+            else:
+                yield ModelEvent("text", text="done")
+                yield ModelEvent("done", usage={"prompt_tokens": 40, "completion_tokens": 1, "total_tokens": 41})
+
+    backend = ShrinkingUsage()
+    sessions, manager = make_manager(cfg, backend)
+    s = sessions.create()
+    events = list(manager.run(s["id"], "hi", SETTINGS))
+    u = [e for e in events if e["type"] == "usage"][0]
+    assert u["prompt_tokens"] == 40
+    assert sessions.get(s["id"])["last_usage"]["prompt_tokens"] == 40
+
+
+def test_session_isolation_a_b_a(cfg):
+    """Application-level isolation: every request is built solely from the
+    selected session's stored history. B's request contains none of A's
+    content (and vice versa), A's thinking is never re-sent, each session's
+    persisted last_usage is exactly its own final request, and the on-disk
+    session files never contain the other session's content."""
+    (cfg.root / "hello.txt").write_text("ALPHA-TOOL-RESULT")
+
+    class IsoBackend(ModelBackend):
+        def __init__(self):
+            self.calls = []
+            self.n = 0
+
+        def stream(self, messages, tools, model):
+            self.n += 1
+            self.calls.append(json.loads(json.dumps(messages)))
+            prompt_tokens = sum(len(str(m.get("content") or "")) for m in messages)
+            usage = {"prompt_tokens": prompt_tokens, "completion_tokens": 1, "total_tokens": prompt_tokens + 1}
+            if self.n == 3:  # A turn 2, first request: call a tool
+                yield ModelEvent("tool_call", tool_call_id="t1", name="read_file", arguments={"path": "hello.txt"})
+            else:
+                if self.n == 1:
+                    yield ModelEvent("thinking", text="THINK-A-SECRET")
+                yield ModelEvent("text", text="ok")
+            yield ModelEvent("done", usage=usage)
+
+    backend = IsoBackend()
+    sessions, manager = make_manager(cfg, backend)
+    a = sessions.create()
+    b = sessions.create()
+
+    list(manager.run(a["id"], "ALPHA-A-1", SETTINGS))  # call 1: A turn 1 (thinking)
+    list(manager.run(b["id"], "BRAVO-B-22", SETTINGS))  # call 2: B turn 1
+    list(manager.run(a["id"], "ALPHA-A-2", SETTINGS))  # calls 3+4: A turn 2 (tool + final)
+
+    calls = backend.calls
+    assert len(calls) == 4
+    a_t2_final = json.dumps(calls[3])
+    assert "ALPHA-A-1" in a_t2_final and "ALPHA-A-2" in a_t2_final
+    assert "ALPHA-TOOL-RESULT" in a_t2_final  # tool result re-sent within A
+    assert "BRAVO" not in a_t2_final
+    b_call = json.dumps(calls[1])
+    assert "BRAVO-B-22" in b_call
+    assert "ALPHA" not in b_call
+    for later in calls[1:]:  # thinking never re-sent in any subsequent request
+        assert "THINK-A-SECRET" not in json.dumps(later)
+
+    # Per-session last_usage: exactly each session's own final request size.
+    expected_a = sum(len(str(m.get("content") or "")) for m in calls[3])
+    expected_b = sum(len(str(m.get("content") or "")) for m in calls[1])
+    assert expected_a != expected_b
+    assert sessions.get(a["id"])["last_usage"]["prompt_tokens"] == expected_a
+    assert sessions.get(b["id"])["last_usage"]["prompt_tokens"] == expected_b
+
+    # On-disk isolation: session files never hold the other session's content.
+    a_raw = sessions._path(a["id"]).read_text()
+    b_raw = sessions._path(b["id"]).read_text()
+    assert "BRAVO" not in a_raw
+    assert "ALPHA" not in b_raw
+    assert "THINK-A-SECRET" not in b_raw
+
+
+def test_failed_turn_does_not_emit_or_overwrite_usage(cfg):
+    """A turn ending in model_error emits no `usage` event and leaves the
+    previously persisted last_usage untouched."""
+
+    class ErrBackend(ModelBackend):
+        def stream(self, messages, tools, model):
+            raise ModelError("boom")
+            yield  # pragma: no cover
+
+    backend = ErrBackend()
+    sessions, manager = make_manager(cfg, backend)
+    s = sessions.create()
+    sessions.set_last_usage(s["id"], {"prompt_tokens": 999, "completion_tokens": 1, "total_tokens": 1000})
+    events = list(manager.run(s["id"], "hi", SETTINGS))
+
+    assert not [e for e in events if e["type"] == "usage"]
+    assert any(e["type"] == "error" for e in events)
+    assert events[-1]["type"] == "done"
+    assert sessions.get(s["id"])["last_usage"]["prompt_tokens"] == 999

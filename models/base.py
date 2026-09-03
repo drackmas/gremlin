@@ -23,7 +23,8 @@ class ModelEvent:
         "text"       -- assistant text delta (``text``)
         "thinking"   -- reasoning delta, if the backend exposes it (``text``)
         "tool_call"  -- a complete tool call (``tool_call_id``, ``name``, ``arguments``)
-        "done"       -- stream finished (``finish_reason``)
+        "done"       -- stream finished (``finish_reason``); carries the
+                       provider ``usage`` dict when the backend reports it
     """
 
     kind: str
@@ -32,6 +33,7 @@ class ModelEvent:
     name: str = ""
     arguments: dict[str, Any] = field(default_factory=dict)
     finish_reason: str = ""
+    usage: dict[str, Any] = field(default_factory=dict)
 
 
 class ModelBackend:
