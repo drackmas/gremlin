@@ -13,6 +13,7 @@ from models.base import ModelBackend, ModelError, ModelEvent
 from sessions import SessionManager
 from skills.loader import SkillLoader
 from tools import build_registry
+import re
 
 KEY = "test-key"
 SETTINGS = {"show_thinking": True, "base_url": "http://fake", "model": "fake-model"}
@@ -223,3 +224,23 @@ def test_unknown_session(bridge):
         extra={"X-Gremlin-Session": "nope"},
     )
     assert resp.status == 404
+
+def test_seed_timestamp_is_utc(bridge):
+    srv, manager, sessions, backend = bridge
+    backend.scripts = [[ModelEvent(kind="text", text="ok"), ModelEvent(kind="done")]]
+    resp, _ = _req(
+        srv.bound_port,
+        "POST",
+        "/v1/chat/completions",
+        body={
+            "messages": [
+                {"role": "user", "content": "earlier"},
+                {"role": "user", "content": "now"},
+            ]
+        },
+    )
+    assert resp.status == 200
+    sid = resp.getheader("X-Gremlin-Session")
+    seeded = sessions.get(sid)["messages"][0]  # the seeded "earlier" turn
+    # now_utc() yields ISO-8601 with a UTC offset (…+00:00); local time would not.
+    assert re.search(r"Z$|\+00:00$", seeded["ts"]), seeded["ts"]

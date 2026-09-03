@@ -46,6 +46,9 @@ class OpenAICompatBackend(ModelBackend):
         self.base_url = (base_url or "").rstrip("/")
         if not self.base_url:
             raise ModelError("base_url is required")
+        # Reuse one connection pool so repeated turns keep-alive instead of
+        # re-handshaking every call.
+        self._session = requests.Session()
 
     def _url(self) -> str:
         return self.base_url if self.base_url.endswith("/chat/completions") else self.base_url + "/chat/completions"
@@ -55,7 +58,7 @@ class OpenAICompatBackend(ModelBackend):
         if tools:
             payload["tools"] = tools
         try:
-            resp = requests.post(
+            resp = self._session.post(
                 self._url(),
                 json=payload,
                 headers={"Content-Type": "application/json"},
@@ -101,9 +104,9 @@ class OpenAICompatBackend(ModelBackend):
                 if raw_line is None:
                     continue
                 # Defensive: a single line could (rarely) hold multiple events.
-                for line in raw_line.split("\n"):
+                for line in raw_line.split("\n"):  # type: ignore[arg-type]  # str via decode_unicode
                     line = line.strip()
-                    if not line or not line.startswith("data:"):
+                    if not line or not line.startswith("data:"):  # type: ignore[arg-type]
                         continue
                     data = line[len("data:"):].strip()
                     if data == "[DONE]":

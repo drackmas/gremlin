@@ -81,7 +81,26 @@ def test_corrupt_settings_file_falls_back_to_defaults(cfg):
     cfg.settings_path.parent.mkdir(parents=True, exist_ok=True)
     cfg.settings_path.write_text("{broken")
     data = SettingsStore(cfg).load()
-    assert data == dict(cfg.DEFAULT_SETTINGS)
+    expected = dict(cfg.DEFAULT_SETTINGS)
+    expected["discord_token_set"] = False  # derived flag; no .env in the tmp tree
+    assert data == expected
+
+
+def test_discord_token_saved_to_env(cfg):
+    store = SettingsStore(cfg)
+    assert store.load()["discord_token_set"] is False
+    # no token yet -> no .env file created
+    store.save({"discord_enabled": True})
+    assert not cfg.env_path.exists()
+    # providing a token writes it to .env, never into settings.json
+    store.save({"GREMLIN_DISCORD_TOKEN": "  tok123  "})
+    assert cfg.env_path.exists()
+    assert "tok123" in cfg.env_path.read_text(encoding="utf-8")
+    assert "GREMLIN_DISCORD_TOKEN" not in json.loads(cfg.settings_path.read_text())
+    assert store.load()["discord_token_set"] is True
+    # a blank token must not clobber an existing one
+    store.save({"GREMLIN_DISCORD_TOKEN": "   "})
+    assert store.load()["discord_token_set"] is True
 
 
 def test_themes_endpoint(client, cfg):

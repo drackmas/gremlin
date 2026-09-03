@@ -37,7 +37,7 @@ HOMOGLYPHS = {
     "\u03a5": "Y",  # Υ
 }
 
-HOMOGLYPHS = {ord(ch): rep for ch, rep in HOMOGLYPHS.items()}
+_HOMOGLYPH_TABLE: dict[int, str] = {ord(ch): rep for ch, rep in HOMOGLYPHS.items()}
 
 # Invisible format chars, bidi controls, soft hyphen, C0 controls (keep
 # \n \r \t), DEL.
@@ -65,7 +65,7 @@ def sanitize_untrusted(text: str) -> str:
     contains homoglyphs, invisible characters, or injection patterns.
     """
     text = unicodedata.normalize("NFKC", text or "")
-    text = text.translate(HOMOGLYPHS)
+    text = text.translate(_HOMOGLYPH_TABLE)
     text = _STRIP.sub("", text)
     for pat in _INJECTIONS:
         text = pat.sub(REDACTED, text)

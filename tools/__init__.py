@@ -1,4 +1,4 @@
-"""Tool registry assembly: filesystem + youtube + skill + memory tools."""
+"""Tool registry assembly: filesystem + grep + youtube + skill + memory tools."""
 
 from __future__ import annotations
 
@@ -11,6 +11,9 @@ from .registry import Tool, ToolError, ToolRegistry, validate_args
 from .memory import build_memory_tools
 from .skill_tool import build_skill_tool
 from .youtube import build_youtube_tools
+from .shell import build_shell_tool
+from .grep import build_grep_tool, build_find_tool
+from .task import build_task_tool
 
 __all__ = [
     "Tool",
@@ -26,6 +29,10 @@ def build_registry(cfg, loader: SkillLoader | None = None, memory_store: MemoryS
     registry = ToolRegistry()
     for tool in build_fs_tools(cfg, cfg.FS_READ_LIMIT):
         registry.register(tool)
+    registry.register(build_shell_tool(cfg))
+    registry.register(build_grep_tool(cfg))
+    registry.register(build_find_tool(cfg))
+    registry.register(build_task_tool(cfg))
     for tool in build_youtube_tools(cfg):
         registry.register(tool)
     registry.register(build_skill_tool(loader or SkillLoader(cfg)))

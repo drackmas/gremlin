@@ -26,7 +26,8 @@ import socket
 import threading
 import time
 import uuid
-from datetime import datetime
+
+from utils import now_utc
 
 log = logging.getLogger("gremlin.bridge")
 
@@ -43,14 +44,10 @@ class BridgeError(Exception):
         self.message = message
 
 
-def _now() -> str:
-    return datetime.now().astimezone().isoformat()
-
-
 class BridgeServer:
     def __init__(self, manager, sessions, settings_fn, host="127.0.0.1", port=8787, api_key="") -> None:
         if not api_key:
-            raise ValueError("bridge requires an api_key")
+            raise ValueError("api_key is required")
         self.manager = manager
         self.sessions = sessions
         self.settings_fn = settings_fn
@@ -58,65 +55,51 @@ class BridgeServer:
         self.port = port
         self.api_key = api_key
         self._sock: socket.socket | None = None
-        self._thread: threading.Thread | None = None
-        self._stopping = False
+        self._running = False
 
-    # -- lifecycle ------------------------------------------------------
-    def start(self) -> int:
-        """Bind and start accepting. Returns the actual bound port."""
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # A short accept timeout keeps stop() responsive: closing a socket
-        # does not reliably wake a thread blocked in accept() on Linux.
-        sock.settimeout(0.5)
-        sock.bind((self.host, self.port))
-        sock.listen(16)
-        self._sock = sock
-        self._stopping = False
-        self._thread = threading.Thread(target=self._accept_loop, name="gremlin-bridge", daemon=True)
-        self._thread.start()
+    @property
+    def bound_port(self) -> int:
+        """Actual port the socket is bound to (useful when port=0)."""
+        return self._sock.getsockname()[1]  # type: ignore[union-attr]  # set in start()
+
+    def start(self) -> None:
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._sock.bind((self.host, self.port))
+        self._sock.listen(16)
+        self._running = True
+        t = threading.Thread(target=self._accept_loop, daemon=True)
+        t.start()
         log.info("bridge listening on %s:%d", self.host, self.bound_port)
-        return self.bound_port
+
+    def _accept_loop(self) -> None:
+        while self._running:
+            try:
+                conn, _addr = self._sock.accept()  # type: ignore[union-attr]  # set in start()
+            except OSError:
+                break
+            t = threading.Thread(target=self._handle, args=(conn,), daemon=True)
+            t.start()
 
     def stop(self) -> None:
-        self._stopping = True
+        self._running = False
         if self._sock:
             try:
                 self._sock.close()
             except OSError:
                 pass
-        if self._thread:
-            self._thread.join(timeout=2)
 
-    @property
-    def bound_port(self) -> int:
-        if self._sock:
-            return self._sock.getsockname()[1]
-        return self.port
-
-    def _accept_loop(self) -> None:
-        while not self._stopping:
-            try:
-                conn, _addr = self._sock.accept()
-            except socket.timeout:
-                continue
-            except OSError:
-                break
-            threading.Thread(target=self._handle_conn, args=(conn,), daemon=True).start()
-
-    # -- connection handling --------------------------------------------
-    def _handle_conn(self, conn: socket.socket) -> None:
-        conn.settimeout(30)
-        # Per-connection state: once the response head is out, HTTP status
-        # errors are impossible -- later failures must go in-band or log.
+    # -- connection handling ------------------------------------------------
+    def _handle(self, conn: socket.socket) -> None:
         state = {"headers_sent": False}
         try:
             (method, path, headers), body = self._read_request(conn)
             self._route(conn, method, path, headers, body, state)
         except BridgeError as e:
             self._send_error(conn, e.status, e.message, state)
-        except (ConnectionError, socket.timeout, ValueError):
-            pass
+        except (ValueError, OSError) as e:
+            log.warning("bridge request error: %s", e)
+            self._send_error(conn, 400, str(e), state)
         except Exception:
             log.exception("bridge connection error")
             self._send_error(conn, 500, "internal bridge error", state)
@@ -183,84 +166,105 @@ class BridgeServer:
         else:
             self._send_json(conn, 404, {"error": {"message": f"no route: {method} {path}"}}, state=state)
 
+    # -- chat completions ---------------------------------------------------
     def _chat_completion(self, conn, req: dict, headers: dict, state: dict) -> None:
-        messages = req.get("messages") or []
+        messages = req.get("messages")
         if not isinstance(messages, list) or not messages:
-            raise BridgeError(400, "messages must be a non-empty list")
+            raise BridgeError(400, "'messages' must be a non-empty list")
         if not isinstance(messages[-1], dict) or messages[-1].get("role") != "user":
-            raise BridgeError(400, "last message must be from the user")
-        stream = bool(req.get("stream"))
-        settings = self.settings_fn()
+            raise BridgeError(400, "last message must have role 'user'")
 
         sid, prior = self._resolve_session(headers, messages)
+
+        # Seed a fresh session with the caller's earlier turns.
         for m in prior:
-            if isinstance(m, dict) and m.get("role") in ("user", "assistant"):
-                self.sessions.add_message(
-                    sid,
-                    {"id": uuid.uuid4().hex, "role": m["role"], "content": m.get("content", ""), "ts": _now()},
-                )
+            self.sessions.add_message(
+                sid,
+                {"id": uuid.uuid4().hex, "role": m["role"], "content": m.get("content", ""), "ts": now_utc()},
+            )
 
         completion_id = f"chatcmpl-{uuid.uuid4().hex[:24]}"
-        created = int(time.time())
-        model = settings.get("model", "gremlin")
-        user_text = messages[-1].get("content", "")
+        settings = self.settings_fn()
+        stream = bool(req.get("stream"))
 
         if not stream:
-            text_parts: list[str] = []
-            error: str | None = None
-            for ev in self.manager.run(sid, user_text, settings):
-                if ev["type"] == "text":
-                    text_parts.append(ev["text"])
-                elif ev["type"] == "error":
-                    error = ev["message"]
-            if error:
-                raise BridgeError(502, error)
-            body = {
+            self._complete_json(conn, req, sid, settings, completion_id, state)
+        else:
+            self._complete_sse(conn, req, sid, settings, completion_id, headers, state)
+
+    def _complete_json(self, conn, req, sid, settings, completion_id, state) -> None:
+        text_parts: list[str] = []
+        error_msg: str | None = None
+        for ev in self.manager.run(sid, req["messages"][-1]["content"], settings):
+            if ev["type"] == "text":
+                text_parts.append(ev["text"])
+            elif ev["type"] == "error":
+                error_msg = ev["message"]
+        if error_msg:
+            self._send_json(
+                conn,
+                502,
+                {"error": {"message": error_msg}},
+                extra_headers={"X-Gremlin-Session": sid},
+                state=state,
+            )
+            return
+        content = "".join(text_parts)
+        self._send_json(
+            conn,
+            200,
+            {
                 "id": completion_id,
                 "object": "chat.completion",
-                "created": created,
-                "model": model,
+                "created": int(time.time()),
+                "model": settings.get("model", "gremlin"),
                 "choices": [
                     {
                         "index": 0,
-                        "message": {"role": "assistant", "content": "".join(text_parts)},
+                        "message": {"role": "assistant", "content": content},
                         "finish_reason": "stop",
                     }
                 ],
-                "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
-            }
-            self._send_json(conn, 200, body, state=state, extra_headers={"X-Gremlin-Session": sid})
-        else:
-            self._send_json(
-                conn,
-                200,
-                None,
-                state=state,
-                content_type="text/event-stream",
-                extra_headers={"X-Gremlin-Session": sid, "Cache-Control": "no-cache"},
-                suppress_content_length=True,
-            )
-            self._stream_events(conn, sid, user_text, settings, completion_id, created, model)
+            },
+            extra_headers={"X-Gremlin-Session": sid},
+            state=state,
+        )
 
-    def _stream_events(self, conn, sid, user_text, settings, completion_id, created, model) -> None:
+    def _complete_sse(self, conn, req, sid, settings, completion_id, headers, state) -> None:
+        extra: dict[str, str] = {}
+        session_hdr = (headers.get("x-gremlin-session") or "").strip()
+        if not session_hdr:
+            # Echo the new session id so callers can reuse it.
+            extra["X-Gremlin-Session"] = sid
+
+        conn.sendall(
+            (
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: text/event-stream\r\n"
+                "Connection: close\r\n"
+                f"X-Gremlin-Session: {extra.get('X-Gremlin-Session', session_hdr)}\r\n"
+                "\r\n"
+            ).encode("latin-1")
+        )
+        state["headers_sent"] = True
+
         def chunk(delta: dict, finish: str | None = None) -> bytes:
-            payload = {
+            obj: dict = {
                 "id": completion_id,
                 "object": "chat.completion.chunk",
-                "created": created,
-                "model": model,
+                "created": int(time.time()),
+                "model": settings.get("model", "gremlin"),
                 "choices": [{"index": 0, "delta": delta, "finish_reason": finish}],
             }
-            return f"data: {json.dumps(payload)}\n\n".encode()
+            return f"data: {json.dumps(obj, ensure_ascii=False)}\n\n".encode()
 
-        conn.sendall(chunk({"role": "assistant", "content": ""}))
         try:
-            for ev in self.manager.run(sid, user_text, settings):
+            conn.sendall(chunk({"role": "assistant", "content": ""}))
+            for ev in self.manager.run(sid, req["messages"][-1]["content"], settings):
                 if ev["type"] == "text":
                     conn.sendall(chunk({"content": ev["text"]}))
                 elif ev["type"] == "error":
-                    # Head already sent: no HTTP status possible. Signal the
-                    # failure in-band, then terminate the stream cleanly.
+                    # Stream already started: report the failure in-band, then terminate.
                     conn.sendall(chunk({"content": f"\n(error: {ev['message']})"}))
                     break
             conn.sendall(chunk({}, "stop"))

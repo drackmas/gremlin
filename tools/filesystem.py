@@ -62,22 +62,90 @@ def build_fs_tools(cfg, read_limit: int) -> list[Tool]:
         if not p.is_file():
             raise SandboxError(f"not a file: {args['path']}")
         try:
-            raw = p.read_bytes()[: read_limit + 1]
+            text = p.read_text(encoding="utf-8", errors="replace")
         except OSError as e:
             raise SandboxError(f"cannot read {args['path']}: {e}") from e
-        text = raw.decode("utf-8", errors="replace")
-        if len(raw) > read_limit:
-            text = text[:read_limit] + "\n[truncated]"
+        if len(text) > read_limit and not args.get("start_line") and not args.get("end_line"):
+            return text[:read_limit] + f"\n[truncated: file is {len(text)} bytes, showing first {read_limit}]"
+        start_line = args.get("start_line")
+        end_line = args.get("end_line")
+        if start_line is not None or end_line is not None:
+            lines = text.splitlines(keepends=True)
+            total = len(lines)
+            if total == 0:
+                return ""
+            s = max(1, int(start_line or 1))
+            end = min(total, int(end_line or total))
+            if s > total:
+                return ""
+            numbered = [f"{i:4d}  {ln.rstrip()}" for i, ln in enumerate(lines[s - 1 : end], s)]
+            return "\n".join(numbered)
         return text
 
-    def write_file(args: dict) -> str:
-        p = _resolve(root, args["path"])
-        try:
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(args["content"], encoding="utf-8")
-        except OSError as e:
-            raise SandboxError(f"cannot write {args['path']}: {e}") from e
-        return f"wrote {len(args['content'])} bytes to {args['path']}"
+    def edit_file(args: dict) -> str:
+        action = args["action"]
+        path = args["path"]
+        p = _resolve(root, path)
+
+        if action == "str_replace":
+            old_str = args["old_str"]
+            new_str = args["new_str"]
+            if not p.exists():
+                raise SandboxError(f"file not found: {path}")
+            if not p.is_file():
+                raise SandboxError(f"not a file: {path}")
+            try:
+                text = p.read_text(encoding="utf-8")
+            except OSError as e:
+                raise SandboxError(f"cannot read {path}: {e}") from e
+            count = text.count(old_str)
+            if count == 0:
+                raise SandboxError(f"old_str not found in {path}")
+            if count > 1:
+                raise SandboxError(f"old_str is not unique in {path} ({count} occurrences)")
+            new_text = text.replace(old_str, new_str, 1)
+            try:
+                p.write_text(new_text, encoding="utf-8")
+            except OSError as e:
+                raise SandboxError(f"cannot write {path}: {e}") from e
+            return f"replaced old_str in {path}"
+
+        elif action == "create":
+            content = args["content"]
+            if not p.parent.is_dir():
+                raise SandboxError(f"parent directory does not exist: {p.parent}")
+            try:
+                p.write_text(content, encoding="utf-8")
+            except OSError as e:
+                raise SandboxError(f"cannot write {path}: {e}") from e
+            return f"wrote {len(content)} bytes to {path}"
+
+        elif action == "insert":
+            line = args["line"]
+            text = args["text"]
+            if not p.exists():
+                raise SandboxError(f"file not found: {path}")
+            if not p.is_file():
+                raise SandboxError(f"not a file: {path}")
+            try:
+                content = p.read_text(encoding="utf-8")
+            except OSError as e:
+                raise SandboxError(f"cannot read {path}: {e}") from e
+            lines = content.splitlines(keepends=True)
+            total = len(lines)
+            ln = max(1, min(int(line), total + 1))
+            if not text.endswith("\n"):
+                text = text + "\n"
+            lines.insert(ln - 1, text)
+            new_content = "".join(lines)
+            try:
+                p.write_text(new_content, encoding="utf-8")
+            except OSError as e:
+                raise SandboxError(f"cannot write {path}: {e}") from e
+            return f"inserted {len(text)} bytes at line {ln} in {path}"
+
+        else:
+            raise SandboxError(f"unknown action: {action}")
 
     def list_directory(args: dict) -> str:
         p = _resolve(root, args.get("path") or ".")
@@ -126,26 +194,44 @@ def build_fs_tools(cfg, read_limit: int) -> list[Tool]:
     return [
         Tool(
             name="read_file",
-            description="Read a text file from the project workspace (relative path from project root).",
+            description="Read a text file from the project workspace (relative path from project root). "
+            "Optionally read a line range with start_line and end_line (1-based, inclusive); "
+            "range output includes line numbers.",
             parameters={
                 "type": "object",
-                "properties": {"path": {"type": "string", "description": "relative file path"}},
+                "properties": {
+                    "path": {"type": "string", "description": "relative file path"},
+                    "start_line": {"type": "integer", "description": "first line to read (1-based, inclusive)"},
+                    "end_line": {"type": "integer", "description": "last line to read (1-based, inclusive)"},
+                },
                 "required": ["path"],
             },
             handler=read_file,
         ),
         Tool(
-            name="write_file",
-            description="Create or overwrite a text file in the project workspace (relative path). Parent directories are created.",
+            name="edit_file",
+            description="Edit a file in the project workspace. Actions: "
+            "str_replace (replace a unique old_str with new_str), "
+            "create (write full content to a new or existing file; parent dir must exist), "
+            "insert (insert text at a 1-based line number; 0 clamps to 1, past EOF appends).",
             parameters={
                 "type": "object",
                 "properties": {
                     "path": {"type": "string", "description": "relative file path"},
-                    "content": {"type": "string", "description": "full file content"},
+                    "action": {
+                        "type": "string",
+                        "enum": ["str_replace", "create", "insert"],
+                        "description": "edit action to perform",
+                    },
+                    "old_str": {"type": "string", "description": "exact text to find (str_replace; must be unique in file)"},
+                    "new_str": {"type": "string", "description": "replacement text (str_replace)"},
+                    "content": {"type": "string", "description": "full file content (create)"},
+                    "line": {"type": "integer", "description": "1-based line number to insert at (insert)"},
+                    "text": {"type": "string", "description": "text to insert (insert)"},
                 },
-                "required": ["path", "content"],
+                "required": ["path", "action"],
             },
-            handler=write_file,
+            handler=edit_file,
         ),
         Tool(
             name="list_directory",

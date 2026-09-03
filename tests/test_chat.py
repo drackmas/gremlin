@@ -10,6 +10,7 @@ from chat.manager import ChatManager
 from models.base import ModelBackend, ModelEvent, ModelError
 from sessions import SessionManager
 from skills.loader import SkillLoader
+from memory.store import MemoryStore
 from tools import build_registry
 
 
@@ -44,6 +45,7 @@ def test_plain_text_turn(cfg):
     events = list(manager.run(s["id"], "hi", SETTINGS))
     types = [e["type"] for e in events]
     assert types == ["text", "text", "done"]
+    assert events[-1]["stop_reason"] == "completed"
     stored = sessions.get(s["id"])["messages"]
     assert stored[0]["role"] == "user"
     assert stored[1]["role"] == "assistant"
@@ -109,6 +111,11 @@ def test_tool_loop_end_to_end(cfg):
     assert tc["name"] == "read_file"
     assert tc["status"] == "ok"
     assert "hi from file" in tc["result"]
+    # Phase 1b precise pins: exactly 2 backend calls, and the last streamed text is
+    # the response-2 text (the persisted assistant content concatenates both texts,
+    # asserted below as "Let me read it.It says hi.").
+    assert len(backend.calls) == 2
+    assert events[2]["text"] == "It says hi."
 
     # the second model call must carry the tool result in OpenAI shape
     second = backend.calls[1]["messages"]
@@ -117,6 +124,8 @@ def test_tool_loop_end_to_end(cfg):
     tool_msg = next(m for m in second if m["role"] == "tool")
     assert tool_msg["tool_call_id"] == "call_1"
     assert "hi from file" in tool_msg["content"]
+    # the role:tool message carries the tool's actual returned string verbatim
+    assert tool_msg["content"] == "hi from file"
     assistant_msg = next(m for m in second if m["role"] == "assistant" and m.get("tool_calls"))
     assert assistant_msg["tool_calls"][0]["function"]["name"] == "read_file"
 
@@ -165,6 +174,7 @@ def test_model_error_yields_error_event(cfg):
     events = list(manager.run(s["id"], "hi", SETTINGS))
     assert any(e["type"] == "error" for e in events)
     assert events[-1]["type"] == "done"
+    assert events[-1]["stop_reason"] == "model_error"
     err = next(e for e in events if e["type"] == "error")
     assert "model exploded" in err["message"]
     stored = sessions.get(s["id"])["messages"][1]
@@ -185,8 +195,9 @@ def test_tool_loop_exhaustion(cfg):
     err = next(e for e in events if e["type"] == "error")
     assert "maximum iterations" in err["message"]
     assert events[-1]["type"] == "done"
-    # bounded by MAX_TOOL_ITERATIONS
-    assert len(backend.calls) == cfg.MAX_TOOL_ITERATIONS
+    assert events[-1]["stop_reason"] == "max_iterations"
+    # bounded by _DEFAULT_TOOL_ITERATIONS
+    assert len(backend.calls) == cfg._DEFAULT_TOOL_ITERATIONS
     stored = sessions.get(s["id"])["messages"][1]
     last = stored["timeline"][-1]
     assert last["t"] == "text"
@@ -336,3 +347,21 @@ def test_registry_rejects_raw_malformed_args(cfg):
     assert ok is False
     assert "malformed JSON arguments" in text
     assert "Retry" in text
+
+
+def test_discord_wiring_injects_pinned_memory(cfg):
+    """Regression for #4: the Discord surface must wire the shared MemoryStore
+    into the registry and manager exactly like app.py/cli.py, so pinned
+    memories reach the system prompt on a Discord turn."""
+    memory = MemoryStore(cfg.data_dir / "memory.json")
+    memory.add("user prefers terse answers", pin=True)
+    backend = FakeBackend([[ModelEvent(kind="text", text="ok"), ModelEvent(kind="done")]])
+    sessions = SessionManager(cfg)
+    registry = build_registry(cfg, SkillLoader(cfg), memory_store=memory)
+    manager = ChatManager(cfg, sessions, registry, SkillLoader(cfg), backend, memory=memory)
+    sid = sessions.create("discord")["id"]
+    for _ in manager.run(sid, "hi", SETTINGS):
+        pass
+    sys_msg = backend.calls[0]["messages"][0]
+    assert sys_msg["role"] == "system"
+    assert "user prefers terse answers" in sys_msg["content"]

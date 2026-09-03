@@ -1,0 +1,23 @@
+Look through the current project/folder I’m working on and create a detailed ABOUT.md explaining my Python agentic assistant.
+
+Focus on understanding what I’ve actually built.
+
+Cover:
+
+What the assistant is
+How the agent works
+The overall architecture
+How the LLM is used
+What tools it has and how they work
+How memory/state works
+How the main Python files connect
+How a typical user request flows through the system
+How to configure and run it
+How to add or change tools/features
+Any important limitations or unfinished parts
+
+Include a simple Mermaid diagram showing the architecture.
+
+Read the actual files in the current project before writing anything. Do not make up features or assumptions. Keep the documentation specific to my project and written so that another developer could quickly understand how it works.
+
+Create the finished ABOUT.md in the current project folder.

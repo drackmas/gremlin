@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 
 import cli
 from models.base import ModelBackend, ModelError, ModelEvent

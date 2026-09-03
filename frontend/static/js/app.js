@@ -50,9 +50,13 @@ function applySettings(s) {
   document.documentElement.setAttribute("data-bs-theme", s.appearance === "light" ? "light" : "dark");
   $("theme-css").href = themeHref(s.theme);
   $("set-thinking").checked = !!s.show_thinking;
+  $("set-max-tool-calls").value = s.max_tool_calls ?? "20";
   $("set-base-url").value = s.base_url || "";
   $("set-model").value = s.model || "";
   $("set-identity").value = s.identity || "";
+  $("set-discord").checked = !!s.discord_enabled;
+  const tokStatus = $("set-discord-token-status");
+  if (tokStatus) tokStatus.textContent = s.discord_token_set ? "Token is configured." : "No token configured yet.";
   setAppearanceActive(s.appearance);
   const sel = $("set-theme");
   if (sel.value !== s.theme) sel.value = s.theme;
@@ -84,14 +88,19 @@ async function loadThemes() {
 }
 
 function collectSettings() {
-  return {
+  const s = {
     show_thinking: $("set-thinking").checked,
     appearance: currentAppearance(),
     theme: $("set-theme").value,
     base_url: $("set-base-url").value.trim(),
     model: $("set-model").value.trim(),
     identity: $("set-identity").value.trim(),
+    discord_enabled: $("set-discord").checked,
+    max_tool_calls: parseInt($("set-max-tool-calls").value, 10) || 20,
   };
+  const tok = $("set-discord-token").value.trim();
+  if (tok) s.GREMLIN_DISCORD_TOKEN = tok;
+  return s;
 }
 
 async function saveSettings() {

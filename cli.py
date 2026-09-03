@@ -20,6 +20,7 @@ from chat.manager import ChatManager
 from chat.settings import SettingsStore
 from sessions import SessionManager
 from skills.loader import SkillLoader
+from memory.store import MemoryStore
 from tools import build_registry
 
 HELP = """commands:
@@ -73,8 +74,9 @@ def main(cfg=None, backend=None) -> int:
     settings = SettingsStore(cfg)
     s_cfg = settings.load()
     skills = SkillLoader(cfg)
-    registry = build_registry(cfg, skills)
-    manager = ChatManager(cfg, sessions, registry, skills, backend=backend)
+    memory = MemoryStore(cfg.data_dir / "memory.json")
+    registry = build_registry(cfg, skills, memory)
+    manager = ChatManager(cfg, sessions, registry, skills, backend=backend, memory=memory)
     s = sessions.create("terminal")
 
     p = _Paint(sys.stdout.isatty() and not os.environ.get("NO_COLOR"))

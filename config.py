@@ -46,6 +46,10 @@ class AppConfig:
         return self.data_dir / "settings.json"
 
     @property
+    def env_path(self) -> Path:
+        return self.root / ".env"
+
+    @property
     def frontend_dir(self) -> Path:
         return self.root / "frontend"
 
@@ -71,11 +75,13 @@ class AppConfig:
         "appearance": "dark",  # "light" | "dark"
         "theme": "default",    # bootswatch theme slug or "default"
         "base_url": "http://127.0.0.1:8080/v1",
-        "model": "/home/dracmas/Downloads/Qwen3.8-27B-UD-Q8_K_XL.gguf",
+        "model": os.environ.get("GREMLIN_MODEL", ""),
         "identity": "",  # optional persona text injected into the system prompt
+        "discord_enabled": False,  # run the Discord bot (toggle in settings)
+        "max_tool_calls": 20,  # max tool-loop iterations per user turn
     }
 
-    MAX_TOOL_ITERATIONS: ClassVar[int] = 8
+    _DEFAULT_TOOL_ITERATIONS: ClassVar[int] = 20
     FS_READ_LIMIT: ClassVar[int] = 128 * 1024  # max bytes returned by read_file
 
 

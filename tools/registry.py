@@ -8,12 +8,15 @@ before dispatch, and handlers are expected to return plain strings
 
 from __future__ import annotations
 
+import contextvars
 import json
 import logging
 from dataclasses import dataclass
 from typing import Any, Callable
 
 log = logging.getLogger("gremlin.tools")
+
+SESSION_ID: contextvars.ContextVar[str] = contextvars.ContextVar("SESSION_ID", default="default")
 
 _TYPE_MAP = {
     "string": (str,),
@@ -94,6 +97,10 @@ class ToolRegistry:
     def names(self) -> list[str]:
         return sorted(self._tools)
 
+    def tools(self) -> list[Tool]:
+        """All registered Tool objects in sorted-name order."""
+        return [self._tools[n] for n in sorted(self._tools)]
+
     def to_openai_tools(self) -> list[dict]:
         return [t.to_openai() for t in (self._tools[n] for n in sorted(self._tools))]
 
@@ -121,4 +128,4 @@ class ToolRegistry:
             return result, True
         except Exception as e:  # handler failure -> structured error for model
             log.exception("tool failed: %s", name)
-            return f"ERROR: {e}", False
+            return f"ERROR: {type(e).__name__}: {e}", False

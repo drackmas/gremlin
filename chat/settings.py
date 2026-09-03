@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import json
 import logging
-import os
-import tempfile
+
+from dotenv import dotenv_values, set_key
+
+from utils import atomic_write_json
 
 log = logging.getLogger("gremlin.settings")
 
@@ -20,20 +22,6 @@ class SettingsError(ValueError):
     """Raised when submitted settings fail validation."""
 
 
-def _atomic_write(path, data: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=str(path.parent), suffix=".tmp")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        os.replace(tmp, path)
-    except BaseException:
-        try:
-            os.unlink(tmp)
-        except OSError:
-            pass
-        raise
-
 
 class SettingsStore:
     def __init__(self, cfg) -> None:
@@ -41,17 +29,19 @@ class SettingsStore:
 
     def load(self) -> dict:
         defaults = dict(self.cfg.DEFAULT_SETTINGS)
+        data: dict = {}
         try:
             with open(self.cfg.settings_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             if not isinstance(data, dict):
                 raise ValueError("settings file is not an object")
         except FileNotFoundError:
-            return defaults
+            pass
         except (json.JSONDecodeError, OSError, ValueError) as e:
             log.warning("settings file unreadable (%s); using defaults", e)
-            return defaults
+            data = {}
         merged = {**defaults, **{k: v for k, v in data.items() if k in defaults}}
+        merged["discord_token_set"] = bool(self._env_token())
         return merged
 
     def save(self, data: dict) -> dict:
@@ -76,6 +66,23 @@ class SettingsStore:
             else:
                 continue
             current[key] = value
-        _atomic_write(self.cfg.settings_path, current)
+        atomic_write_json(self.cfg.settings_path, current)
+        token = data.get("GREMLIN_DISCORD_TOKEN")
+        if isinstance(token, str) and token.strip():
+            self._write_env_token(token.strip())
+            log.info("GREMLIN_DISCORD_TOKEN written to %s", self.cfg.env_path)
         log.info("settings saved: %s", {k: current[k] for k in current if k != "model"})
         return current
+
+    def _env_token(self) -> str:
+        """Current GREMLIN_DISCORD_TOKEN from the .env file ('' if absent)."""
+        values = dotenv_values(self.cfg.env_path)
+        return (values.get("GREMLIN_DISCORD_TOKEN") or "").strip()
+
+    def _write_env_token(self, token: str) -> None:
+        """Create/update the .env file so the Discord token persists to disk."""
+        env_path = self.cfg.env_path
+        env_path.parent.mkdir(parents=True, exist_ok=True)
+        if not env_path.exists():
+            env_path.write_text("", encoding="utf-8")
+        set_key(str(env_path), "GREMLIN_DISCORD_TOKEN", token)

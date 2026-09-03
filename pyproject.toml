@@ -1,0 +1,20 @@
+# Tooling config for Gremlin. This file carries ONLY linter / type-checker
+# configuration; it is deliberately NOT a package manifest (no [project] table)
+# so the repo stays a flat, script-style tree driven by requirements.txt.
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["venv", "files", "dev", "frontend", "data"]
+
+[tool.ruff.lint]
+# High-signal rules only: pyflakes (F) plus runtime-error / import / warning
+# E-subsets. Pure style (E501 line length, etc.) is intentionally off so the
+# existing code is not reformatted.
+select = ["E4", "E7", "E9", "F", "W"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+check_untyped_defs = false
+exclude = ["venv/", "files/", "dev/", "frontend/", "data/", "tests/"]

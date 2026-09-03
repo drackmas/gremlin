@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import uuid
 from pathlib import Path
+from utils import atomic_write_json
 
 log = logging.getLogger("gremlin.memory")
 
@@ -38,11 +38,7 @@ class MemoryStore:
             self._items = []
 
     def save(self) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = self.path.with_suffix(".tmp")
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(self._items, f, ensure_ascii=False, indent=2)
-        os.replace(tmp, self.path)
+        atomic_write_json(self.path, self._items)
 
     # --- CRUD -------------------------------------------------------------
     def add(self, content: str, tags: list[str] | None = None, pin: bool = False) -> str:

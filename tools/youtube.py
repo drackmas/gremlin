@@ -12,8 +12,6 @@ structured ``ERROR:`` string so the model can react (e.g. try another lang).
 
 import logging
 import re
-import tempfile
-from pathlib import Path
 
 import requests
 
@@ -170,7 +168,6 @@ def fetch_transcript(url: str, lang: str = "en", limit: int = TRANSCRIPT_LIMIT, 
     date = _upload_date(info)
     date_line = f"\nUploaded: {date}" if date else ""
     file_header = f"Video: {title}\nChannel: {channel}{date_line}\nSource: {source} ({lang})\nURL: {url}\n\n"
-    out = file_header + text
     saved = None
     if cfg is not None:
         try:

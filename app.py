@@ -10,8 +10,8 @@ import json
 import logging
 import os
 import sys
-from pathlib import Path
 
+from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, render_template, request
 
 from chat.manager import ChatManager
@@ -47,6 +47,7 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
     cfg = cfg or AppConfig()
     ensure_dirs(cfg)
     _setup_logging(cfg)
+    load_dotenv(cfg.env_path)  # expose GREMLIN_DISCORD_TOKEN (and friends) from .env
 
     app = Flask(
         __name__,
@@ -61,6 +62,23 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
     memory = MemoryStore(cfg.data_dir / "memory.json")
     registry = build_registry(cfg, skills, memory)
     manager = ChatManager(cfg, sessions, registry, skills, memory=memory)
+
+    # --- discord bot (opt-in; start/stop tracked by the settings toggle) --
+    from discord_bot import DiscordBot
+
+    discord_bot = DiscordBot(
+        manager,
+        sessions,
+        settings.load,
+        cfg.data_dir / "discord_sessions.json",
+    )
+    app.extensions["gremlin_discord"] = discord_bot
+    if settings.load().get("discord_enabled"):
+        try:
+            discord_bot.start()
+            log.info("discord bot started at boot")
+        except ValueError as e:
+            log.warning("discord bot not started at boot: %s", e)
 
     # --- pages ----------------------------------------------------------
     @app.get("/")
@@ -151,9 +169,21 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
         if data is None:
             return jsonify({"error": "JSON body required"}), 400
         try:
-            return jsonify(settings.save(data))
+            before = settings.load()
+            saved = settings.save(data)
         except SettingsError as e:
             return jsonify({"error": str(e)}), 400
+        was, now = before.get("discord_enabled"), saved.get("discord_enabled")
+        if now and not was:
+            try:
+                discord_bot.start()
+                log.info("discord bot started from settings toggle")
+            except ValueError as e:
+                log.warning("discord start failed: %s", e)
+        elif was and not now:
+            discord_bot.stop()
+            log.info("discord bot stopped from settings toggle")
+        return jsonify(saved)
 
     # --- themes -----------------------------------------------------------
     @app.get("/api/themes")
@@ -181,10 +211,10 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
         try:
             bridge.start()
             log.info("API bridge listening on %s:%d", cfg.bridge_host, bridge.bound_port)
+            app.extensions["gremlin_bridge"] = bridge
         except (OSError, ValueError) as e:
             log.error("API bridge failed to start: %s", e)
-            bridge = None
-        app.extensions["gremlin_bridge"] = bridge
+            app.extensions["gremlin_bridge"] = None
 
     return app
 

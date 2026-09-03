@@ -4,3 +4,8 @@ json_repair
 requests
 yt-dlp
 pytest
+python-dotenv
+
+# dev / tooling
+ruff
+mypy

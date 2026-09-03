@@ -126,6 +126,41 @@
                       placeholder="e.g. You are called Gremlin. Be terse and playful."></textarea>
           </div>
         </div>
+
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="fw-semibold mb-2">Chat</div>
+            <div class="row g-2 align-items-end">
+              <div class="col-auto">
+                <label for="set-max-tool-calls" class="form-label small">Max tool calls</label>
+                <input id="set-max-tool-calls" class="form-control" type="number" min="1" max="100" value="20">
+              </div>
+              <div class="col text-body-secondary small">
+                Tool-loop iterations per user turn (default 20).
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="fw-semibold">Discord bot</div>
+                <div class="text-body-secondary small">Run Gremlin as a Discord bot. Toggling on starts it, toggling off stops it.</div>
+              </div>
+              <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" role="switch" id="set-discord">
+                <label class="form-check-label" for="set-discord"></label>
+              </div>
+            </div>
+            <div class="mt-3">
+              <label for="set-discord-token" class="form-label small">Discord token (GREMLIN_DISCORD_TOKEN)</label>
+              <input id="set-discord-token" class="form-control" type="password"
+                     placeholder="paste your bot token (stored in .env)" autocomplete="off">
+              <div class="text-body-secondary small mt-1" id="set-discord-token-status">No token configured yet.</div>
+            </div>
+          </div>
+        </div>
         <div class="d-flex align-items-center gap-2">
           <button id="btn-save-settings" class="btn btn-primary">
             <i class="bi bi-check-lg me-1"></i>Save settings

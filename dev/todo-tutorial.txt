@@ -1,0 +1,70 @@
+oh-my-pi Todo Tool — Usage Note
+
+When using the oh-my-pi todo tool, never use op: "add". add is not a valid operation.
+
+The supported operations are:
+
+init — create a new todo plan.
+start — mark a task as started/in progress.
+done — mark a task completed.
+append — add new tasks to an existing phase.
+rm — remove the todo list.
+drop — abandon a task.
+block — mark a task/phase as blocked.
+unblock — remove a blocked state.
+view — inspect the current todo state.
+
+Typical workflow:
+
+Create the plan with init.
+Use start when beginning a task.
+Use done when completing a task.
+Use append when additional work needs to be added to an existing phase.
+Use block/unblock when work cannot proceed or becomes available again.
+Use view when the current plan/state needs to be inspected.
+
+Example initial plan:
+
+{
+  "op": "init",
+  "list": [
+    {
+      "phase": "Implementation",
+      "items": [
+        "Inspect the existing code",
+        "Implement the change",
+        "Run tests"
+      ]
+    }
+  ]
+}
+
+
+Example starting a task:
+
+{
+  "op": "start",
+  "task": "Inspect the existing code"
+}
+
+
+Example completing it:
+
+{
+  "op": "done",
+  "task": "Inspect the existing code"
+}
+
+
+Example adding work later:
+
+{
+  "op": "append",
+  "phase": "Implementation",
+  "items": [
+    "Add regression test"
+  ]
+}
+
+
+Remember: The todo tool uses explicit state-transition operations. Do not invent operations such as add, create, or update. When in doubt, inspect the todo tool schema and use one of its defined operations.

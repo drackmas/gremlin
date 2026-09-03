@@ -101,3 +101,81 @@ def test_register_duplicate_raises():
     reg.register(t)
     with pytest.raises(ValueError):
         reg.register(t)
+
+
+# --- task tool -------------------------------------------------------------
+
+
+def _task_registry(tmp_path):
+    from config import AppConfig, ensure_dirs
+    from tools import build_registry
+
+    cfg = AppConfig(root=tmp_path)
+    ensure_dirs(cfg)
+    return build_registry(cfg)
+
+
+def test_task_plan_writes_file(tmp_path):
+    from tools.registry import SESSION_ID
+
+    reg = _task_registry(tmp_path)
+    SESSION_ID.set("test-sid-1")
+    out, ok = reg.execute("task", {"action": "plan", "items": ["do a", "do b"]})
+    assert ok, out
+    assert "planned 2 item(s)" in out
+    path = tmp_path / "data" / "tasks" / "test-sid-1.json"
+    assert path.exists()
+
+
+def test_task_view_reads_file(tmp_path):
+    from tools.registry import SESSION_ID
+
+    reg = _task_registry(tmp_path)
+    SESSION_ID.set("test-sid-2")
+    reg.execute("task", {"action": "plan", "items": ["step one", "step two"]})
+    out, ok = reg.execute("task", {"action": "view"})
+    assert ok, out
+    assert "step one" in out
+    assert "step two" in out
+    assert "task plan for session test-sid-2" in out
+
+
+def test_task_sessions_independent(tmp_path):
+    from tools.registry import SESSION_ID
+
+    reg = _task_registry(tmp_path)
+    SESSION_ID.set("sid-a")
+    reg.execute("task", {"action": "plan", "items": ["only a"]})
+    SESSION_ID.set("sid-b")
+    reg.execute("task", {"action": "plan", "items": ["only b"]})
+
+    SESSION_ID.set("sid-a")
+    out_a, _ = reg.execute("task", {"action": "view"})
+    assert "only a" in out_a
+    assert "only b" not in out_a
+
+    SESSION_ID.set("sid-b")
+    out_b, _ = reg.execute("task", {"action": "view"})
+    assert "only b" in out_b
+    assert "only a" not in out_b
+
+
+def test_task_view_same_sid_shares(tmp_path):
+    from tools.registry import SESSION_ID
+
+    reg = _task_registry(tmp_path)
+    SESSION_ID.set("shared-sid")
+    reg.execute("task", {"action": "plan", "items": ["x", "y"]})
+    out1, _ = reg.execute("task", {"action": "view"})
+    out2, _ = reg.execute("task", {"action": "view"})
+    assert out1 == out2
+
+
+def test_task_view_no_plan(tmp_path):
+    from tools.registry import SESSION_ID
+
+    reg = _task_registry(tmp_path)
+    SESSION_ID.set("empty-sid")
+    out, ok = reg.execute("task", {"action": "view"})
+    assert ok, out
+    assert "no task plan" in out
