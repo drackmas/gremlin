@@ -1,0 +1,8 @@
+{
+  "items": [
+    "Fix `openai_compat.py` to not `return` on `finish_reason` immediately",
+    "Add debug logging to see raw `usage` from `llama-server`",
+    "Verify `manager.py` passes `usage` to frontend",
+    "Check `app.js` logic for displaying stats"
+  ]
+}
