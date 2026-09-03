@@ -3,4 +3,5 @@ __pycache__/
 .pytest_cache/
 sessions/
 .env
-files/
+files/*
+!files/.gitkeep
