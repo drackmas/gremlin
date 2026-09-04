@@ -1,7 +1,7 @@
 """YouTube tools: subtitle picking, VTT parsing, error handling.
 
 Network calls are stubbed: ``_extract`` is monkeypatched per test and
-``requests.get`` returns canned VTT payloads.
+``_download_subtitle`` returns canned VTT payloads.
 """
 
 from __future__ import annotations
@@ -42,33 +42,33 @@ def _sub(ext="vtt", url="http://subs/example.vtt"):
 
 def test_manual_preferred_over_auto():
     info = _info(manual={"en": _sub()}, auto={"en": _sub(url="http://subs/auto.vtt")})
-    entry, source = _pick_subtitle(info, "en")
+    entry, source = _pick_subtitle(info)
     assert source == "manual"
     assert entry["url"].endswith("example.vtt")
 
 
 def test_falls_back_to_auto():
     info = _info(auto={"en": _sub()})
-    entry, source = _pick_subtitle(info, "en")
+    entry, source = _pick_subtitle(info)
     assert source == "auto"
 
 
 def test_base_language_match():
     info = _info(auto={"en-US": _sub()})
-    entry, source = _pick_subtitle(info, "en")
+    entry, source = _pick_subtitle(info)
     assert source == "auto"
 
 
 def test_no_subtitles_lists_available():
     info = _info(manual={"de": _sub()}, auto={"fr": _sub()})
     with pytest.raises(YoutubeError) as ei:
-        _pick_subtitle(info, "ja")
+        _pick_subtitle(info)
     assert "de" in str(ei.value) and "fr" in str(ei.value)
 
 
 def test_no_subtitles_at_all():
-    with pytest.raises(YoutubeError, match="no subtitles"):
-        _pick_subtitle(_info(), "en")
+    with pytest.raises(YoutubeError, match="no English subtitles"):
+        _pick_subtitle(_info())
 
 
 # --- _parse_vtt -----------------------------------------------------------
@@ -114,30 +114,25 @@ def test_parse_strips_tags_and_blank():
 
 # --- end-to-end with stubs --------------------------------------------------
 
-class _FakeResp:
-    text = MANUAL_VTT
-    def raise_for_status(self):
-        pass
-
-
 @pytest.fixture
 def stubbed(monkeypatch):
     import tools.youtube as y
 
     monkeypatch.setattr(y, "_extract", lambda url: _info(manual={"en": _sub()}, auto={}))
-    monkeypatch.setattr(y.requests, "get", lambda *a, **k: _FakeResp())
+    monkeypatch.setattr(y, "_download_subtitle", lambda url: MANUAL_VTT)
     return y
 
 
+
 def test_transcript_header_and_body(stubbed):
-    out = fetch_transcript("https://youtu.be/x", "en")
+    out = fetch_transcript("https://youtu.be/x")
     assert out.startswith(BANNER)
     assert "Video: Test Video\nTranscript source: manual (en)" in out
     assert "Hello world." in out
 
 
 def test_transcript_truncation(stubbed):
-    out = fetch_transcript("https://youtu.be/x", "en", limit=50)
+    out = fetch_transcript("https://youtu.be/x", limit=50)
     assert out.endswith("[truncated]")
     assert len(out) <= 50 + len("\n[truncated]") + len(BANNER) + 2
 
@@ -195,7 +190,7 @@ def test_transcript_saved_to_files(stubbed, tmp_path, monkeypatch):
     monkeypatch.setattr(stubbed, "_extract", lambda url: _info(
         manual={"en": _sub()}, auto={}, upload_date="20050423"))
     cfg = AppConfig(root=tmp_path)
-    out = fetch_transcript("https://youtu.be/x", "en", cfg=cfg)
+    out = fetch_transcript("https://youtu.be/x", cfg=cfg)
     dest = tmp_path / "files" / "transcripts" / "tester" / "2005-04-23_Test Video.txt"
     assert dest.is_file()
     assert dest.read_text(encoding="utf-8").startswith("Video: Test Video")
