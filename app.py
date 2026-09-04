@@ -271,7 +271,7 @@ def main() -> None:
     host = os.environ.get("GREMLIN_HOST", "127.0.0.1")
     port = int(os.environ.get("GREMLIN_PORT", "7860"))
     log.info("starting gremlin on http://%s:%d", host, port)
-    app.run(host=host, port=port, debug=True, threaded=True)
+    app.run(host=host, port=port, debug=False, threaded=True)
 
 
 if __name__ == "__main__":
