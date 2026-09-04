@@ -37,40 +37,57 @@ def parse_frontmatter(text: str) -> tuple[dict, str]:
 class SkillLoader:
     def __init__(self, cfg) -> None:
         self.dir = Path(cfg.skills_dir)
+        self._cache: dict[str, tuple[str, str, str, float]] = {}
+        self._dir_mtime: float | None = None
 
-    def list(self) -> list[dict]:
-        out: list[dict] = []
+    def _ensure_cache(self) -> None:
+        if self._cache and self._dir_mtime is not None:
+            try:
+                if self.dir.stat().st_mtime == self._dir_mtime:
+                    return
+            except OSError:
+                pass
+        self._build_cache()
+
+    def _build_cache(self) -> None:
+        self._cache.clear()
         if not self.dir.is_dir():
-            return out
+            self._dir_mtime = None
+            return
         for sub in sorted(self.dir.iterdir()):
             skill_file = sub / "SKILL.md"
             if not sub.is_dir() or not skill_file.is_file():
                 continue
             try:
-                meta, _ = parse_frontmatter(skill_file.read_text(encoding="utf-8"))
+                text = skill_file.read_text(encoding="utf-8")
+                meta, _ = parse_frontmatter(text)
+                mtime = skill_file.stat().st_mtime
             except (OSError, UnicodeDecodeError) as e:
                 log.warning("skipping unreadable skill %s: %s", sub.name, e)
                 continue
-            out.append(
-                {
-                    "slug": sub.name,
-                    "name": meta.get("name") or sub.name,
-                    "description": meta.get("description", ""),
-                }
+            self._cache[sub.name] = (
+                meta.get("name") or sub.name,
+                meta.get("description", ""),
+                text,
+                mtime,
             )
-        return out
+        try:
+            self._dir_mtime = self.dir.stat().st_mtime
+        except OSError:
+            self._dir_mtime = None
+
+    def list(self) -> list[dict]:
+        self._ensure_cache()
+        return [
+            {"slug": slug, "name": name, "description": desc}
+            for slug, (name, desc, _, _) in sorted(self._cache.items())
+        ]
 
     def get(self, name: str) -> str:
         """Full skill text by name or slug (case-insensitive)."""
+        self._ensure_cache()
         want = (name or "").strip().lower()
-        for sub in sorted(self.dir.iterdir()) if self.dir.is_dir() else []:
-            skill_file = sub / "SKILL.md"
-            if not sub.is_dir() or not skill_file.is_file():
-                continue
-            try:
-                meta, body = parse_frontmatter(skill_file.read_text(encoding="utf-8"))
-            except (OSError, UnicodeDecodeError):
-                continue
-            if want in (sub.name.lower(), meta.get("name", "").lower()):
-                return skill_file.read_text(encoding="utf-8")
+        for slug, (skill_name, _, full_text, _) in self._cache.items():
+            if want in (slug.lower(), skill_name.lower()):
+                return full_text
         raise SkillNotFoundError(name)
