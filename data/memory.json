@@ -7,5 +7,15 @@
       "drinks"
     ],
     "pinned": false
+  },
+  {
+    "id": "d89bda8c",
+    "content": "Web browsing and image generation are planned future features for Gremlin — not yet implemented (as of Sept 2026). Don't claim to have them until they exist.",
+    "tags": [
+      "features",
+      "roadmap",
+      "capabilities"
+    ],
+    "pinned": false
   }
 ]

@@ -304,7 +304,11 @@ def test_compress_cuts_history(cfg):
     list(manager.run(s["id"], "more tea?", SETTINGS))
     sent = backend.calls[1]["messages"]
     assert sent[0]["role"] == "system"
-    assert sent[1] == {"role": "user", "content": "Summary: user loves tea."}
+    # Summary is now a system message with a prefix, not a raw user message.
+    assert sent[1]["role"] == "system"
+    assert "Summary: user loves tea." in sent[1]["content"]
+    assert "[Conversation Summary]" in sent[1]["content"]
+    # Pre-compression messages are not re-sent.
     assert all(m.get("content") != "I love tea" for m in sent)
     assert sent[-1] == {"role": "user", "content": "more tea?"}
 
@@ -313,7 +317,7 @@ def test_compress_empty_session_raises(cfg):
     backend = FakeBackend([[]])
     sessions, manager = make_manager(cfg, backend)
     s = sessions.create("empty")
-    with pytest.raises(ValueError):
+    with pytest.raises(ModelError):
         manager.compress(s["id"], SETTINGS)
 def test_pinned_memory_in_prompt(cfg):
     from memory.store import MemoryStore

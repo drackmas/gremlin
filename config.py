@@ -79,6 +79,11 @@ class AppConfig:
         "identity": "",  # optional persona text injected into the system prompt
         "discord_enabled": False,  # run the Discord bot (toggle in settings)
         "max_tool_calls": 20,  # max tool-loop iterations per user turn
+        # --- context management -------------------------------------------
+        "max_context_tokens": 32768,      # model context window (hard limit)
+        "context_window_turns": 10,       # full turns kept verbatim in the API message list
+        "compaction_threshold": 0.65,     # fraction of max_context_tokens that triggers auto-compact
+        "tool_result_max_chars": 8000,    # truncate stored tool results beyond this length
     }
 
     _DEFAULT_TOOL_ITERATIONS: ClassVar[int] = 20

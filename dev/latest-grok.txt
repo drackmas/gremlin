@@ -1,0 +1,58 @@
+You are an expert Python engineer fixing a local agentic chat system.
+
+Primary goal: stop sending the full conversation history on every turn and implement proper context management so the system scales to long sessions without blowing the context window or wasting tokens.
+
+### Confirmed root cause
+In `chat/manager.py` → `_build_api_messages()` the code currently does:
+- Load the entire session (or everything after the last compression marker)
+- Convert every stored message (including all historical tool calls + full tool results) via `_stored_to_api()`
+- Prepend a freshly built system prompt
+- Append the new user message
+
+This is re-sent in full on every model call. Tool results (file contents, shell output, transcripts, etc.) accumulate forever.
+
+### Required changes (in priority order)
+
+1. **Implement intelligent context management** (highest priority)
+   - Before every model call, build a *bounded* message list instead of the full history.
+   - Strategy (prefer this order of sophistication):
+     a. Keep a fixed number of recent turns (configurable, default ~8–12 full turns).
+     b. Always keep the system prompt + pinned memory + identity.
+     c. For older turns: either drop them or replace with a compact summary.
+     d. Prefer token-aware truncation if possible (estimate tokens roughly or use a lightweight counter).
+   - Make the window / token budget configurable in settings and `AppConfig`.
+   - Never re-send full historical tool results that are no longer needed.
+
+2. **Make compaction automatic and robust**
+   - Trigger compaction automatically when the estimated context size exceeds a threshold (e.g. 60–70 % of a configurable max context).
+   - Improve `compress()` so it produces a high-quality summary that includes:
+     - User goals and decisions
+     - Important tool outcomes (not full outputs)
+     - Open questions / current state
+   - After compaction, replace the old history with the summary + a short recent tail.
+   - Store the summary in a clean way (prefer a dedicated `"role": "system"` or special user message rather than the current assistant + compression flag hack).
+
+3. **Protect against large tool results**
+   - When storing tool results in the session, optionally truncate or summarize very large outputs (keep a short version for history, full version only for the immediate next model turn if needed).
+   - Or: keep full tool results only for the most recent N tool calls and drop older ones from the API message list.
+
+4. **Clean up related problems**
+   - Fix the system prompt so it only claims tools that actually exist (remove “search the web” or add a real web search tool).
+   - Ensure `sessions.py` / `SessionManager` exists and is correct (it appears missing or broken in the current tree).
+   - Update README architecture diagram and tool table to match reality.
+   - Make max context / window size / compaction threshold configurable via settings UI and `data/settings.json`.
+
+5. **Keep everything else working**
+   - Preserve the existing tool-calling loop, streaming, Discord bot, CLI, Flask UI, and bridge.
+   - Do not break the current event format (`thinking`, `text`, `tool_call`, `done`, etc.).
+   - Maintain backward compatibility with existing session JSON files where possible (or provide a migration path).
+
+### Implementation guidance
+- Prefer changes concentrated in `chat/manager.py`, `sessions.py` (or wherever SessionManager lives), and `config.py` / settings.
+- Add clear logging when compaction or truncation happens.
+- Write or update tests for the new context-building logic.
+- After the changes, a long-running session should stay well under the model’s context limit even after dozens of tool-using turns.
+
+Start by examining `chat/manager.py` (`_build_api_messages`, `_run_tool_loop`, `compress`, and `run`) and the session persistence layer. Implement the bounded context builder first, then automatic compaction.
+
+Deliver clean, well-commented, production-quality code.

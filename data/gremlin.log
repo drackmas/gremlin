@@ -1,0 +1,63 @@
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: read_file
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: edit_file
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: list_directory
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: rename_file
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: move_file
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: run_command
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: grep_files
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: find_files
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: task
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: youtube_transcript
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: youtube_video_info
+2026-09-04 16:35:27,231 INFO gremlin.tools: tool registered: load_skill
+2026-09-04 16:35:27,232 INFO gremlin.tools: tool registered: memory_add
+2026-09-04 16:35:27,232 INFO gremlin.tools: tool registered: memory_search
+2026-09-04 16:35:27,232 INFO gremlin.tools: tool registered: memory_get
+2026-09-04 16:35:27,232 INFO gremlin.tools: tool registered: memory_remove
+2026-09-04 16:35:27,232 INFO gremlin.tools: tool registered: memory_pin
+2026-09-04 16:35:27,338 WARNING discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-04 16:35:27,338 WARNING discord.client: davey is not installed, voice will NOT be supported
+2026-09-04 16:35:27,338 INFO gremlin.discord: discord bot starting
+2026-09-04 16:35:27,338 INFO gremlin: discord bot started at boot
+2026-09-04 16:35:27,341 INFO discord.client: logging in using static token
+2026-09-04 16:35:27,342 INFO gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=1)
+2026-09-04 16:35:27,342 INFO gremlin: starting gremlin on http://127.0.0.1:7860
+2026-09-04 16:35:28,841 INFO discord.gateway: Shard ID None has connected to Gateway (Session ID: 71d0579ca1510e99f067fa706ab02040).
+2026-09-04 16:35:30,887 INFO gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-04 16:37:08,509 INFO gremlin.sessions: session created e336372d3bc44e37ba1448fee5914310 (discord)
+2026-09-04 16:40:17,001 INFO gremlin.tools: tool ok: memory_add
+2026-09-04 16:40:17,002 INFO gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-04 16:41:52,369 INFO gremlin.tools: tool ok: memory_search
+2026-09-04 16:41:52,369 INFO gremlin.chat: tool call: memory_search -> ok (20 chars)
+2026-09-04 16:41:57,846 INFO gremlin.tools: tool ok: memory_search
+2026-09-04 16:41:57,846 INFO gremlin.chat: tool call: memory_search -> ok (20 chars)
+2026-09-04 16:42:00,822 INFO gremlin.tools: tool ok: memory_get
+2026-09-04 16:42:00,822 INFO gremlin.chat: tool call: memory_get -> ok (256 chars)
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: read_file
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: edit_file
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: list_directory
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: rename_file
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: move_file
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: run_command
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: grep_files
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: find_files
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: task
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: youtube_transcript
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: youtube_video_info
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: load_skill
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: memory_add
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: memory_search
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: memory_get
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: memory_remove
+2026-09-04 16:57:14,537 INFO gremlin.tools: tool registered: memory_pin
+2026-09-04 16:57:14,648 WARNING discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-04 16:57:14,648 WARNING discord.client: davey is not installed, voice will NOT be supported
+2026-09-04 16:57:14,649 INFO gremlin.discord: discord bot starting
+2026-09-04 16:57:14,649 INFO gremlin: discord bot started at boot
+2026-09-04 16:57:14,651 INFO discord.client: logging in using static token
+2026-09-04 16:57:14,653 INFO gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=2)
+2026-09-04 16:57:14,653 INFO gremlin: starting gremlin on http://127.0.0.1:7860
+2026-09-04 16:57:15,735 INFO discord.gateway: Shard ID None has connected to Gateway (Session ID: 318b5ea7912f726638af809c84f5df7e).
+2026-09-04 16:57:17,764 INFO gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-04 17:00:27,463 INFO gremlin.tools: tool ok: run_command
+2026-09-04 17:00:27,463 INFO gremlin.chat: tool call: run_command -> ok (631 chars)

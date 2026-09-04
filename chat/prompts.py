@@ -12,7 +12,8 @@ def build_system_prompt(skill_index: list[dict], tools: list | None = None, iden
         "You work in a loop of action and observation: call a tool, read its result, "
         "decide the next step, and repeat until the task is genuinely complete. "
         "You have tools to read, write and rename files in the user's project, run "
-        "shell commands to build, test and verify, search the web, and recall memory. "
+        "shell commands to build, test and verify, search project files, fetch YouTube "
+        "transcripts, and recall memory. "
         "Paths are relative to the project root. Never invent file contents or command "
         "output - call the tool and read what it actually returns.",
         "Working well:\n"

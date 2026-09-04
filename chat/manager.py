@@ -32,22 +32,62 @@ from .prompts import build_system_prompt
 
 log = logging.getLogger("gremlin.chat")
 
+# ---------------------------------------------------------------------------
+# Prompts & constants
+# ---------------------------------------------------------------------------
 
 COMPACT_PROMPT = (
-    "You compact chat history. Reply with a concise markdown summary that preserves: "
-    "user intents, decisions made, open questions, key facts and figures, file/URL "
-    "references, and the state of any in-progress task. Do not answer anything in the "
-    "conversation; only summarize."
+    "You are a conversation compactor. Summarize the chat history above into a "
+    "structured markdown block that a future model turn can use as context. "
+    "Your summary MUST include these sections (omit a section only if truly empty):\n\n"
+    "## User Goals & Decisions\n"
+    "What the user asked for, key decisions made, constraints stated.\n\n"
+    "## Important Tool Outcomes\n"
+    "One-line summaries of significant tool results (file writes, command outputs, "
+    "searches). Do NOT paste full outputs; capture the essential fact.\n\n"
+    "## Current State\n"
+    "What was being worked on last, any open questions, pending tasks.\n\n"
+    "## Key Facts & References\n"
+    "File paths, URLs, names, values the model still needs.\n\n"
+    "Rules: be concise (under 500 words total). Do not answer the user's questions "
+    "or continue the conversation — only summarize for context handoff."
 )
+
+# Rough chars-per-token estimate for English text (conservative ~4 chars/token).
+_CHARS_PER_TOKEN = 4
+
+
+def _estimate_tokens(text: str) -> int:
+    """Lightweight token estimate: chars / 4. Good enough for budgeting."""
+    return max(1, len(text) // _CHARS_PER_TOKEN)
+
+
+def _estimate_messages_tokens(messages: list[dict]) -> int:
+    """Sum token estimates across all message content fields."""
+    total = 0
+    for m in messages:
+        content = m.get("content") or ""
+        total += _estimate_tokens(content)
+        for tc in m.get("tool_calls") or []:
+            total += _estimate_tokens(json.dumps(tc.get("arguments", {})))
+        # role overhead is negligible
+    return total
+
+
+def _truncate_tool_result(result: str, max_chars: int) -> str:
+    """Truncate a tool result to max_chars, appending a truncation marker."""
+    if len(result) <= max_chars:
+        return result
+    return result[:max_chars] + f"\n... [truncated: {len(result) - max_chars} chars omitted]"
+
+
+# ---------------------------------------------------------------------------
+# OpenAI message helpers
+# ---------------------------------------------------------------------------
 
 
 def _tool_call_obj(id: str, name: str, arguments: dict) -> dict:
-    """Build one OpenAI assistant ``tool_calls`` entry from resolved values.
-
-    ``arguments`` is serialized with the same ``json.dumps`` both call sites used
-    inline; the value is passed through unchanged (no type check), so the wire
-    output is identical for every current representation.
-    """
+    """Build one OpenAI assistant ``tool_calls`` entry from resolved values."""
     return {
         "id": id,
         "type": "function",
@@ -60,8 +100,12 @@ def _tool_result_obj(tool_call_id: str, content: str) -> dict:
     return {"role": "tool", "tool_call_id": tool_call_id, "content": content}
 
 
-def _stored_to_api(message: dict) -> list[dict]:
-    """Convert one stored message into OpenAI-shaped API messages."""
+def _stored_to_api(message: dict, max_tool_chars: int = 8000) -> list[dict]:
+    """Convert one stored message into OpenAI-shaped API messages.
+
+    Tool results are truncated to ``max_tool_chars`` to keep the API payload
+    bounded. The full result remains in the session file for history purposes.
+    """
     role = message.get("role")
     if role == "user":
         return [{"role": "user", "content": message.get("content", "")}]
@@ -77,8 +121,42 @@ def _stored_to_api(message: dict) -> list[dict]:
         ]
     out.append(api_msg)
     for i, tc in enumerate(tool_calls):
-        out.append(_tool_result_obj(tc.get("id") or f"call_{i}", tc.get("result", "")))
+        result = tc.get("result", "")
+        out.append(_tool_result_obj(tc.get("id") or f"call_{i}", _truncate_tool_result(result, max_tool_chars)))
     return out
+
+
+def _find_last_compression(stored: list[dict]) -> int | None:
+    """Return index of the last compression summary message, or None."""
+    for i in range(len(stored) - 1, -1, -1):
+        if stored[i].get("compression"):
+            return i
+    return None
+
+
+def _group_into_turns(stored: list[dict]) -> list[list[dict]]:
+    """Group stored messages into conversation turns.
+
+    A turn is one user message + one assistant message (with any tool calls).
+    This lets us bound context by number of turns rather than raw messages.
+    """
+    turns: list[list[dict]] = []
+    current: list[dict] = []
+    for msg in stored:
+        role = msg.get("role")
+        if role == "user" and current:
+            # New user message starts a new turn
+            turns.append(current)
+            current = []
+        current.append(msg)
+    if current:
+        turns.append(current)
+    return turns
+
+
+# ---------------------------------------------------------------------------
+# ChatManager
+# ---------------------------------------------------------------------------
 
 
 class ChatManager:
@@ -90,29 +168,172 @@ class ChatManager:
         self._backend = backend
         self.memory = memory
 
-    def _build_api_messages(self, session_id: str, settings: dict) -> list[dict]:
-        """Construct the system prompt + stored-message-to-API-message conversion."""
-        system = build_system_prompt(
+    # -- context building ---------------------------------------------------
+
+    def _build_system(self, settings: dict) -> str:
+        """Build the system prompt (always included, never truncated)."""
+        return build_system_prompt(
             self.skills.list(),
             tools=self.registry.tools(),
             identity=settings.get("identity", ""),
             now=datetime.now().astimezone().strftime("%A, %B %d, %Y, %H:%M %Z"),
             memory=[m["content"] for m in self.memory.pinned()] if self.memory is not None else None,
         )
+
+    def _build_api_messages(self, session_id: str, settings: dict) -> list[dict]:
+        """Construct a bounded API message list.
+
+        Strategy:
+        1. System prompt (always included).
+        2. Compression summary if one exists (replaces all older history).
+        3. Most recent N turns verbatim (configurable, default 10).
+        4. Token-aware truncation: if the total still exceeds the token budget,
+           drop oldest turns until it fits.
+        """
+        max_context_tokens = int(settings.get("max_context_tokens", 32768))
+        window_turns = int(settings.get("context_window_turns", 10))
+        max_tool_chars = int(settings.get("tool_result_max_chars", 8000))
+
+        system = self._build_system(settings)
         api_messages: list[dict] = [{"role": "system", "content": system}]
+
         stored = self.sessions.get(session_id)["messages"]
-        cut = next((i for i in range(len(stored) - 1, -1, -1) if stored[i].get("compression")), None)
+
+        # If a compression summary exists, it replaces all earlier messages.
+        cut = _find_last_compression(stored)
         if cut is not None:
-            # Post-compaction: the summary (as a user message) replaces all earlier turns.
-            api_messages.append({"role": "user", "content": stored[cut]["content"]})
+            # Include the summary as a system message (cleaner than user hack).
+            api_messages.append({"role": "system", "content": f"[Conversation Summary]\n{stored[cut]['content']}"})
             tail = stored[cut + 1:]
         else:
             tail = stored
-        for m in tail:
-            api_messages.extend(_stored_to_api(m))
+
+        # Group into turns and keep only the most recent N.
+        turns = _group_into_turns(tail)
+        if len(turns) > window_turns:
+            dropped = len(turns) - window_turns
+            log.debug("context: dropping %d oldest turns (window=%d)", dropped, window_turns)
+            turns = turns[-window_turns:]
+
+        # Flatten turns back to messages and convert to API format.
+        for msg in (m for turn in turns for m in turn):
+            api_messages.extend(_stored_to_api(msg, max_tool_chars))
+
+        # Token-aware safety net: drop oldest messages if still over budget.
+        # If the budget is non-positive (system prompt alone exceeds the window),
+        # skip token truncation — the window-based limit above is the only useful bound.
+        system_tokens = _estimate_tokens(system)
+        budget = max_context_tokens - system_tokens - 512  # reserve for response
+        if budget > 0:
+            while len(api_messages) > 1:
+                msg_tokens = _estimate_messages_tokens(api_messages[1:])
+                if msg_tokens <= budget:
+                    break
+                api_messages.pop(1)
+                log.debug("context: token budget exceeded, dropping one more message (est=%d, budget=%d)", msg_tokens, budget)
+
         return api_messages
 
-    def _execute_tool_calls(self, turn_tools: list[dict], turn_content: list[str], api_messages: list[dict], timeline: list[dict]) -> tuple[list[dict], list[dict]]:
+    # -- compaction ---------------------------------------------------------
+
+    def _should_compact(self, session_id: str, settings: dict) -> bool:
+        """Check if the session's stored context exceeds the compaction threshold."""
+        max_context_tokens = int(settings.get("max_context_tokens", 32768))
+        threshold = float(settings.get("compaction_threshold", 0.65))
+        budget = int(max_context_tokens * threshold)
+
+        stored = self.sessions.get(session_id)["messages"]
+        cut = _find_last_compression(stored)
+        # Only consider messages after the last compression.
+        relevant = stored[cut + 1:] if cut is not None else stored
+        est = _estimate_messages_tokens([
+            {"role": m.get("role"), "content": m.get("content", ""), "tool_calls": m.get("tool_calls")}
+            for m in relevant
+        ])
+        return est > budget
+
+    def _maybe_compact(self, session_id: str, settings: dict) -> None:
+        """Trigger automatic compaction if the context is too large.
+
+        Runs the model to produce a summary, stores it as a compression marker,
+        and the next _build_api_messages will use it to bound history.
+        """
+        if not self._should_compact(session_id, settings):
+            return
+
+        log.info("session %s: auto-compaction triggered", session_id)
+        try:
+            self.compress(session_id, settings)
+            log.info("session %s: auto-compaction complete", session_id)
+        except (ModelError, Exception) as e:
+            # Compaction failure should not break the turn; log and continue.
+            log.warning("session %s: auto-compaction failed (%s); continuing with full context", session_id, e)
+
+    def compress(self, session_id: str, settings: dict) -> dict:
+        """Produce a high-quality summary of the session history.
+
+        Stores the summary as a message with ``compression: True``. The
+        ``_build_api_messages`` method uses this as a boundary: everything
+        before it is replaced by the summary.
+        """
+        stored = self.sessions.get(session_id)["messages"]
+        cut = _find_last_compression(stored)
+        # Summarize everything after the last compression (or all if none).
+        relevant = stored[cut + 1:] if cut is not None else stored
+
+        if not relevant:
+            raise ModelError("nothing to compress")
+
+        # Build a compact version of the messages for the compaction call.
+        # Limit input to the model to avoid blowing the context during compaction itself.
+        max_input_tokens = int(settings.get("max_context_tokens", 32768)) // 2
+        compaction_messages: list[dict] = []
+        running_tokens = 0
+        # Walk backwards to keep the most recent messages within budget.
+        for msg in reversed(relevant):
+            msg_dict = {"role": msg.get("role"), "content": msg.get("content", "")}
+            if msg.get("tool_calls"):
+                msg_dict["tool_calls"] = msg["tool_calls"]
+            t = _estimate_messages_tokens([msg_dict])
+            if running_tokens + t > max_input_tokens:
+                break
+            compaction_messages.insert(0, msg_dict)
+            running_tokens += t
+
+        # Build the compaction API call.
+        api: list[dict] = [{"role": "system", "content": COMPACT_PROMPT}]
+        # Convert to a simple text format for the compaction model call.
+        for msg in compaction_messages:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            if role == "assistant" and msg.get("tool_calls"):
+                tc_summary = "; ".join(f"{tc.get('name')}({json.dumps(tc.get('arguments', {}))[:100]})" for tc in msg["tool_calls"])
+                content = f"{content} [tools: {tc_summary}]"
+            api.append({"role": "user" if role != "assistant" else "assistant", "content": content})
+
+        backend = self._backend or OpenAICompatBackend(settings["base_url"])
+        parts: list[str] = []
+        for ev in backend.stream(api, [], settings["model"]):
+            if ev.kind == "text":
+                parts.append(ev.text)
+        summary = "".join(parts).strip()
+        if not summary:
+            raise ModelError("model returned an empty summary")
+
+        msg = {
+            "id": uuid.uuid4().hex,
+            "role": "assistant",
+            "content": summary,
+            "compression": True,
+            "ts": now_utc(),
+        }
+        self.sessions.add_message(session_id, msg)
+        log.info("session %s compressed: %d messages -> %d-char summary", session_id, len(relevant), len(summary))
+        return msg
+
+    # -- tool execution -----------------------------------------------------
+
+    def _execute_tool_calls(self, turn_tools: list[dict], turn_content: list[str], api_messages: list[dict], timeline: list[dict], max_tool_chars: int = 8000) -> tuple[list[dict], list[dict]]:
         """Execute each tool, update api_messages and timeline. Returns (events, tool_call_records)."""
         # Record the assistant's tool-call message.
         api_messages.append(
@@ -130,48 +351,23 @@ class ChatManager:
         for t in turn_tools:
             result, ok = self.registry.execute(t["name"], t["arguments"])
             status = "ok" if ok else "error"
-            records.append({**t, "result": result, "status": status})
-            log.info("tool call: %s -> %s", t["name"], status)
+            # Truncate the stored result for session persistence.
+            truncated_result = _truncate_tool_result(result, max_tool_chars)
+            records.append({**t, "result": truncated_result, "status": status})
+            log.info("tool call: %s -> %s (%d chars)", t["name"], status, len(result))
             events.append({
                 "type": "tool_call",
                 "name": t["name"],
                 "arguments": t["arguments"],
-                "result": result,
+                "result": result,  # full result to the UI
                 "status": status,
             })
             timeline.append({"t": "tool", "name": t["name"], "status": status})
-            api_messages.append(_tool_result_obj(t["id"], result))
+            # Store truncated result in api_messages for the next model call.
+            api_messages.append(_tool_result_obj(t["id"], truncated_result))
         return events, records
 
-    def compress(self, session_id: str, settings: dict) -> dict:
-        """Summarize the session so far into one stored compression message."""
-        session = self.sessions.get(session_id)
-        history = [
-            {"role": m["role"], "content": m["content"]}
-            for m in session["messages"]
-            if m.get("content") and m["role"] in ("user", "assistant")
-        ]
-        if not history:
-            raise ValueError("nothing to compress")
-        api = [{"role": "system", "content": COMPACT_PROMPT}] + history
-        backend = self._backend or OpenAICompatBackend(settings["base_url"])
-        parts: list[str] = []
-        for ev in backend.stream(api, [], settings["model"]):
-            if ev.kind == "text":
-                parts.append(ev.text)
-        summary = "".join(parts).strip()
-        if not summary:
-            raise ModelError("model returned an empty summary")
-        msg = {
-            "id": uuid.uuid4().hex,
-            "role": "assistant",
-            "content": summary,
-            "compression": True,
-            "ts": now_utc(),
-        }
-        self.sessions.add_message(session_id, msg)
-        log.info("session %s compressed to %d chars", session_id, len(summary))
-        return msg
+    # -- main loop ----------------------------------------------------------
 
     def _run_tool_loop(
         self,
@@ -184,6 +380,7 @@ class ChatManager:
         session_id,
         state,
         max_tool_calls: int | None = None,
+        max_tool_chars: int = 8000,
     ):
         """Stream model turns and execute tool calls for one user turn.
 
@@ -240,7 +437,7 @@ class ChatManager:
             if not turn_tools:
                 break
 
-            events, records = self._execute_tool_calls(turn_tools, turn_content, api_messages, timeline)
+            events, records = self._execute_tool_calls(turn_tools, turn_content, api_messages, timeline, max_tool_chars)
             tool_calls.extend(records)
             for ev in events:
                 yield ev
@@ -280,6 +477,10 @@ class ChatManager:
         }
         self.sessions.add_message(session_id, user_msg)
 
+        # Automatic compaction: run before building the API message list so
+        # the bounded builder can use the fresh summary as a boundary.
+        self._maybe_compact(session_id, settings)
+
         show_thinking = bool(settings.get("show_thinking", True))
         api_messages = self._build_api_messages(session_id, settings)
         backend = self._backend or OpenAICompatBackend(settings["base_url"])
@@ -288,6 +489,7 @@ class ChatManager:
 
         # read from settings first, fall back to class default
         max_tool_calls = settings.get("max_tool_calls", self.cfg._DEFAULT_TOOL_ITERATIONS)
+        max_tool_chars = int(settings.get("tool_result_max_chars", 8000))
 
         timeline: list[dict] = []
         state: dict = {}
@@ -301,6 +503,7 @@ class ChatManager:
             session_id,
             state,
             max_tool_calls=max_tool_calls,
+            max_tool_chars=max_tool_chars,
         ):
             yield ev
 
