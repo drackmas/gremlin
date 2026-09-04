@@ -63,6 +63,9 @@ class SettingsStore:
                     raise SettingsError(f"{key} must be a non-empty string")
                 if key == "appearance" and value not in _APPEARANCES:
                     raise SettingsError("appearance must be 'light' or 'dark'")
+            elif isinstance(default, int):
+                if not isinstance(value, int) or isinstance(value, bool):
+                    raise SettingsError(f"{key} must be an integer")
             else:
                 continue
             current[key] = value

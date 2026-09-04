@@ -66,6 +66,20 @@ def test_empty_model_rejected(client):
     assert res.status_code == 400
 
 
+def test_max_tool_calls_saved(client):
+    res = client.post("/api/settings", json={"max_tool_calls": 42})
+    assert res.status_code == 200
+    assert res.get_json()["max_tool_calls"] == 42
+    # reload from disk
+    again = client.get("/api/settings").get_json()
+    assert again["max_tool_calls"] == 42
+
+
+def test_max_tool_calls_non_int_rejected(client):
+    res = client.post("/api/settings", json={"max_tool_calls": "twenty"})
+    assert res.status_code == 400
+
+
 def test_unknown_keys_ignored(client):
     res = client.post("/api/settings", json={"theme": "darkly", "bogus": 123})
     assert res.status_code == 200
