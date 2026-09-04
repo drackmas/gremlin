@@ -229,8 +229,17 @@ class ChatManager:
                 msg_tokens = _estimate_messages_tokens(api_messages[1:])
                 if msg_tokens <= budget:
                     break
-                api_messages.pop(1)
-                log.debug("context: token budget exceeded, dropping one more message (est=%d, budget=%d)", msg_tokens, budget)
+                # Drop the oldest message. If it's an assistant with tool_calls,
+                # also drop its tool-result messages to keep the sequence valid
+                # for the model's chat template.
+                drop_end = 1
+                if api_messages[1].get("role") == "assistant" and api_messages[1].get("tool_calls"):
+                    i = 2
+                    while i < len(api_messages) and api_messages[i].get("role") == "tool":
+                        i += 1
+                    drop_end = i
+                del api_messages[1:drop_end]
+                log.debug("context: token budget exceeded, dropping %d message(s) (est=%d, budget=%d)", drop_end - 1, msg_tokens, budget)
 
         return api_messages
 
