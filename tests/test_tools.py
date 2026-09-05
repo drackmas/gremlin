@@ -179,3 +179,36 @@ def test_task_view_no_plan(tmp_path):
     out, ok = reg.execute("task", {"action": "view"})
     assert ok, out
     assert "no task plan" in out
+
+
+def test_session_filter_injects_session_id():
+    import logging
+
+    from tools.registry import LOG_FORMAT, SESSION_ID, SessionFilter
+
+    lines = []
+
+    class _Cap(logging.Handler):
+        def emit(self, record):
+            lines.append(self.format(record))
+
+    handler = _Cap()
+    handler.setFormatter(logging.Formatter(LOG_FORMAT))
+    handler.addFilter(SessionFilter())
+    logger = logging.getLogger("test.session.filter")
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+    # The filter injects whatever session id is active at emit time, so set
+    # known values explicitly (do not depend on prior test state).
+    try:
+        SESSION_ID.set("sid-a")
+        logger.info("phase a")
+        SESSION_ID.set("sid-b")
+        logger.info("phase b")
+    finally:
+        logger.removeHandler(handler)
+
+    assert "[sid-a]" in lines[0]
+    assert "[sid-b]" in lines[1]

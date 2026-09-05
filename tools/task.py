@@ -7,8 +7,10 @@ from pathlib import Path
 
 from .registry import SESSION_ID, Tool
 
+from config import AppConfig
 
-def build_task_tool(cfg) -> Tool:
+
+def build_task_tool(cfg: AppConfig) -> Tool:
     def task(args: dict) -> str:
         action = args["action"]
         sid = SESSION_ID.get()

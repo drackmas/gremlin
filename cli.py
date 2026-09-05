@@ -22,6 +22,7 @@ from sessions import SessionManager
 from skills.loader import SkillLoader
 from memory.store import MemoryStore
 from tools import build_registry
+from tools.registry import LOG_FORMAT, SessionFilter
 
 HELP = """commands:
   /new    start a fresh session
@@ -66,7 +67,9 @@ def _handle_command(text: str, sessions: SessionManager) -> tuple[str, str | Non
 def main(cfg=None, backend=None) -> int:
     cfg = cfg or AppConfig()
     ensure_dirs(cfg)
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+    for h in logging.getLogger().handlers:
+        h.addFilter(SessionFilter())
     for noisy in ("werkzeug", "httpx", "urllib3"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
@@ -75,7 +78,7 @@ def main(cfg=None, backend=None) -> int:
     s_cfg = settings.load()
     skills = SkillLoader(cfg)
     memory = MemoryStore(cfg.data_dir / "memory.json")
-    registry = build_registry(cfg, skills, memory)
+    registry = build_registry(cfg, skills, memory, settings.load)
     manager = ChatManager(cfg, sessions, registry, skills, backend=backend, memory=memory)
     s = sessions.create("terminal")
 

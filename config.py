@@ -14,6 +14,15 @@ from typing import ClassVar
 
 def _default_root() -> Path:
     return Path(os.environ.get("GREMLIN_ROOT", Path(__file__).resolve().parent))
+def _default_shell_allowlist() -> tuple[str, ...]:
+    """Program allow-list for ``run_command`` from GREMLIN_SHELL_ALLOWLIST.
+
+    Empty by default = unrestricted (preserves existing behavior). Set a
+    comma-separated list (e.g. ``"ls,cat,git,python"``) to restrict which
+    programs the shell tool may execute.
+    """
+    raw = os.environ.get("GREMLIN_SHELL_ALLOWLIST", "")
+    return tuple(p.strip() for p in raw.split(",") if p.strip())
 
 
 @dataclass
@@ -27,6 +36,8 @@ class AppConfig:
     bridge_host: str = "127.0.0.1"
     bridge_port: int = 8787
     bridge_key: str = ""
+    # --- shell safety --------------------------------------------------
+    shell_allowlist: tuple[str, ...] = field(default_factory=_default_shell_allowlist)
 
     # --- derived paths -------------------------------------------------
     @property
@@ -68,6 +79,9 @@ class AppConfig:
     @property
     def transcripts_dir(self) -> Path:
         return self.root / "files" / "transcripts"
+    @property
+    def generated_tools_dir(self) -> Path:
+        return self.root / "data" / "generated_tools"
 
     # --- defaults ------------------------------------------------------
     DEFAULT_SETTINGS: ClassVar[dict] = {
@@ -78,12 +92,15 @@ class AppConfig:
         "model": os.environ.get("GREMLIN_MODEL", ""),
         "identity": "",  # optional persona text injected into the system prompt
         "discord_enabled": False,  # run the Discord bot (toggle in settings)
+        # --- shell safety (opt-in) ----------------------------------------
+        "shell_allowlist": [],  # allowed programs for run_command; empty = unrestricted
         "max_tool_calls": 20,  # max tool-loop iterations per user turn
         # --- context management -------------------------------------------
         "max_context_tokens": 32768,      # model context window (hard limit)
         "context_window_turns": 10,       # full turns kept verbatim in the API message list
         "compaction_threshold": 0.65,     # fraction of max_context_tokens that triggers auto-compact
         "tool_result_max_chars": 8000,    # truncate stored tool results beyond this length
+        "chars_per_token": 4,           # chars-per-token divisor for context estimation
     }
 
     _DEFAULT_TOOL_ITERATIONS: ClassVar[int] = 20
@@ -91,6 +108,18 @@ class AppConfig:
 
 
 def ensure_dirs(cfg: AppConfig) -> None:
-    """Create runtime directories that may not exist yet."""
-    for p in (cfg.sessions_dir, cfg.data_dir):
+    """Create every runtime directory the app may write to.
+
+    Idempotent: safe to call at boot and in tests. Parents and the data
+    sub-tree (tasks, generated tools) are all created here.
+    """
+    dirs = [
+        cfg.sessions_dir,
+        cfg.data_dir,
+        cfg.data_dir / "tasks",
+        cfg.generated_tools_dir,
+        cfg.skills_dir,
+        cfg.transcripts_dir,
+    ]
+    for p in dirs:
         p.mkdir(parents=True, exist_ok=True)

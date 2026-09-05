@@ -1,7 +1,57 @@
-# Tooling config for Gremlin. This file carries ONLY linter / type-checker
-# configuration; it is deliberately NOT a package manifest (no [project] table)
-# so the repo stays a flat, script-style tree driven by requirements.txt.
+# Gremlin — local, self-contained chat assistant.
+#
+# This is a real package manifest. The repo keeps a FLAT, script-style layout
+# (top-level modules ``app.py``, ``cli.py`` ... and top-level packages
+# ``chat/``, ``tools/`` ...). All imports are flat (``from tools import
+# build_registry``), so setuptools installs the top-level modules and packages
+# verbatim onto ``sys.path`` — no namespace rename is needed. Run the app from
+# the project root (it serves the bundled frontend from there) or use
+# ``pip install -e .`` for an editable install.
 
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gremlin"
+version = "0.1.0"
+description = "Local, self-contained agentic chat assistant with a plugin-free tool/skill system."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "dracmas" }]
+keywords = ["chat", "assistant", "agent", "tools", "skills", "llm"]
+# Runtime dependencies. pytest / ruff / mypy live in [project.optional-dependencies].
+dependencies = [
+    "discord.py",
+    "flask",
+    "json_repair",
+    "requests",
+    "ddgs",
+    "yt-dlp",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "mypy"]
+
+[project.scripts]
+# Interactive terminal front door.
+gremlin = "cli:main"
+# Flask web front door.
+gremlin-app = "app:main"
+
+# --- flat layout --------------------------------------------------------
+# Top-level modules installed onto sys.path as-is.
+[tool.setuptools]
+py-modules = ["app", "cli", "config", "utils", "discord_bot"]
+
+[tool.setuptools.packages.find]
+# Explicit: only the real Python packages, never the data / asset dirs.
+include = ["chat", "tools", "skills", "memory", "sessions", "models", "bridge"]
+namespaces = false
+
+# --- tooling ------------------------------------------------------------
 [tool.ruff]
 line-length = 110
 target-version = "py312"

@@ -73,3 +73,44 @@ def test_run_command_truncates_long_output(cfg):
     )
     assert ok is True
     assert "[truncated" in out
+def make_reg_allowlist(cfg, allowlist):
+    return build_registry(cfg, settings_loader=lambda: {"shell_allowlist": allowlist})
+
+
+def test_shell_allowlist_opt_in_restricts(cfg):
+    reg = make_reg_allowlist(cfg, ["echo"])
+    out, ok = reg.execute("run_command", {"command": "echo hello"})
+    assert ok is True
+    assert "hello" in out
+    out, ok = reg.execute("run_command", {"command": "python3 -c 'print(1)'"})
+    assert ok is False
+    assert "not in the shell allow-list" in out
+    assert "echo" in out  # the allowed set is listed for the model
+
+
+def test_shell_allowlist_comma_string_normalizes(cfg):
+    reg = make_reg_allowlist(cfg, "echo, ls")
+    out, ok = reg.execute("run_command", {"command": "ls -a"})
+    assert ok is True
+    out, ok = reg.execute("run_command", {"command": "python3 -V"})
+    assert ok is False
+    assert "not in the shell allow-list" in out
+
+
+def test_shell_allowlist_unrestricted_when_empty_or_absent(cfg):
+    # No settings loader (falls back to the empty env-based default).
+    out, ok = make_reg(cfg).execute("run_command", {"command": "python3 -c 'print(1)'"})
+    assert ok is True
+    assert "1" in out
+    # An explicitly empty list from settings is also unrestricted.
+    out, ok = make_reg_allowlist(cfg, []).execute("run_command", {"command": "python3 -c 'print(2)'"})
+    assert ok is True
+    assert "2" in out
+
+
+def test_shell_allowlist_rejects_unparseable_in_restricted_mode(cfg):
+    reg = make_reg_allowlist(cfg, ["echo"])
+    # An unclosed quote cannot be lexed into programs, so it is refused.
+    out, ok = reg.execute("run_command", {"command": 'echo "unclosed'})
+    assert ok is False
+    assert "restricted mode" in out

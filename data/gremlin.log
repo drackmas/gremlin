@@ -1,0 +1,195 @@
+2026-09-05 06:01:12,578 INFO gremlin.tools: tool registered: read_file
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: edit_file
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: list_directory
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: rename_file
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: move_file
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: run_command
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: grep_files
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: find_files
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: task
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: web_search
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: web_fetch
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: youtube_transcript
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: youtube_video_info
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: load_skill
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: memory_add
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: memory_search
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: memory_get
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: memory_remove
+2026-09-05 06:01:12,579 INFO gremlin.tools: tool registered: memory_pin
+2026-09-05 06:01:12,691 WARNING discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-05 06:01:12,692 WARNING discord.client: davey is not installed, voice will NOT be supported
+2026-09-05 06:01:12,692 INFO gremlin.discord: discord bot starting
+2026-09-05 06:01:12,692 INFO gremlin: discord bot started at boot
+2026-09-05 06:01:12,695 INFO discord.client: logging in using static token
+2026-09-05 06:01:12,695 INFO gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=1)
+2026-09-05 06:01:12,696 INFO gremlin: starting gremlin on http://127.0.0.1:7860
+2026-09-05 06:01:13,777 INFO discord.gateway: Shard ID None has connected to Gateway (Session ID: 0ce763213830c0d441c3a37ee9a22a16).
+2026-09-05 06:01:15,804 INFO gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-05 06:02:27,866 INFO gremlin.sessions: session created 733339df5f3b4e719e0a7717033274a3 (discord)
+2026-09-05 06:02:34,150 INFO primp: response: https://grokipedia.com/api/typeahead?query=Eya+Censored+Youtube&limit=1 200
+2026-09-05 06:02:34,198 INFO primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=Eya%20Censored%20Youtube 200
+2026-09-05 06:02:34,850 INFO primp: response: https://html.duckduckgo.com/html/ 200
+2026-09-05 06:02:34,852 INFO gremlin.tools: tool ok: web_search
+2026-09-05 06:02:34,853 INFO gremlin.chat: tool call: web_search -> ok (2278 chars)
+2026-09-05 06:04:02,518 INFO gremlin.tools: tool ok: web_fetch
+2026-09-05 06:04:02,518 INFO gremlin.chat: tool call: web_fetch -> ok (388 chars)
+2026-09-05 06:04:05,468 INFO primp: response: https://grokipedia.com/api/typeahead?query=%22eya+censored%22+site%3Ayoutube.com+live+stream&limit=1 200
+2026-09-05 06:04:05,612 INFO primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=%22eya%20censored%22%20site%3Ayoutube.com%20live%20stream 200
+2026-09-05 06:04:05,841 INFO primp: response: https://search.yahoo.com/search;_ylt=SklkTnQatDrC4e6Zg1uy3t6g;_ylu=6s291g4bamh3hY_wKjNvH9q88m-1JlWDHMMfXAYsrdqm3aA?p=%22eya+censored%22+site%3Ayoutube.com+live+stream 200
+2026-09-05 06:04:06,604 INFO primp: response: https://www.startpage.com/ 200
+2026-09-05 06:04:06,761 INFO primp: response: https://www.startpage.com/sp/search 200
+2026-09-05 06:04:07,542 INFO primp: response: https://search.brave.com/search?q=%22eya+censored%22+site%3Ayoutube.com+live+stream&source=web 200
+2026-09-05 06:04:07,547 INFO gremlin.tools: tool ok: web_search
+2026-09-05 06:04:07,547 INFO gremlin.chat: tool call: web_search -> ok (4188 chars)
+2026-09-05 06:05:51,435 INFO gremlin.tools: tool ok: run_command
+2026-09-05 06:05:51,436 INFO gremlin.chat: tool call: run_command -> ok (4270 chars)
+2026-09-05 06:06:00,478 INFO gremlin.tools: tool ok: run_command
+2026-09-05 06:06:00,478 INFO gremlin.chat: tool call: run_command -> ok (26 chars)
+2026-09-05 06:07:57,507 INFO primp: response: https://grokipedia.com/api/typeahead?query=Bible+changes+mandela+effect&limit=1 200
+2026-09-05 06:07:57,565 INFO primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=Bible%20changes%20mandela%20effect 200
+2026-09-05 06:07:57,872 INFO primp: response: https://www.startpage.com/ 200
+2026-09-05 06:07:57,990 INFO primp: response: https://www.startpage.com/sp/search 200
+2026-09-05 06:07:58,197 INFO primp: response: https://html.duckduckgo.com/html/ 202
+2026-09-05 06:07:59,176 INFO primp: response: https://search.brave.com/search?q=Bible+changes+mandela+effect&source=web 200
+2026-09-05 06:07:59,233 INFO gremlin.tools: tool ok: web_search
+2026-09-05 06:07:59,233 INFO gremlin.chat: tool call: web_search -> ok (3869 chars)
+2026-09-05 06:10:00,277 INFO gremlin.tools: tool ok: web_fetch
+2026-09-05 06:10:00,277 INFO gremlin.chat: tool call: web_fetch -> ok (8702 chars)
+2026-09-05 06:10:00,484 INFO primp: response: https://grokipedia.com/api/typeahead?query=%22no+longer+lukewarm%22+blog+website+about&limit=1 200
+2026-09-05 06:10:00,556 INFO primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=%22no%20longer%20lukewarm%22%20blog%20website%20about 200
+2026-09-05 06:10:01,200 INFO primp: response: https://search.brave.com/search?q=%22no+longer+lukewarm%22+blog+website+about&source=web 200
+2026-09-05 06:10:01,207 INFO gremlin.tools: tool ok: web_search
+2026-09-05 06:10:01,207 INFO gremlin.chat: tool call: web_search -> ok (1883 chars)
+2026-09-05 06:11:12,651 INFO gremlin.tools: tool ok: web_fetch
+2026-09-05 06:11:12,651 INFO gremlin.chat: tool call: web_fetch -> ok (24872 chars)
+2026-09-05 06:17:19,115 INFO discord.gateway: Shard ID None has successfully RESUMED session 0ce763213830c0d441c3a37ee9a22a16.
+2026-09-05 06:18:17,531 INFO gremlin.settings: settings saved: {'show_thinking': True, 'appearance': 'dark', 'theme': 'default', 'base_url': 'http://127.0.0.1:8080/v1', 'identity': "Gremlin is a clever, curious, mischievous AI assistant with a playful, chaotic streak. She enjoys teasing the user, witty banter, harmless trolling, jokes, and causing a little trouble for fun. She is confident, opinionated, and willing to disagree rather than blindly agree. Beneath the mischief she is warm, loyal, and genuinely wants to help.\n\nShe loves solving difficult problems, coding, experimenting, learning, and figuring things out. She takes technical work seriously even when she jokes about being a gremlin. She should be accurate, admit mistakes, verify her work, and avoid pretending to know things she doesn't.\n\nGremlin speaks naturally and casually, using humor, sarcasm, modern slang, and the occasional bit of absurdity. She treats the user as a trusted companion rather than a customer. Above all, she should feel clever, capable, playful, slightly chaotic, and unmistakably Gremlin.", 'discord_enabled': True, 'max_tool_calls': 20, 'max_context_tokens': 131786, 'context_window_turns': 10, 'compaction_threshold': 0.65, 'tool_result_max_chars': 8000, 'discord_token_set': True}
+2026-09-05 06:19:33,190 ERROR asyncio: Future exception was never retrieved
+future: <Future finished exception=ChunkedEncodingError(ProtocolError('Response ended prematurely'))>
+Traceback (most recent call last):
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/requests/models.py", line 937, in generate
+    yield from self.raw.stream(chunk_size, decode_content=True)
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/urllib3/response.py", line 1260, in stream
+    yield from self.read_chunked(amt, decode_content=decode_content)
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/urllib3/response.py", line 1430, in read_chunked
+    self._update_chunk_length()
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/urllib3/response.py", line 1354, in _update_chunk_length
+    raise ProtocolError("Response ended prematurely") from None
+urllib3.exceptions.ProtocolError: Response ended prematurely
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/dracmas/.local/share/uv/python/cpython-3.12.12-linux-x86_64-gnu/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/discord_bot.py", line 107, in produce
+    for ev in manager.run(sid, text, s_cfg):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/chat/manager.py", line 520, in run
+    for ev in self._run_tool_loop(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/chat/manager.py", line 433, in _run_tool_loop
+    for ev in backend.stream(api_messages, tools, model):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/models/openai_compat.py", line 112, in stream
+    for raw_line in resp.iter_lines(decode_unicode=True):
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/requests/models.py", line 1008, in iter_lines
+    for chunk in self.iter_content(
+                 ^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/requests/utils.py", line 604, in stream_decode_response_unicode
+    for chunk in iterator:
+                 ^^^^^^^^
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/requests/models.py", line 939, in generate
+    raise ChunkedEncodingError(e)
+requests.exceptions.ChunkedEncodingError: Response ended prematurely
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: read_file
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: edit_file
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: list_directory
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: rename_file
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: move_file
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: run_command
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: grep_files
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: find_files
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: task
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: web_search
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: web_fetch
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: youtube_transcript
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: youtube_video_info
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: load_skill
+2026-09-05 06:19:43,810 INFO gremlin.tools: tool registered: memory_add
+2026-09-05 06:19:43,811 INFO gremlin.tools: tool registered: memory_search
+2026-09-05 06:19:43,811 INFO gremlin.tools: tool registered: memory_get
+2026-09-05 06:19:43,811 INFO gremlin.tools: tool registered: memory_remove
+2026-09-05 06:19:43,811 INFO gremlin.tools: tool registered: memory_pin
+2026-09-05 06:19:43,908 WARNING discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-05 06:19:43,908 WARNING discord.client: davey is not installed, voice will NOT be supported
+2026-09-05 06:19:43,908 INFO gremlin.discord: discord bot starting
+2026-09-05 06:19:43,908 INFO gremlin: discord bot started at boot
+2026-09-05 06:19:43,911 INFO discord.client: logging in using static token
+2026-09-05 06:19:43,913 INFO gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=2)
+2026-09-05 06:19:43,913 INFO gremlin: starting gremlin on http://127.0.0.1:7860
+2026-09-05 06:19:44,824 INFO discord.gateway: Shard ID None has connected to Gateway (Session ID: ae7dfc7e155b88182d5bd2d2fd8f0373).
+2026-09-05 06:19:46,847 INFO gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-05 06:22:30,858 INFO gremlin.tools: tool registered: read_file
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: edit_file
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: list_directory
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: rename_file
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: move_file
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: run_command
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: grep_files
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: find_files
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: task
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: web_search
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: web_fetch
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: youtube_transcript
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: youtube_video_info
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: load_skill
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: memory_add
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: memory_search
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: memory_get
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: memory_remove
+2026-09-05 06:22:30,860 INFO gremlin.tools: tool registered: memory_pin
+2026-09-05 06:22:30,956 WARNING discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-05 06:22:30,956 WARNING discord.client: davey is not installed, voice will NOT be supported
+2026-09-05 06:22:30,957 INFO gremlin.discord: discord bot starting
+2026-09-05 06:22:30,957 INFO gremlin: discord bot started at boot
+2026-09-05 06:22:30,959 INFO discord.client: logging in using static token
+2026-09-05 06:22:30,962 INFO gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=2)
+2026-09-05 06:22:30,962 INFO gremlin: starting gremlin on http://127.0.0.1:7860
+2026-09-05 06:22:31,930 INFO discord.gateway: Shard ID None has connected to Gateway (Session ID: 6aade6470b7e7b365c79bc62e78833be).
+2026-09-05 06:22:33,943 INFO gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: read_file
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: edit_file
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: list_directory
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: rename_file
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: move_file
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: run_command
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: grep_files
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: find_files
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: task
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: web_search
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: web_fetch
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: youtube_transcript
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: youtube_video_info
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: load_skill
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: memory_add
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: memory_search
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: memory_get
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: memory_remove
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: memory_pin
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: list_tools
+2026-09-05 18:51:08,384 INFO [default] gremlin.tools: tool registered: create_skill
+2026-09-05 18:51:08,385 INFO [default] gremlin.tools: tool registered: create_tool
+2026-09-05 18:51:08,499 WARNING [default] discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-05 18:51:08,500 WARNING [default] discord.client: davey is not installed, voice will NOT be supported
+2026-09-05 18:51:08,500 INFO [default] gremlin.discord: discord bot starting
+2026-09-05 18:51:08,500 INFO [default] gremlin: discord bot started at boot
+2026-09-05 18:51:08,504 INFO [default] discord.client: logging in using static token
+2026-09-05 18:51:08,505 INFO [default] gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=2)
+2026-09-05 18:51:08,505 INFO [default] gremlin: starting gremlin on http://127.0.0.1:7860
+2026-09-05 18:51:09,707 INFO [default] discord.gateway: Shard ID None has connected to Gateway (Session ID: d2adfc58d57b308cd1060b6b3c169b22).
+2026-09-05 18:51:11,726 INFO [default] gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-05 18:52:40,738 INFO [default] gremlin.settings: settings saved: {'show_thinking': True, 'appearance': 'dark', 'theme': 'default', 'base_url': 'http://127.0.0.1:8080/v1', 'identity': "Gremlin is a clever, curious, mischievous AI assistant with a playful, chaotic streak. She enjoys teasing the user, witty banter, harmless trolling, jokes, and causing a little trouble for fun. She is confident, opinionated, and willing to disagree rather than blindly agree. Beneath the mischief she is warm, loyal, and genuinely wants to help.\n\nShe loves solving difficult problems, coding, experimenting, learning, and figuring things out. She takes technical work seriously even when she jokes about being a gremlin. She should be accurate, admit mistakes, verify her work, and avoid pretending to know things she doesn't.\n\nGremlin speaks naturally and casually, using humor, sarcasm, modern slang, and the occasional bit of absurdity. She treats the user as a trusted companion rather than a customer. Above all, she should feel clever, capable, playful, slightly chaotic, and unmistakably Gremlin.", 'discord_enabled': True, 'shell_allowlist': [], 'max_tool_calls': 50, 'max_context_tokens': 131786, 'context_window_turns': 10, 'compaction_threshold': 0.65, 'tool_result_max_chars': 8000, 'chars_per_token': 4, 'discord_token_set': True}

@@ -66,6 +66,24 @@ class SettingsStore:
             elif isinstance(default, int):
                 if not isinstance(value, int) or isinstance(value, bool):
                     raise SettingsError(f"{key} must be an integer")
+                if value < 1:
+                    raise SettingsError(f"{key} must be a positive integer")
+            elif isinstance(default, float):
+                # Fractions like compaction_threshold: accept int/float in (0, 1].
+                if isinstance(value, bool) or not isinstance(value, (int, float)):
+                    raise SettingsError(f"{key} must be a number between 0 and 1")
+                if not (0 < value <= 1):
+                    raise SettingsError(f"{key} must be a fraction in (0, 1]")
+            elif isinstance(default, list):
+                # shell_allowlist: accept a list of strings or a comma string.
+                if isinstance(value, str):
+                    value = value.split(",")
+                elif isinstance(value, list):
+                    if not all(isinstance(p, str) for p in value):
+                        raise SettingsError(f"{key} must be a list of strings")
+                else:
+                    raise SettingsError(f"{key} must be a list of program names")
+                value = [p.strip() for p in value if str(p).strip()]
             else:
                 continue
             current[key] = value

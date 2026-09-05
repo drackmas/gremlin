@@ -15,6 +15,8 @@ from pathlib import Path
 from .filesystem import _resolve
 from .registry import Tool
 
+from config import AppConfig
+
 
 class GrepError(Exception):
     """Raised when grep cannot run: bad pattern, bad path, no root."""
@@ -56,7 +58,7 @@ def _truncation_marker(limit: int, noun: str) -> str:
     return f"[showing first {limit} {noun}; raise max_results to see more]"
 
 
-def build_grep_tool(cfg) -> Tool:
+def build_grep_tool(cfg: AppConfig) -> Tool:
     root = Path(cfg.root)
 
     def grep_files(args: dict) -> str:
@@ -220,7 +222,7 @@ def build_grep_tool(cfg) -> Tool:
     )
 
 
-def build_find_tool(cfg) -> Tool:
+def build_find_tool(cfg: AppConfig) -> Tool:
     root = Path(cfg.root)
 
     def find_files(args: dict) -> str:

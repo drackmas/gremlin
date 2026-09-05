@@ -1,58 +1,122 @@
-You are an expert Python engineer fixing a local agentic chat system.
+Refactor and harden the Gremlin codebase at https://github.com/drackmas/gremlin (local self-contained Python agentic chat assistant with tool-calling loop, OpenAI-compatible backend, Flask UI + CLI + Discord + API bridge).
 
-Primary goal: stop sending the full conversation history on every turn and implement proper context management so the system scales to long sessions without blowing the context window or wasting tokens.
+Goal: Make it cleaner, more reliable, more extensible, and production-ready while preserving the existing architecture and all current functionality. Then implement a powerful meta-capability so the bot can autonomously create, register, and use new skills and tools on demand.
 
-### Confirmed root cause
-In `chat/manager.py` → `_build_api_messages()` the code currently does:
-- Load the entire session (or everything after the last compression marker)
-- Convert every stored message (including all historical tool calls + full tool results) via `_stored_to_api()`
-- Prepend a freshly built system prompt
-- Append the new user message
+### Core architecture to preserve
+- ChatManager.run() agentic loop (tools → observations → continue until done or MAX_TOOL_ITERATIONS)
+- ToolRegistry with Tool dataclass (name, description, JSON-schema parameters, handler → str)
+- Skills as pure instruction files: skills/<slug>/SKILL.md with simple --- frontmatter (name, description)
+- load_skill tool
+- Sandboxed FS tools, run_command, grep/find, YouTube (yt-dlp), memory store, task planner
+- System prompt injection of tools + skills + pinned memory + identity + time
+- Context management: turn window + token estimate + auto-compaction
+- Multiple front doors sharing the same ChatManager
+- Sanitize untrusted content (YouTube etc.)
 
-This is re-sent in full on every model call. Tool results (file contents, shell output, transcripts, etc.) accumulate forever.
+### Issues and problems I notice (fix all of these)
 
-### Required changes (in priority order)
+1. Packaging & structure
+   - pyproject.toml is tooling-only (ruff/mypy). No [project] table, not installable as a package. Flat script-style imports. Hard to develop, test, or distribute.
+   - requirements.txt has no version pins.
+   - Mixed root-level modules (app.py, cli.py, discord_bot.py, sessions.py, config.py, utils.py) vs packages.
+   - ensure_dirs only creates sessions + data; transcripts, tasks, etc. created ad-hoc.
 
-1. **Implement intelligent context management** (highest priority)
-   - Before every model call, build a *bounded* message list instead of the full history.
-   - Strategy (prefer this order of sophistication):
-     a. Keep a fixed number of recent turns (configurable, default ~8–12 full turns).
-     b. Always keep the system prompt + pinned memory + identity.
-     c. For older turns: either drop them or replace with a compact summary.
-     d. Prefer token-aware truncation if possible (estimate tokens roughly or use a lightweight counter).
-   - Make the window / token budget configurable in settings and `AppConfig`.
-   - Never re-send full historical tool results that are no longer needed.
+2. Tool & skill system is static / incomplete
+   - build_registry() hardcodes every tool. No plugin discovery, no hot-reload for tools, only crude mtime cache for skills dir.
+   - Skills are load-only. Model cannot create, edit, or register new skills/tools at runtime.
+   - No “meta” tool for extending the system itself.
+   - README still mentions some outdated tool names (youtube_summary etc.); actual youtube.py only has youtube_transcript + youtube_video_info.
+   - task tool is very basic (only plan/view, no update/complete/status).
+   - Shell uses /bin/sh -c with only cwd + timeout; no further command allow/deny list or safer defaults.
+   - Argument validation is basic (flat schema, no nested objects/arrays deeply validated, no additionalProperties: false enforced everywhere).
+   - Tool handlers sometimes raise custom exceptions that get turned into ERROR: strings; inconsistent patterns.
 
-2. **Make compaction automatic and robust**
-   - Trigger compaction automatically when the estimated context size exceeds a threshold (e.g. 60–70 % of a configurable max context).
-   - Improve `compress()` so it produces a high-quality summary that includes:
-     - User goals and decisions
-     - Important tool outcomes (not full outputs)
-     - Open questions / current state
-   - After compaction, replace the old history with the summary + a short recent tail.
-   - Store the summary in a clean way (prefer a dedicated `"role": "system"` or special user message rather than the current assistant + compression flag hack).
+3. Reliability / robustness
+   - File-based session + memory + tasks stores have no locking → race conditions under concurrent web/Discord/bridge use.
+   - Token estimation is crude (chars/4). Compaction can fail silently.
+   - Bridge is raw socket HTTP (fragile compared to proper ASGI/WSGI or FastAPI).
+   - Discord bot and Flask app start logic is a bit tangled.
+   - Logging is present but not structured; no request/session correlation IDs everywhere.
+   - Error surfaces to the model are sometimes too terse or too verbose.
+   - No graceful degradation when the LLM backend is down or returns malformed tool calls (beyond the existing json_repair path).
 
-3. **Protect against large tool results**
-   - When storing tool results in the session, optionally truncate or summarize very large outputs (keep a short version for history, full version only for the immediate next model turn if needed).
-   - Or: keep full tool results only for the most recent N tool calls and drop older ones from the API message list.
+4. Code quality & maintainability
+   - Some large files (chat/manager.py is long).
+   - Inconsistent type hints / mypy is very loose.
+   - Duplicated path handling and atomic writes.
+   - Frontend is basic Bootstrap; no modern build step, limited accessibility/UX polish.
+   - Tests exist and look decent, but coverage of edge cases (concurrent access, malformed tool args, skill cache invalidation, dynamic registration) is incomplete. Tests are excluded from mypy.
 
-4. **Clean up related problems**
-   - Fix the system prompt so it only claims tools that actually exist (remove “search the web” or add a real web search tool).
-   - Ensure `sessions.py` / `SessionManager` exists and is correct (it appears missing or broken in the current tree).
-   - Update README architecture diagram and tool table to match reality.
-   - Make max context / window size / compaction threshold configurable via settings UI and `data/settings.json`.
+5. Missing capabilities that hurt usability
+   - No built-in way to download YouTube audio (mp3/m4a) or other media.
+   - No general “create_file / write_file” convenience beyond edit_file actions.
+   - No tool to list/reload skills or tools at runtime.
+   - Settings and config scattered between DEFAULT_SETTINGS, env vars, and code constants.
 
-5. **Keep everything else working**
-   - Preserve the existing tool-calling loop, streaming, Discord bot, CLI, Flask UI, and bridge.
-   - Do not break the current event format (`thinking`, `text`, `tool_call`, `done`, etc.).
-   - Maintain backward compatibility with existing session JSON files where possible (or provide a migration path).
+### Required improvements (do these thoroughly)
 
-### Implementation guidance
-- Prefer changes concentrated in `chat/manager.py`, `sessions.py` (or wherever SessionManager lives), and `config.py` / settings.
-- Add clear logging when compaction or truncation happens.
-- Write or update tests for the new context-building logic.
-- After the changes, a long-running session should stay well under the model’s context limit even after dozens of tool-using turns.
+1. Turn the repo into a proper modern Python package
+   - Add full [project] table to pyproject.toml (name=gremlin, version, dependencies with reasonable pins, scripts entry points for gremlin-web, gremlin-cli, gremlin-discord, gremlin-bridge).
+   - Keep requirements.txt in sync or generate it.
+   - Make the package installable in editable mode (pip install -e .).
+   - Clean import structure; prefer absolute imports inside the package.
+   - Add a simple Makefile or just document the new install/run flow in README.
 
-Start by examining `chat/manager.py` (`_build_api_messages`, `_run_tool_loop`, `compress`, and `run`) and the session persistence layer. Implement the bounded context builder first, then automatic compaction.
+2. Harden existing systems
+   - Add file locking (or switch critical stores to SQLite) for sessions, memory, tasks.
+   - Improve ToolRegistry validation (support nested schemas better, reject unknown properties by default, better error messages).
+   - Make shell safer by default (optional allow-list of common safe commands, or at least document the risk clearly and add a config toggle).
+   - Better structured logging with session_id correlation.
+   - Make context token estimation slightly smarter or configurable.
+   - Ensure all runtime directories are created cleanly via ensure_dirs.
+   - Update README to match reality (current tools, skills list, architecture diagram if needed).
+   - Keep and expand the test suite; add tests for the new meta capability.
 
-Deliver clean, well-commented, production-quality code.
+3. Code cleanup
+   - Extract large methods, reduce duplication, improve type hints where it helps.
+   - Consistent error handling patterns for tools (prefer returning ERROR: strings; reserve raises for truly unexpected cases).
+   - Make SkillLoader cache more robust (watch individual file mtimes if needed).
+   - Keep the existing front doors working unchanged from the user’s perspective.
+
+### CRITICAL NEW FEATURE: Meta-skill / self-extension capability
+
+Implement a first-class way for the bot to create and register new skills AND tools on demand so that requests like:
+
+“make a skill to convert this youtube video to mp3”
+
+…work end-to-end automatically.
+
+Requirements for the meta capability:
+
+- Add a new tool (or small set of tools), e.g. `create_skill` and/or `create_tool` / `register_extension`, that the model can call.
+- Workflow the model should follow (encode this clearly in a new skill called something like `skill_creator` or `extension_builder`):
+  1. Check whether a suitable skill or tool already exists (list skills / list tools).
+  2. If not, decide whether a pure skill (instructions only) is enough or a new executable tool is required.
+  3. For a skill: write a proper skills/<slug>/SKILL.md with frontmatter + clear step-by-step instructions that use existing tools (or newly created ones).
+  4. For a tool: generate a new Python module under tools/ (or a plugins/ directory) that follows the exact existing Tool pattern (build_xxx_tools function returning list[Tool] or a single Tool). The tool must be sandboxed and safe.
+  5. Register the new tool into the live ToolRegistry (hot-reload / dynamic register) so it is immediately available in the current and future sessions without restarting the process.
+  6. Invalidate/reload the SkillLoader cache so the new skill appears in the system prompt and load_skill works.
+  7. Confirm success and show the model how to use the new capability.
+  8. Prefer reusing existing tools (yt-dlp already present) rather than reinventing.
+
+Concrete example that must work after the change:
+User: “make a skill to convert this youtube video to mp3”
+→ Model checks for existing skill/tool → creates skills/youtube_to_mp3/SKILL.md that instructs using a new (or existing) tool → if needed creates tools/youtube_audio.py with a youtube_to_mp3(url, output_path?) tool that uses yt-dlp to extract audio → registers it → returns the skill name and usage instructions → subsequent turns can call load_skill("youtube_to_mp3") and then the tool.
+
+Safety constraints for the meta tools:
+- All generated code and files must stay inside the project sandbox.
+- New tool handlers must follow the same security model as existing ones (path sandboxing, timeouts, output truncation, sanitize_untrusted where appropriate).
+- Do not allow arbitrary unrestricted code execution; the create_tool path should generate and import only well-formed Tool modules, or provide a safer restricted way to add handlers.
+- Log every creation/registration.
+- Provide a way to list and (optionally) remove/disable dynamically created extensions.
+
+Also add a corresponding skill (skills/skill_creator/SKILL.md or similar) that teaches the model exactly when and how to use the meta tools.
+
+### Delivery expectations
+- Make the changes incrementally and keep the test suite green.
+- Update README with the new package install instructions, the meta-skill capability, and any new tools.
+- Do not break existing sessions, settings, or the four front doors.
+- Prefer minimal external dependencies; stick to what’s already there (yt-dlp, etc.) unless a clear win exists.
+- After refactoring, Gremlin should feel cleaner, safer, and significantly more powerful because the agent can now extend itself.
+
+Start by exploring the current tree thoroughly, then produce a short plan, then implement. Prioritize the packaging + meta-skill feature while cleaning up the issues listed above.

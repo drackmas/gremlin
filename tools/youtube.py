@@ -21,6 +21,8 @@ from typing import Any
 from .registry import Tool
 from .sanitize import sanitize_untrusted
 
+from config import AppConfig
+
 log = logging.getLogger("gremlin.tools.youtube")
 
 TRANSCRIPT_LIMIT = 24 * 1024  # max chars returned to the model
@@ -311,7 +313,7 @@ def fetch_video_info(url: str) -> str:
     )
 
 
-def build_youtube_tools(cfg) -> list[Tool]:
+def build_youtube_tools(cfg: AppConfig) -> list[Tool]:
     """Build the YouTube tools exposed to the model."""
     return [
         Tool(

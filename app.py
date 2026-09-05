@@ -24,22 +24,25 @@ from config import AppConfig, ensure_dirs
 from sessions import SessionError, SessionManager
 from skills.loader import SkillLoader
 from tools import build_registry
+from tools.registry import LOG_FORMAT, SessionFilter
 
 log = logging.getLogger("gremlin")
 
 
 def _setup_logging(cfg: AppConfig) -> None:
     cfg.data_dir.mkdir(parents=True, exist_ok=True)
-    fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    fmt = logging.Formatter(LOG_FORMAT)
     root = logging.getLogger()
     root.setLevel(logging.INFO)
     for h in list(root.handlers):
         root.removeHandler(h)
     console = logging.StreamHandler(sys.stdout)
     console.setFormatter(fmt)
+    console.addFilter(SessionFilter())
     root.addHandler(console)
     fileh = logging.FileHandler(cfg.data_dir / "gremlin.log", encoding="utf-8")
     fileh.setFormatter(fmt)
+    fileh.addFilter(SessionFilter())
     root.addHandler(fileh)
     logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
@@ -97,7 +100,7 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
     settings = SettingsStore(cfg)
     skills = SkillLoader(cfg)
     memory = MemoryStore(cfg.data_dir / "memory.json")
-    registry = build_registry(cfg, skills, memory)
+    registry = build_registry(cfg, skills, memory, settings.load)
     manager = ChatManager(cfg, sessions, registry, skills, memory=memory)
 
     # --- discord bot (opt-in; start/stop tracked by the settings toggle) --

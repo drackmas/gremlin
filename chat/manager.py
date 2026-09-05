@@ -53,24 +53,37 @@ COMPACT_PROMPT = (
     "or continue the conversation — only summarize for context handoff."
 )
 
-# Rough chars-per-token estimate for English text (conservative ~4 chars/token).
-_CHARS_PER_TOKEN = 4
+# Rough default chars-per-token estimate (conservative ~4 chars/token).
+# Overridable per request via the ``chars_per_token`` setting.
+_DEFAULT_CHARS_PER_TOKEN = 4
 
 
-def _estimate_tokens(text: str) -> int:
-    """Lightweight token estimate: chars / 4. Good enough for budgeting."""
-    return max(1, len(text) // _CHARS_PER_TOKEN)
+def _chars_per_token(settings: dict | None) -> int:
+    """Resolve the chars-per-token divisor from settings (default 4)."""
+    if settings:
+        try:
+            value = int(settings.get("chars_per_token", _DEFAULT_CHARS_PER_TOKEN))
+            return value if value > 0 else _DEFAULT_CHARS_PER_TOKEN
+        except (TypeError, ValueError):
+            pass
+    return _DEFAULT_CHARS_PER_TOKEN
 
 
-def _estimate_messages_tokens(messages: list[dict]) -> int:
+def _estimate_tokens(text: str, chars_per_token: int = _DEFAULT_CHARS_PER_TOKEN) -> int:
+    """Lightweight token estimate: chars / chars_per_token. Good for budgeting."""
+    return max(1, len(text) // max(1, chars_per_token))
+
+
+def _estimate_messages_tokens(
+    messages: list[dict], chars_per_token: int = _DEFAULT_CHARS_PER_TOKEN
+) -> int:
     """Sum token estimates across all message content fields."""
     total = 0
     for m in messages:
         content = m.get("content") or ""
-        total += _estimate_tokens(content)
+        total += _estimate_tokens(content, chars_per_token)
         for tc in m.get("tool_calls") or []:
-            total += _estimate_tokens(json.dumps(tc.get("arguments", {})))
-        # role overhead is negligible
+            total += _estimate_tokens(json.dumps(tc.get("arguments", {})), chars_per_token)
     return total
 
 
@@ -222,11 +235,11 @@ class ChatManager:
         # Token-aware safety net: drop oldest messages if still over budget.
         # If the budget is non-positive (system prompt alone exceeds the window),
         # skip token truncation — the window-based limit above is the only useful bound.
-        system_tokens = _estimate_tokens(system)
+        system_tokens = _estimate_tokens(system, _chars_per_token(settings))
         budget = max_context_tokens - system_tokens - 512  # reserve for response
         if budget > 0:
             while len(api_messages) > 1:
-                msg_tokens = _estimate_messages_tokens(api_messages[1:])
+                msg_tokens = _estimate_messages_tokens(api_messages[1:], _chars_per_token(settings))
                 if msg_tokens <= budget:
                     break
                 # Drop the oldest message. If it's an assistant with tool_calls,
@@ -246,19 +259,31 @@ class ChatManager:
     # -- compaction ---------------------------------------------------------
 
     def _should_compact(self, session_id: str, settings: dict) -> bool:
-        """Check if the session's stored context exceeds the compaction threshold."""
+        """Check if the session's context is close enough to the window to compact.
+
+        Prefers the real prompt-token usage from the last model request
+        (recorded on the session); falls back to a chars/4 estimate of the
+        stored messages when the provider reported nothing.
+        """
         max_context_tokens = int(settings.get("max_context_tokens", 32768))
         threshold = float(settings.get("compaction_threshold", 0.65))
         budget = int(max_context_tokens * threshold)
 
-        stored = self.sessions.get(session_id)["messages"]
+        session = self.sessions.get(session_id)
+        stored = session["messages"]
         cut = _find_last_compression(stored)
         # Only consider messages after the last compression.
         relevant = stored[cut + 1:] if cut is not None else stored
+
+        # Real usage from the last model request, when the provider reported it.
+        usage = session.get("last_usage") or {}
+        last_prompt = usage.get("prompt_tokens")
+        if isinstance(last_prompt, int) and last_prompt >= budget:
+            return True
         est = _estimate_messages_tokens([
             {"role": m.get("role"), "content": m.get("content", ""), "tool_calls": m.get("tool_calls")}
             for m in relevant
-        ])
+        ], _chars_per_token(settings))
         return est > budget
 
     def _maybe_compact(self, session_id: str, settings: dict) -> None:
@@ -303,7 +328,7 @@ class ChatManager:
             msg_dict = {"role": msg.get("role"), "content": msg.get("content", "")}
             if msg.get("tool_calls"):
                 msg_dict["tool_calls"] = msg["tool_calls"]
-            t = _estimate_messages_tokens([msg_dict])
+            t = _estimate_messages_tokens([msg_dict], _chars_per_token(settings))
             if running_tokens + t > max_input_tokens:
                 break
             compaction_messages.insert(0, msg_dict)
@@ -337,6 +362,9 @@ class ChatManager:
             "ts": now_utc(),
         }
         self.sessions.add_message(session_id, msg)
+        # The recorded usage describes the pre-compaction payload; drop it so
+        # the next turn's auto-compact decision uses the fresh context size.
+        self.sessions.clear_last_usage(session_id)
         log.info("session %s compressed: %d messages -> %d-char summary", session_id, len(relevant), len(summary))
         return msg
 

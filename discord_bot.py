@@ -224,16 +224,19 @@ def main() -> int:
     from memory.store import MemoryStore
     from skills.loader import SkillLoader
     from tools import build_registry
+    from tools.registry import LOG_FORMAT, SessionFilter
 
     cfg = AppConfig()
     ensure_dirs(cfg)
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+    for h in logging.getLogger().handlers:
+        h.addFilter(SessionFilter())
     sessions = SessionManager(cfg)
     settings = SettingsStore(cfg)
     s_cfg = settings.load()
     skills = SkillLoader(cfg)
     memory = MemoryStore(cfg.data_dir / "memory.json")
-    registry = build_registry(cfg, skills, memory_store=memory)
+    registry = build_registry(cfg, skills, memory_store=memory, settings_loader=settings.load)
     manager = ChatManager(cfg, sessions, registry, skills, memory=memory)
 
     map_path = cfg.data_dir / "discord_sessions.json"

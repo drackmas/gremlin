@@ -146,6 +146,63 @@
         </div>
         <div class="card mb-3">
           <div class="card-body">
+            <div class="fw-semibold mb-2">Shell safety</div>
+            <div class="row g-2 align-items-end">
+              <div class="col-auto">
+                <label for="set-shell-allowlist" class="form-label small">Allowed programs</label>
+                <input id="set-shell-allowlist" class="form-control" type="text"
+                       placeholder="e.g. ls, cat, grep, python3">
+              </div>
+              <div class="col text-body-secondary small">
+                Optional (opt-in). Leave empty to allow any command, or list comma-separated
+                program names to restrict <code>run_command</code> to.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="fw-semibold mb-2">Context management</div>
+            <div class="row g-2 align-items-end">
+              <div class="col-auto">
+                <label for="set-max-context-tokens" class="form-label small">Max context tokens</label>
+                <input id="set-max-context-tokens" class="form-control" type="number" min="1024" step="1" value="32768">
+              </div>
+              <div class="col text-body-secondary small">
+                Model context window limit (default 32768).
+              </div>
+            </div>
+            <div class="row g-2 align-items-end mt-2">
+              <div class="col-auto">
+                <label for="set-compaction-threshold" class="form-label small">Compaction threshold</label>
+                <input id="set-compaction-threshold" class="form-control" type="number" min="0.05" max="0.95" step="0.05" value="0.65">
+              </div>
+              <div class="col text-body-secondary small">
+                Auto-compact when prompt usage reaches this fraction of the window (default 0.65).
+              </div>
+            </div>
+            <div class="row g-2 align-items-end mt-2">
+              <div class="col-auto">
+                <label for="set-context-window-turns" class="form-label small">Context window turns</label>
+                <input id="set-context-window-turns" class="form-control" type="number" min="1" max="200" step="1" value="10">
+              </div>
+              <div class="col text-body-secondary small">
+                Recent turns kept verbatim after compaction (default 10).
+              </div>
+            </div>
+            <div class="row g-2 align-items-end mt-2">
+              <div class="col-auto">
+                <label for="set-tool-result-max-chars" class="form-label small">Tool result max chars</label>
+                <input id="set-tool-result-max-chars" class="form-control" type="number" min="100" step="1" value="8000">
+              </div>
+              <div class="col text-body-secondary small">
+                Stored tool results are truncated beyond this (default 8000).
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-body">
             <div class="d-flex align-items-center justify-content-between">
               <div>
                 <div class="fw-semibold">Discord bot</div>

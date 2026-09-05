@@ -113,22 +113,70 @@ All tools are registered in `ToolRegistry` (`tools/registry.py`) at startup by `
 | Tool | File | What it does |
 |---|---|---|
 | `read_file` | `tools/filesystem.py` | Read a file from the sandbox root, up to `FS_READ_LIMIT` (128 KB). Paths are sandboxed — anything escaping the root raises `SandboxError`. |
+| `edit_file` | `tools/filesystem.py` | Exact-match replacement of a line range in a sandboxed file. |
 | `list_directory` | `tools/filesystem.py` | List files/dirs under the sandbox root. |
+| `rename_file` / `move_file` | `tools/filesystem.py` | Rename or move a file/directory within the sandbox. |
 | `grep_files` | `tools/grep.py` | Regex search across the sandbox. Skips `.git`, `__pycache__`, `node_modules`, `venv`, etc. Caps: 128 KB per file, 300 chars per line, 200 results. |
-| `run_command` | `tools/shell.py` | Run a shell command from the project root. Timeout clamped 1–300 s (default 60). stdout/stderr truncated to 20 000 chars (60/40 head/tail split). |
-| `youtube_transcript` | `tools/youtube.py` | Fetch a YouTube video's transcript via `yt-dlp`. |
-| `youtube_summary` | `tools/youtube.py` | Fetch transcript, then ask the model to summarize it. |
+| `find_files` | `tools/grep.py` | Glob-based filename search across the sandbox. |
+| `run_command` | `tools/shell.py` | Run a shell command from the project root. Timeout clamped 1–300 s (default 60). stdout/stderr truncated to 20 000 chars (60/40 head/tail split). Restrictable via the opt-in `shell_allowlist` setting — see *Security*. |
+| `web_search` | `tools/web.py` | DuckDuckGo web search (no API key). Results are sanitized before reaching the model. |
+| `web_fetch` | `tools/web.py` | Fetch a URL and extract readable text (HTML stripped, sanitized). |
+| `youtube_transcript` | `tools/youtube.py` | Fetch a YouTube video's transcript via `yt-dlp` (sanitized). |
+| `youtube_video_info` | `tools/youtube.py` | Fetch a YouTube video's title/description/duration via `yt-dlp`. |
+| `task` | `tools/task.py` | Maintain a per-session task plan (`action`: `plan` to set items, `view` to read them). Persisted under `data/tasks/`. |
 | `load_skill` | `tools/skill_tool.py` | Read the full `SKILL.md` instructions for a named skill. The model calls this before doing a job that matches a skill. |
 | `memory_add` | `tools/memory.py` | Add a memory entry (content + optional tags + pin flag). |
 | `memory_search` | `tools/memory.py` | Substring search across memory content and tags. |
-| `memory_list` | `tools/memory.py` | List all memories. |
+| `memory_get` | `tools/memory.py` | Fetch one memory by id. |
 | `memory_remove` | `tools/memory.py` | Delete a memory by id. |
-| `memory_pin` / `memory_unpin` | `tools/memory.py` | Toggle pin state. Pinned memories are injected into the system prompt every turn. |
+| `memory_pin` | `tools/memory.py` | Pin (`value=true`) or unpin (`value=false`) a memory. Pinned memories are injected into the system prompt every turn. |
+| `list_tools` | `tools/meta.py` | List every registered tool with its schema and description. First step of the self-extension flow. |
+| `create_skill` | `tools/meta.py` | Write a new `skills/<slug>/SKILL.md` (instructions only). See *Self-extension*. |
+| `create_tool` | `tools/meta.py` | Write + register a new executable tool from Python source. See *Self-extension*. |
+
+### Self-extension (meta tools)
+
+Gremlin can extend itself on demand. The bundled `extension_builder` skill
+(`skills/extension_builder/SKILL.md`) encodes the workflow:
+
+1. Call `list_tools` to see whether an existing tool already does the job.
+2. If the job is a *recombination of existing tools*, call `create_skill` to
+   write a new instruction-only `SKILL.md` under `skills/<slug>/`.
+3. If the job needs *new computation*, call `create_tool` with a complete
+   Python module that defines `build_tool()` (returning a `Tool`). The module
+   is written to `data/generated_tools/<name>.py` and registered immediately;
+   `load_generated_tools()` re-registers it at the next start, so a created
+   tool survives across sessions.
+
+`create_tool` validates the module before persisting (valid identifier,
+compiles cleanly, `build_tool()` returns a `Tool`, schema is an object) and
+rejects duplicates unless `overwrite` is set. Generated tools run inside the
+same sandbox as the built-ins, and the shell allow-list applies to them too.
 
 ### Sanitization
 
 External content (e.g. YouTube transcripts) passes through `sanitize_untrusted()` (`tools/sanitize.py`) before reaching the model. It prepends a warning banner, normalizes Unicode (NFKC), translates Cyrillic/Greek homoglyphs to Latin, strips invisible/bidi control characters, and redacts known prompt-injection patterns.
 
+### Security
+
+- **Filesystem sandbox.** Every path the model can touch is resolved against
+  the project root; any component that escapes it (`..`, absolute paths,
+  symlinks) raises `SandboxError`. This applies to `read_file`, `edit_file`,
+  `list_directory`, `rename_file`, `move_file`, `grep_files`, and `find_files`.
+- **Shell allow-list (opt-in).** `run_command` executes real shell commands
+  from the project root. By default the `shell_allowlist` setting is empty and
+  any command is allowed. To restrict it, set `shell_allowlist` (in **Settings**,
+  saved to `settings.json`) to a list of program names (e.g.
+  `["ls", "cat", "grep", "git"]`); the *base* command of each pipeline segment
+  must then be in the list, and anything else is rejected before execution.
+  Note this is a convenience guard, not a sandbox — a determined model can
+  still chain allowed commands. Treat the project root as trusted.
+- **Self-extension sandbox.** Tools created via `create_tool` run inside the
+  same sandbox and obey the same shell allow-list as the built-in tools.
+  Generated code is persisted to `data/generated_tools/`; delete a file there
+  (or pass `overwrite`) to remove or replace it.
+- **Untrusted input.** All externally fetched text (web, YouTube) is run
+  through `sanitize_untrusted()` (see *Sanitization*) before reaching the model.
 ## Memory and state
 
 ### Sessions (`sessions.py`)
@@ -143,14 +191,15 @@ External content (e.g. YouTube transcripts) passes through `sanitize_untrusted()
 
 Skills are instruction-only resources: `skills/<slug>/SKILL.md` with a small frontmatter block (`name`, `description`). They are never executed; the model reads them via `load_skill` as instructions on how to accomplish a job with the available tools. Bundled skills:
 
+- `extension_builder` — the self-extension workflow: when to make a skill vs. a tool, and how.
 - `list_directory` — how to explore a project's file structure.
-- `youtube_transcript` — how to fetch and use a YouTube transcript.
-- `youtube_summary` — how to summarize a YouTube video.
 - `project_explorer` — how to explore and understand a codebase.
+- `youtube_transcript` / `youtube_summary` — how to fetch and summarize a YouTube video.
+- `code_review`, `debugging`, `git_workflow`, `refactoring`, `testing`, `web_research` — task-specific playbooks.
 
 ### Settings (`chat/settings.py`)
 
-`SettingsStore` reads/writes `data/settings.json`. Keys: `show_thinking`, `appearance` (light/dark), `theme` (bootswatch slug), `base_url`, `model`, `identity` (persona text), `discord_enabled`. The Discord token is stored separately in `.env` via `python-dotenv`.
+`SettingsStore` reads/writes `data/settings.json`. Keys: `show_thinking`, `appearance` (light/dark), `theme` (bootswatch slug), `base_url`, `model`, `identity` (persona text), `discord_enabled`, `max_tool_calls` (tool-loop iterations per turn). Context management: `max_context_tokens` (model context window, default 32768), `compaction_threshold` (fraction of the window that triggers auto-compaction, default 0.65), `context_window_turns` (recent turns kept verbatim after compaction, default 10), `tool_result_max_chars` (truncate stored tool results beyond this, default 8000), `chars_per_token` (chars-per-token divisor for the context estimator, default 4). Shell hardening: `shell_allowlist` (list of allowed base programs for `run_command`; empty by default = unrestricted — set it from **Settings** to opt in, or via the `GREMLIN_SHELL_ALLOWLIST` env var for front doors without a settings store). The Discord token is stored separately in `.env` via `python-dotenv`.
 
 ## File map
 
@@ -176,13 +225,16 @@ gremlin/
 │   └── openai_compat.py    # OpenAI-compatible SSE streaming backend
 │
 ├── tools/
-│   ├── registry.py         # Tool dataclass, ToolRegistry, validate_args
-│   ├── filesystem.py       # read_file, list_directory (sandboxed)
-│   ├── grep.py             # grep_files
-│   ├── shell.py            # run_command (sandboxed)
-│   ├── youtube.py          # youtube_transcript, youtube_summary
+│   ├── registry.py         # Tool dataclass, ToolRegistry, validate_args, SessionFilter
+│   ├── filesystem.py       # read_file, edit_file, list_directory, rename/move_file (sandboxed)
+│   ├── grep.py             # grep_files, find_files (sandboxed)
+│   ├── shell.py            # run_command (sandboxed, allow-listable)
+│   ├── web.py              # web_search, web_fetch (sanitized)
+│   ├── youtube.py          # youtube_transcript, youtube_video_info (sanitized)
+│   ├── task.py             # task (per-session plan)
 │   ├── skill_tool.py       # load_skill
-│   ├── memory.py           # memory_add/search/list/remove/pin/unpin
+│   ├── memory.py           # memory_add/search/get/remove/pin
+│   ├── meta.py             # list_tools, create_skill, create_tool, load_generated_tools
 │   └── sanitize.py         # sanitize_untrusted (homoglyphs, injections)
 │
 ├── memory/
@@ -190,10 +242,11 @@ gremlin/
 │
 ├── skills/
 │   ├── loader.py           # SkillLoader: discover + read SKILL.md files
+│   ├── extension_builder/SKILL.md   # the self-extension workflow
 │   ├── list_directory/SKILL.md
 │   ├── youtube_transcript/SKILL.md
 │   ├── youtube_summary/SKILL.md
-│   └── project_explorer/SKILL.md
+│   └── … 10+ skills total (code_review, debugging, git_workflow, …)
 │
 ├── bridge/
 │   └── server.py           # OpenAI-compatible API bridge (raw socket HTTP)
@@ -204,7 +257,7 @@ gremlin/
 │   └── static/css/         # app.css, bootstrap.min.css
 │
 ├── files/transcripts/      # Cached YouTube transcripts
-├── data/                   # settings.json, memory.json, gremlin.log
+├── data/                   # settings.json, memory.json, gremlin.log, tasks/, generated_tools/
 ├── sessions/               # Per-session JSON files
 └── tests/                  # pytest suite
 ```
@@ -228,14 +281,17 @@ gremlin/
 ### Install
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env                 # optional: then edit .env (Discord token, etc.)
 ```
 
 ### Web UI
 
 ```bash
 python app.py
-# → http://127.0.0.1:5000
+# → http://127.0.0.1:7860
 ```
 
 Configure the model base URL and name in the settings page (persisted to `data/settings.json`).

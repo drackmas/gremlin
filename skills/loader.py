@@ -4,6 +4,12 @@ Skills are instruction-only resources: ``skills/<slug>/SKILL.md`` with a
 small frontmatter block (``name``, ``description``). They are never executed;
 the model reads them (via the ``load_skill`` tool) as instructions on how to
 accomplish a job with the available tools.
+
+The cache is invalidated by the *content signature* (the sorted set of skill
+slugs plus each file's mtime), so both in-place edits and new/removed skill
+directories are detected without relying on directory-mtime semantics that
+vary across filesystems. ``reload()`` forces a rebuild (used after the
+``create_skill`` self-extension tool writes a new skill).
 """
 
 from __future__ import annotations
@@ -11,6 +17,7 @@ from __future__ import annotations
 import logging
 import re
 from pathlib import Path
+from typing import Any
 
 log = logging.getLogger("gremlin.skills")
 
@@ -37,24 +44,29 @@ def parse_frontmatter(text: str) -> tuple[dict, str]:
 class SkillLoader:
     def __init__(self, cfg) -> None:
         self.dir = Path(cfg.skills_dir)
+        # slug -> (name, description, full_text, mtime)
         self._cache: dict[str, tuple[str, str, str, float]] = {}
-        self._dir_mtime: float | None = None
+        self._signature: tuple[Any, ...] | None = None
 
-    def _ensure_cache(self) -> None:
-        if self._cache and self._dir_mtime is not None:
-            try:
-                if self.dir.stat().st_mtime == self._dir_mtime:
-                    return
-            except OSError:
-                pass
-        self._build_cache()
-
-    def _build_cache(self) -> None:
-        self._cache.clear()
+    # --- signature / cache ---------------------------------------------
+    def _scan(self) -> tuple[Any, ...]:
+        """Identify the on-disk skill set: (slug, mtime) pairs, sorted."""
         if not self.dir.is_dir():
-            self._dir_mtime = None
-            return
-        for sub in sorted(self.dir.iterdir()):
+            return ()
+        sig: list[tuple[str, float]] = []
+        for sub in self.dir.iterdir():
+            skill_file = sub / "SKILL.md"
+            if not sub.is_dir() or not skill_file.is_file():
+                continue
+            try:
+                sig.append((sub.name, skill_file.stat().st_mtime))
+            except OSError:
+                continue
+        return tuple(sorted(sig))
+
+    def _build(self) -> None:
+        cache: dict[str, tuple[str, str, str, float]] = {}
+        for sub in sorted(self.dir.iterdir(), key=lambda p: p.name) if self.dir.is_dir() else []:
             skill_file = sub / "SKILL.md"
             if not sub.is_dir() or not skill_file.is_file():
                 continue
@@ -65,18 +77,27 @@ class SkillLoader:
             except (OSError, UnicodeDecodeError) as e:
                 log.warning("skipping unreadable skill %s: %s", sub.name, e)
                 continue
-            self._cache[sub.name] = (
+            cache[sub.name] = (
                 meta.get("name") or sub.name,
                 meta.get("description", ""),
                 text,
                 mtime,
             )
-        try:
-            self._dir_mtime = self.dir.stat().st_mtime
-        except OSError:
-            self._dir_mtime = None
+        self._cache = cache
+        self._signature = self._scan()
 
+    def _ensure_cache(self) -> None:
+        sig = self._scan()
+        if self._signature is None or sig != self._signature:
+            self._build()
+
+    def reload(self) -> None:
+        """Force a cache rebuild (call after writing a new/edited skill)."""
+        self._build()
+
+    # --- API -----------------------------------------------------------
     def list(self) -> list[dict]:
+        """List available skills as ``{slug, name, description}`` dicts."""
         self._ensure_cache()
         return [
             {"slug": slug, "name": name, "description": desc}

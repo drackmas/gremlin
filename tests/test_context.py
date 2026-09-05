@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from chat.manager import (
     ChatManager,
     _estimate_messages_tokens,
@@ -336,6 +334,40 @@ class TestAutoCompaction:
         for i in range(10):
             _add_turn(sessions, s["id"], f"q{i} " + "x" * 100, f"a{i} " + "y" * 100)
         assert manager._should_compact(s["id"], SETTINGS) is True
+
+    def test_triggers_on_last_usage_when_estimate_low(self, cfg):
+        """Compaction triggers from the provider's reported prompt tokens even
+        when the stored-text estimate stays under the threshold."""
+        backend = FakeBackend([
+            [ModelEvent("text", text="COMPACTED SUMMARY"), ModelEvent("done")],
+            [ModelEvent("text", text="ok"), ModelEvent("done")],
+        ])
+        sessions, manager, _ = make_manager(cfg, backend)
+        s = sessions.create("t")
+        sessions.add_message(s["id"], {"id": "u1", "role": "user", "content": "hi", "ts": "t"})
+        # Provider reports a payload over the threshold (200 * 0.6 = 120).
+        sessions.set_last_usage(s["id"], {"prompt_tokens": 180, "completion_tokens": 10, "total_tokens": 190})
+
+        list(manager.run(s["id"], "more", SETTINGS))
+
+        stored = sessions.get(s["id"])["messages"]
+        compression_msgs = [m for m in stored if m.get("compression")]
+        assert len(compression_msgs) == 1
+        # Stale usage is cleared after compaction so it can't re-trigger.
+        assert sessions.get(s["id"]).get("last_usage") is None
+
+    def test_last_usage_under_threshold_does_not_trigger(self, cfg):
+        """Usage below the budget plus a small estimate -> no compaction."""
+        backend = FakeBackend([[ModelEvent("text", text="ok"), ModelEvent("done")]])
+        sessions, manager, _ = make_manager(cfg, backend)
+        s = sessions.create("t")
+        sessions.add_message(s["id"], {"id": "u1", "role": "user", "content": "hi", "ts": "t"})
+        sessions.set_last_usage(s["id"], {"prompt_tokens": 50, "completion_tokens": 5, "total_tokens": 55})
+
+        list(manager.run(s["id"], "more", SETTINGS))
+
+        stored = sessions.get(s["id"])["messages"]
+        assert not [m for m in stored if m.get("compression")]
 
 
 # ---------------------------------------------------------------------------

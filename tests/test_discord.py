@@ -93,5 +93,5 @@ def test_session_map_roundtrip(tmp_path):
     # corrupt file -> empty, no crash
     p.write_text("{not json")
     assert discord_bot._load_map(p) == {}
-    # no tmp file left behind
-    assert list(tmp_path.iterdir()) == [p]
+    # no stray temp file from the atomic write (the .lock file is expected)
+    assert not [f for f in tmp_path.iterdir() if f.suffix == ".tmp"]

@@ -127,3 +127,44 @@ def test_themes_endpoint(client, cfg):
     (cfg.themes_dir / "cerulean.min.css").write_text("/* t */")
     themes = client.get("/api/themes").get_json()
     assert themes == ["default", "cerulean", "darkly"]
+
+
+def test_compaction_threshold_float_saved(client, cfg):
+    res = client.post("/api/settings", json={"compaction_threshold": 0.8})
+    assert res.status_code == 200
+    assert res.get_json()["compaction_threshold"] == 0.8
+    # persisted to disk, not just echoed
+    on_disk = json.loads(cfg.settings_path.read_text())
+    assert on_disk["compaction_threshold"] == 0.8
+
+
+def test_compaction_threshold_boundaries_accepted(client):
+    for ok in (0.05, 0.5, 1):
+        res = client.post("/api/settings", json={"compaction_threshold": ok})
+        assert res.status_code == 200, ok
+
+
+def test_compaction_threshold_out_of_range_rejected(client):
+    for bad in (0, 0.0, 1.5, -0.2, "0.5", None):
+        res = client.post("/api/settings", json={"compaction_threshold": bad})
+        assert res.status_code == 400, bad
+
+
+def test_context_ints_must_be_positive(client):
+    for key in ("max_context_tokens", "context_window_turns", "tool_result_max_chars"):
+        res = client.post("/api/settings", json={key: 0})
+        assert res.status_code == 400, key
+        res = client.post("/api/settings", json={key: -5})
+        assert res.status_code == 400, key
+
+
+def test_max_tool_calls_zero_rejected(client):
+    res = client.post("/api/settings", json={"max_tool_calls": 0})
+    assert res.status_code == 400
+
+
+def test_context_int_rejects_bool_and_float(client):
+    res = client.post("/api/settings", json={"max_context_tokens": True})
+    assert res.status_code == 400
+    res = client.post("/api/settings", json={"max_context_tokens": 32768.5})
+    assert res.status_code == 400

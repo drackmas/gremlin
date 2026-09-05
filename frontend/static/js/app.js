@@ -53,9 +53,14 @@ function applySettings(s) {
   $("theme-css").href = themeHref(s.theme);
   $("set-thinking").checked = !!s.show_thinking;
   $("set-max-tool-calls").value = s.max_tool_calls ?? "20";
+  $("set-max-context-tokens").value = s.max_context_tokens ?? 32768;
+  $("set-compaction-threshold").value = s.compaction_threshold ?? 0.65;
+  $("set-context-window-turns").value = s.context_window_turns ?? 10;
+  $("set-tool-result-max-chars").value = s.tool_result_max_chars ?? 8000;
   $("set-base-url").value = s.base_url || "";
   $("set-model").value = s.model || "";
   $("set-identity").value = s.identity || "";
+  $("set-shell-allowlist").value = (s.shell_allowlist || []).join(", ");
   $("set-discord").checked = !!s.discord_enabled;
   const tokStatus = $("set-discord-token-status");
   if (tokStatus) tokStatus.textContent = s.discord_token_set ? "Token is configured." : "No token configured yet.";
@@ -97,8 +102,13 @@ function collectSettings() {
     base_url: $("set-base-url").value.trim(),
     model: $("set-model").value.trim(),
     identity: $("set-identity").value.trim(),
+    shell_allowlist: $("set-shell-allowlist").value.split(",").map((x) => x.trim()).filter(Boolean),
     discord_enabled: $("set-discord").checked,
     max_tool_calls: parseInt($("set-max-tool-calls").value, 10) || 20,
+    max_context_tokens: parseInt($("set-max-context-tokens").value, 10) || 32768,
+    compaction_threshold: parseFloat($("set-compaction-threshold").value) || 0.65,
+    context_window_turns: parseInt($("set-context-window-turns").value, 10) || 10,
+    tool_result_max_chars: parseInt($("set-tool-result-max-chars").value, 10) || 8000,
   };
   const tok = $("set-discord-token").value.trim();
   if (tok) s.GREMLIN_DISCORD_TOKEN = tok;
@@ -143,10 +153,15 @@ function renderContextIndicator() {
   const ind = $("context-indicator");
   if (!ind) return;
   const p = state.lastPrompt;
-  if (p != null && typeof state.n_ctx === "number" && state.n_ctx > 0) {
-    const pct = (p / state.n_ctx) * 100;
+  // Prefer the model-reported limit; fall back to the configured window.
+  const limit =
+    (typeof state.n_ctx === "number" && state.n_ctx > 0)
+      ? state.n_ctx
+      : Number(state.settings?.max_context_tokens) || 0;
+  if (p != null && limit > 0) {
+    const pct = (p / limit) * 100;
     ind.textContent = `${Math.round(pct)}%`;
-    ind.title = `${p.toLocaleString()} / ${state.n_ctx.toLocaleString()} prompt tokens — last model request for this session`;
+    ind.title = `${p.toLocaleString()} / ${limit.toLocaleString()} prompt tokens — last model request for this session`;
     ind.classList.toggle("warn", pct >= 80);
   } else if (p != null) {
     ind.textContent = `${p.toLocaleString()} prompt tokens`;

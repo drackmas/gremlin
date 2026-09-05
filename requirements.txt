@@ -2,6 +2,7 @@ discord.py
 flask
 json_repair
 requests
+ddgs
 yt-dlp
 pytest
 python-dotenv
