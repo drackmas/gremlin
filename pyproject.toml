@@ -29,6 +29,7 @@ dependencies = [
     "requests",
     "ddgs",
     "yt-dlp",
+    "mcp~=2.1",
     "python-dotenv",
 ]
 

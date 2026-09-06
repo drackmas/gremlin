@@ -4,6 +4,7 @@ json_repair
 requests
 ddgs
 yt-dlp
+mcp~=2.1
 pytest
 python-dotenv
 

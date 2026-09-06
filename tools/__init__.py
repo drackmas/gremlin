@@ -19,6 +19,7 @@ from .shell import build_shell_tool
 from .grep import build_grep_tool, build_find_tool
 from .task import build_task_tool
 from .meta import build_meta_tools, load_generated_tools
+from .grav_mcp import build_grav_mcp_tool
 
 __all__ = [
     "Tool",
@@ -44,6 +45,7 @@ def build_registry(cfg, loader: SkillLoader | None = None, memory_store: MemoryS
         registry.register(tool)
     for tool in build_youtube_tools(cfg):
         registry.register(tool)
+    registry.register(build_grav_mcp_tool(cfg))
     loader = loader or SkillLoader(cfg)
     registry.register(build_skill_tool(loader))
     for tool in build_memory_tools(memory_store or MemoryStore(cfg.data_dir / "memory.json")):

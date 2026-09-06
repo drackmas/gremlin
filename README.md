@@ -123,6 +123,7 @@ All tools are registered in `ToolRegistry` (`tools/registry.py`) at startup by `
 | `web_fetch` | `tools/web.py` | Fetch a URL and extract readable text (HTML stripped, sanitized). |
 | `youtube_transcript` | `tools/youtube.py` | Fetch a YouTube video's transcript via `yt-dlp` (sanitized). |
 | `youtube_video_info` | `tools/youtube.py` | Fetch a YouTube video's title/description/duration via `yt-dlp`. |
+| `grav_mcp` | `tools/grav_mcp.py` | Talk to the local Grav CMS via the Grav MCP server (`grav-mcp` Node package). One general-purpose proxy tool: `action` is `list_tools` (discover the ~70 remote tools), `call_tool` (`tool_name` + free-form `arguments`), `list_resources`, or `read_resource`. Spawns/reuses the server over stdio (default) or HTTP; credentials come from `.env` (`GRAV_API_URL`, `GRAV_API_KEY`) and are never logged. See *Skills* (`grav_cms`). |
 | `task` | `tools/task.py` | Maintain a per-session task plan (`action`: `plan` to set items, `view` to read them). Persisted under `data/tasks/`. |
 | `load_skill` | `tools/skill_tool.py` | Read the full `SKILL.md` instructions for a named skill. The model calls this before doing a job that matches a skill. |
 | `memory_add` | `tools/memory.py` | Add a memory entry (content + optional tags + pin flag). |
@@ -196,6 +197,7 @@ Skills are instruction-only resources: `skills/<slug>/SKILL.md` with a small fro
 - `project_explorer` — how to explore and understand a codebase.
 - `youtube_transcript` / `youtube_summary` — how to fetch and summarize a YouTube video.
 - `code_review`, `debugging`, `git_workflow`, `refactoring`, `testing`, `web_research` — task-specific playbooks.
+- `grav_cms` — how to drive the local Grav CMS (pages, media, config, users, packages, system) through the `grav_mcp` tool: discover with `list_tools`, then `call_tool`.
 
 ### Settings (`chat/settings.py`)
 
@@ -231,6 +233,7 @@ gremlin/
 │   ├── shell.py            # run_command (sandboxed, allow-listable)
 │   ├── web.py              # web_search, web_fetch (sanitized)
 │   ├── youtube.py          # youtube_transcript, youtube_video_info (sanitized)
+│   ├── grav_mcp.py         # grav_mcp (Grav CMS via the Grav MCP server; stdio/HTTP)
 │   ├── task.py             # task (per-session plan)
 │   ├── skill_tool.py       # load_skill
 │   ├── memory.py           # memory_add/search/get/remove/pin
