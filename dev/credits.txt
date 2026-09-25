@@ -1,0 +1,14 @@
+These are the projects that Gremlin ate to improve her codebase:
+https://github.com/Rose22/openlumara
+https://github.com/huggingface/smolagents
+https://github.com/OpenHands/software-agent-sdk
+https://github.com/OpenHands/OpenHands
+
+
+LLM Harnesses involved in project:
+https://github.com/can1357/oh-my-pi
+https://github.com/anomalyco/opencode
+
+...and one day...
+
+...Gremlin.

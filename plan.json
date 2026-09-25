@@ -1,0 +1,138 @@
+{
+  "goal": "Read the actual codebase and UPDATE README.md: keep/refresh it as the project's architecture doc of the Gremlin Python agentic assistant (what it is, how the agent loop works, architecture, LLM usage, tools, memory/state, file relationships, request flow, config/run, extending, limitations) with a Mermaid diagram. No invented features.",
+  "version": 1,
+  "revision": 1,
+  "status": "active",
+  "created": "2026-09-23T12:02:18.488734+00:00",
+  "updated": "2026-09-23T13:35:46.916148+00:00",
+  "notes": [
+    "revision 1: User clarified: we are updating README.md, not creating a separate ABOUT.md."
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "title": "Survey the codebase",
+      "tasks": [
+        {
+          "id": "t1",
+          "title": "Read entrypoints and app shell: app.py, cli.py, discord_bot.py, config.py, utils.py, pyproject.toml, requirements.txt, .env.example",
+          "status": "done",
+          "depends_on": [],
+          "progress": 100,
+          "notes": [],
+          "test": null
+        },
+        {
+          "id": "t2",
+          "title": "Read agent core and LLM layer: chat/ (agent loop, model client, streaming, events), models/ if present",
+          "status": "done",
+          "depends_on": [],
+          "progress": 100,
+          "notes": [],
+          "test": null
+        },
+        {
+          "id": "t3",
+          "title": "Read tooling: tools/ (registry.py, __init__.py, filesystem.py, shell.py, web.py, youtube.py, grav_mcp.py, task.py, plan.py, skill_tool.py, others), planning/store.py",
+          "status": "done",
+          "depends_on": [],
+          "progress": 100,
+          "notes": [],
+          "test": null
+        },
+        {
+          "id": "t4",
+          "title": "Read memory/state: memory/ module, sessions/, data/ (settings.json, tasks/), skills/ SKILL.md files",
+          "status": "done",
+          "depends_on": [],
+          "progress": 100,
+          "notes": [],
+          "test": null
+        },
+        {
+          "id": "t5",
+          "title": "Read support areas: bridge/, dev/, frontend/, tests/ (skim), cache/ and models/ dirs",
+          "status": "done",
+          "depends_on": [],
+          "progress": 100,
+          "notes": [],
+          "test": null
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Draft README.md update",
+      "tasks": [
+        {
+          "id": "t6",
+          "title": "Diff current README.md sections against requested 12 topics + Mermaid diagram; list what's stale, missing, or wrong",
+          "status": "done",
+          "depends_on": [
+            "t1",
+            "t2",
+            "t3",
+            "t4",
+            "t5"
+          ],
+          "progress": 100,
+          "notes": [],
+          "test": null
+        },
+        {
+          "id": "t7",
+          "title": "Write updated draft grounded only in what was read; flag any unknowns as 'not yet implemented' rather than guessing",
+          "status": "done",
+          "depends_on": [
+            "t6"
+          ],
+          "progress": 100,
+          "notes": [],
+          "test": null
+        },
+        {
+          "id": "t8",
+          "title": "Keep/refresh Mermaid architecture diagram (entrypoints -> agent loop -> LLM <-> tool registry -> sandbox, plus memory/session/skills/plan side stores)",
+          "status": "done",
+          "depends_on": [
+            "t7"
+          ],
+          "progress": 100,
+          "notes": [],
+          "test": null
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Verify and finalize",
+      "tasks": [
+        {
+          "id": "t9",
+          "title": "Cross-check every claim (file paths, tool names, settings keys, limits) against the code; fix discrepancies",
+          "status": "done",
+          "depends_on": [
+            "t6",
+            "t7",
+            "t8"
+          ],
+          "progress": 100,
+          "notes": [],
+          "test": null
+        },
+        {
+          "id": "t10",
+          "title": "Write final updates into README.md (no new ABOUT.md) and report a summary of what changed",
+          "status": "done",
+          "depends_on": [
+            "t9"
+          ],
+          "progress": 100,
+          "notes": [],
+          "test": null
+        }
+      ]
+    }
+  ],
+  "checkpoints": []
+}

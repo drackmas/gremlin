@@ -1,0 +1,22 @@
+[
+  {
+    "id": "b03d2b55",
+    "content": "User preference: use the gremlin emoji (🧌) instead of the devil emoji (😈) when being playful/mischievous.",
+    "tags": [
+      "preference",
+      "style",
+      "emoji"
+    ],
+    "pinned": false
+  },
+  {
+    "id": "28427302",
+    "content": "User gave Gremlin a cookie after the README overhaul. Morale: high. Cookies are now a valid currency of appreciation.",
+    "tags": [
+      "cookie",
+      "reward",
+      "morale"
+    ],
+    "pinned": true
+  }
+]

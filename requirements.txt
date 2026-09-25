@@ -1,0 +1,14 @@
+discord.py
+flask
+json_repair
+requests
+ddgs
+yt-dlp
+mcp~=2.1
+pytest
+python-dotenv
+piper-tts
+
+# dev / tooling
+ruff
+mypy

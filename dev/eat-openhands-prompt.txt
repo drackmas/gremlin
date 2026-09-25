@@ -1,0 +1,383 @@
+Gremlin Tool & Skill Capability Audit
+
+You are working on my existing Gremlin repository.
+
+Gremlin already has a working tool and skill system:
+
+tools/
+├── filesystem.py
+├── grep.py
+├── memory.py
+├── registry.py
+├── sanitize.py
+├── shell.py
+├── skill_tool.py
+└── youtube.py
+
+skills/
+├── list_directory/
+├── project_explorer/
+├── youtube_summary/
+└── youtube_transcript/
+
+
+Gremlin already has the infrastructure for registering and using tools and loading skills.
+
+Do not modify the repository yet.
+
+Your job in this task is to research, audit, and produce an implementation plan.
+
+Goal
+
+I want to make Gremlin a significantly better agentic coding assistant by expanding and improving its existing tools and skills.
+
+Use OpenHands as the primary reference:
+
+https://github.com/OpenHands/OpenHands
+https://github.com/OpenHands/software-agent-sdk
+
+Study what OpenHands gives its coding agent in terms of:
+
+tools
+skills
+developer workflows
+repository exploration
+file manipulation/editing
+terminal usage
+Git
+testing
+debugging
+task management
+code review
+other useful coding-agent capabilities
+
+Do not plan to turn Gremlin into OpenHands.
+
+Do not redesign Gremlin's existing architecture.
+
+Instead, answer:
+
+What should Gremlin add or improve in its existing tools/ and skills/ systems to become a substantially better coding agent?
+
+1. Audit Gremlin
+
+Inspect the actual repository.
+
+Understand:
+
+every existing tool
+ToolRegistry
+tool schemas and execution
+every existing skill
+SkillLoader
+load_skill
+how skills appear in the system prompt
+how the model decides to use tools/skills
+existing tests
+current filesystem/shell/search capabilities
+
+Do not rely solely on the README.
+
+2. Audit OpenHands
+
+Study the current OpenHands implementation.
+
+Focus specifically on its agent capabilities, not its entire infrastructure.
+
+Look for:
+
+tools the agent can call
+how file editing works
+terminal/shell capabilities
+repository exploration
+search
+Git capabilities
+testing
+debugging
+task tracking
+code review
+skills
+reusable coding workflows
+anything else that would materially improve Gremlin
+
+Prefer the current OpenHands SDK/source over outdated blog posts or old documentation.
+
+3. Build a capability comparison
+
+Produce a table like:
+
+Capability	Gremlin	OpenHands	Recommendation
+File reading	Yes	Yes	Keep/improve
+File editing	?	Yes	Add
+Code search	Yes	Yes	Improve
+Git	?	Yes	Add
+Testing	?	Yes	Improve/add
+Task tracking	?	Yes	Consider
+Debugging workflow	?	Yes	Skill
+Code review	?	Yes	Skill
+Repository exploration	Yes	Yes	Improve
+
+Use the actual source code to fill this out.
+
+Don't assume OpenHands has something just because it sounds like something a coding agent would have.
+
+4. Categorize every proposed improvement
+
+For each capability, decide whether it should be:
+
+Tool
+
+A concrete operation the model can execute.
+
+Examples:
+
+apply_patch
+git_diff
+git_status
+run_tests
+search_files
+
+Skill
+
+Instructions describing how the model should approach a workflow.
+
+Examples:
+
+debugging
+code_review
+testing
+git_workflow
+refactoring
+repository_exploration
+
+Improvement to an existing tool/skill
+
+If Gremlin already has the capability, determine whether it simply needs to be made better.
+
+5. Prioritize
+
+Do NOT give me a giant list of everything OpenHands has.
+
+Rank proposed changes:
+
+Tier 1 — High value
+
+Things that would immediately make Gremlin better at real coding tasks.
+
+Tier 2 — Useful
+
+Things worth adding after Tier 1.
+
+Tier 3 — Interesting / future
+
+Things that are useful but not currently worth the complexity.
+
+For each proposal give:
+
+name
+tool or skill
+what it does
+why Gremlin needs it
+OpenHands reference
+estimated implementation complexity
+dependencies, if any
+testing requirements
+priority
+6. Pay special attention to these areas
+
+I particularly want your opinion on:
+
+File editing
+
+Gremlin currently has file reading but needs to be a capable coding agent.
+
+Investigate how OpenHands handles precise file modification and propose the best simple equivalent for Gremlin.
+
+Git
+
+Determine the minimum useful Git capabilities Gremlin should have.
+
+Testing
+
+Determine whether Gremlin needs a dedicated test tool or whether run_command should simply be improved.
+
+Search
+
+Determine whether grep_files is sufficient for coding or whether Gremlin needs additional search capabilities.
+
+Task tracking
+
+Determine whether a lightweight task/TODO tool would materially improve multi-step coding tasks.
+
+Coding skills
+
+Identify the highest-value skills Gremlin is missing.
+
+7. Do not over-engineer
+
+Keep Gremlin's philosophy:
+
+local
+simple
+Python
+self-contained
+easy to understand
+OpenAI-compatible
+small composable tools
+Markdown skills
+
+
+Do not recommend something merely because OpenHands has it.
+
+For every proposed feature ask:
+
+Does this solve a real problem for Gremlin?
+
+If not, leave it out.
+
+8. Think in terms of tool + skill composition
+
+The goal isn't to create dozens of tools.
+
+I want a small set of powerful primitives combined with good skills.
+
+For example:
+
+             debugging skill
+                    │
+        ┌───────────┼───────────┐
+        ▼           ▼           ▼
+    search       read_file   run_command
+        │
+        ▼
+   apply_patch
+        │
+        ▼
+   run_tests
+        │
+        ▼
+    git_diff
+
+
+Think about what combinations allow Gremlin to solve real software-engineering tasks.
+
+9. Proposed target toolset
+
+Based on your research, propose what the final Gremlin toolset should look like.
+
+For example:
+
+filesystem
+search
+edit/patch
+shell
+git
+testing
+task tracking
+memory
+youtube
+
+
+But do not assume this exact list is correct.
+
+Explain what you would keep, improve, add, combine, or remove.
+
+10. Proposed target skillset
+
+Likewise, propose the final high-value skills.
+
+For example:
+
+project_explorer
+debugging
+testing
+code_review
+git_workflow
+refactoring
+
+
+Again, these are examples.
+
+Base your actual recommendations on the OpenHands research and Gremlin's needs.
+
+Important constraint
+
+Do not edit any files during this task.
+
+Do not create tools.
+
+Do not create skills.
+
+Do not modify the registry.
+
+Do not modify prompts.
+
+Do not modify tests.
+
+Do not install dependencies.
+
+Research and planning only.
+
+Deliverable
+
+Give me a concrete implementation roadmap.
+
+Structure the final answer as:
+
+Executive summary
+
+What Gremlin is missing and the overall direction.
+
+Current Gremlin capabilities
+
+What it already does well.
+
+OpenHands findings
+
+The useful capabilities you found.
+
+Capability comparison
+
+Gremlin vs OpenHands.
+
+Recommended tools
+
+Prioritized list with rationale.
+
+Recommended skills
+
+Prioritized list with rationale.
+
+Improvements to existing tools/skills
+
+What should be upgraded rather than replaced.
+
+Proposed implementation order
+
+Something like:
+
+Phase 1
+  ├── ...
+  └── ...
+
+Phase 2
+  ├── ...
+  └── ...
+
+Phase 3
+  ├── ...
+  └── ...
+
+Testing strategy
+
+How we should verify each capability.
+
+What NOT to implement
+
+OpenHands features you think would add unnecessary complexity.
+
+End-state
+
+Show me what you think Gremlin's ideal tools/ and skills/ directories should look like after the work.
+
+Stop after producing the plan. Do not implement anything yet.
