@@ -199,5 +199,11 @@ const tts = (() => {
     get enabled() {
       return on;
     },
+
+    // True while audio is scheduled, queued, or being synthesized. STT uses
+    // this to wait for speaker output to stop after a barge-in interrupt.
+    get playing() {
+      return on && (sources.size > 0 || queue.length > 0 || inflight !== null);
+    },
   };
 })();

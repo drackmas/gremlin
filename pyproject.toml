@@ -32,6 +32,7 @@ dependencies = [
     "mcp~=2.1",
     "python-dotenv",
     "piper-tts",
+    "onnx-asr[cpu,hub]",
 ]
 
 [project.optional-dependencies]
@@ -50,7 +51,7 @@ py-modules = ["app", "cli", "config", "utils", "discord_bot"]
 
 [tool.setuptools.packages.find]
 # Explicit: only the real Python packages, never the data / asset dirs.
-include = ["chat", "planning", "tools", "skills", "memory", "sessions", "models", "bridge", "tts"]
+include = ["chat", "planning", "tools", "skills", "memory", "sessions", "models", "bridge", "tts", "stt"]
 namespaces = false
 
 # --- tooling ------------------------------------------------------------

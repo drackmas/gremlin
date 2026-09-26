@@ -6,6 +6,7 @@ All persistence and model logic lives in the packages below.
 
 from __future__ import annotations
 
+import base64
 import json
 import logging
 import os
@@ -26,6 +27,7 @@ from skills.loader import SkillLoader
 from tools import build_registry
 from tools.registry import LOG_FORMAT, SessionFilter
 from tts import DEFAULT_VOICE, MAX_TEXT_CHARS, PiperTTS, TTSModelError, VOICES, voice_by_id
+from stt import DEFAULT_STT_MODEL, MODELS, STTEngine, STTModelError, model_by_id
 
 log = logging.getLogger("gremlin")
 
@@ -101,6 +103,8 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
     settings = SettingsStore(cfg)
     tts = PiperTTS(cfg.piper_dir)
     app.extensions["gremlin_tts"] = tts  # exposed for tests / introspection
+    stt = STTEngine(cfg.stt_dir)
+    app.extensions["gremlin_stt"] = stt  # exposed for tests / introspection
     skills = SkillLoader(cfg)
     memory = MemoryStore(cfg.data_dir / "memory.json")
     registry = build_registry(cfg, skills, memory, settings.load)
@@ -288,6 +292,55 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
         resp.headers["Cache-Control"] = "no-cache"
         resp.headers["X-Accel-Buffering"] = "no"
         return resp
+
+    # --- STT (local models; engine/model selection via settings) ------------
+    @app.get("/api/stt/models")
+    def stt_models():
+        return jsonify(
+            [
+                {
+                    "id": m.id,
+                    "label": m.label,
+                    "engine": m.engine,
+                    "approx_mb": m.approx_mb,
+                    "available": stt.available(m.id),
+                }
+                for m in MODELS
+            ]
+        )
+
+    @app.post("/api/stt/transcribe")
+    def stt_transcribe():
+        s = settings.load()
+        if not s.get("stt_enabled"):
+            return jsonify({"error": "speech-to-text is disabled"}), 400
+        data = request.get_json(silent=True) or {}
+        model_id = (data.get("model") or s.get("stt_model") or DEFAULT_STT_MODEL).strip()
+        try:
+            model = model_by_id(model_id)
+        except ValueError:
+            return jsonify({"error": f"unknown STT model: {model_id}"}), 400
+        audio = data.get("audio") or ""
+        if not isinstance(audio, str) or not audio:
+            return jsonify({"error": "audio is required (base64 WAV)"}), 400
+        try:
+            raw = base64.b64decode(audio, validate=False)
+        except (ValueError, TypeError):
+            return jsonify({"error": "audio must be valid base64"}), 400
+        if not raw:
+            return jsonify({"error": "audio is empty"}), 400
+        if not stt.available(model.id):
+            missing = stt.describe_missing(model.id)
+            log.warning("STT model not found: %s", missing)
+            return jsonify({"error": f"STT model not found: {missing}"}), 503
+        try:
+            text = stt.transcribe(raw, model_id=model.id)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        except STTModelError as e:
+            log.warning("STT unavailable: %s", e)
+            return jsonify({"error": str(e)}), 503
+        return jsonify({"text": text})
     # --- model -------------------------------------------------------------
     model_context_cache: dict[tuple[str, str], int] = {}
 

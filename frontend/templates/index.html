@@ -56,9 +56,12 @@
         <div class="d-flex justify-content-end mb-1">
           <span id="context-indicator" class="context-indicator" title="">–</span>
         </div>
-        <div class="d-flex gap-2 align-items-end">
+        <div class="d-flex gap-2 align-items-stretch">
           <textarea id="input" class="form-control composer-input" rows="2"
                     placeholder="Message Gremlin…  (Enter to send, Shift+Enter for newline)"></textarea>
+          <button id="btn-mic" class="btn btn-outline-secondary composer-mic d-none" title="Hold to talk" aria-label="Microphone">
+            <i class="bi bi-mic"></i>
+          </button>
           <button id="btn-send" class="btn btn-primary composer-send" title="Send">
             <i class="bi bi-send-fill"></i>
           </button>
@@ -245,6 +248,71 @@
             </div>
           </div>
         </div>
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="fw-semibold">Speech-to-Text</div>
+                <div class="text-body-secondary small">
+                  Transcribe your voice with a local model — Whisper
+                  (faster-whisper) or Parakeet-TDT (onnx-asr). Runs on
+                  CPU; models live in <code>models/stt/</code>.
+                </div>
+              </div>
+              <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" id="set-stt">
+                <label class="form-check-label" for="set-stt">Enable STT</label>
+              </div>
+            </div>
+            <div class="row g-3 mt-1">
+              <div class="col-md-2">
+                <label class="form-label small" for="set-stt-mode">Mode</label>
+                <select id="set-stt-mode" class="form-select">
+                  <option value="hold">Hold to talk</option>
+                  <option value="continuous">Continuous</option>
+                </select>
+                <div class="text-body-secondary small mt-1">
+                  <b>Hold</b>: press the mic, speak, release to fill the
+                  input box. <b>Continuous</b>: tap the mic to listen; each
+                  sentence is transcribed and sent automatically after a
+                  pause.
+                </div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small" for="set-stt-engine">Engine</label>
+                <select id="set-stt-engine" class="form-select">
+                  <option value="parakeet">Parakeet-TDT</option>
+                  <option value="whisper">Whisper</option>
+                </select>
+                <div class="text-body-secondary small mt-1">
+                  Parakeet-TDT is fast and accurate (English /
+                  multilingual); Whisper models are slower.
+                </div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small" for="set-stt-model">Model</label>
+                <select id="set-stt-model" class="form-select"></select>
+                <div class="text-body-secondary small mt-1" id="set-stt-model-status">
+                  Models live in <code>models/stt/</code> — see its README.
+                </div>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small" for="set-stt-threshold">Threshold</label>
+                <input type="number" id="set-stt-threshold" class="form-control" min="0" max="1" step="0.005" value="0.02">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small" for="set-stt-silence">Silence (ms)</label>
+                <input type="number" id="set-stt-silence" class="form-control" min="100" max="10000" step="50" value="800">
+              </div>
+            </div>
+            <div class="text-body-secondary small mt-2">
+              Threshold: how loud you must be (0–1) to be recognized as
+              speech. Silence: the pause that ends an utterance in
+              Continuous mode. Starting to speak always interrupts any
+              running reply, so you can barge in at any time.
+            </div>
+          </div>
+        </div>
         <div class="d-flex align-items-center gap-2">
           <button id="btn-save-settings" class="btn btn-primary">
             <i class="bi bi-check-lg me-1"></i>Save settings
@@ -272,6 +340,7 @@
 
 <script src="/static/js/bootstrap.bundle.min.js"></script>
 <script src="/static/js/tts.js"></script>
+<script src="/static/js/stt.js"></script>
 <script src="/static/js/app.js"></script>
 </body>
 </html>

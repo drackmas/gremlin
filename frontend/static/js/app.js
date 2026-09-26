@@ -71,6 +71,23 @@ function applySettings(s) {
   if (sel.value !== s.theme) sel.value = s.theme;
   const voiceSel = $("set-piper-voice");
   if (voiceSel && s.piper_voice) voiceSel.value = s.piper_voice;
+  // Speech-to-text
+  $("set-stt").checked = !!s.stt_enabled;
+  $("set-stt-mode").value = s.stt_mode || "hold";
+  $("set-stt-engine").value = s.stt_engine || "whisper";
+  $("set-stt-threshold").value = s.stt_volume_threshold ?? 0.02;
+  $("set-stt-silence").value = s.stt_silence_duration_ms ?? 800;
+  $("btn-mic").classList.toggle("d-none", !s.stt_enabled);
+  stt.configure({
+    enabled: !!s.stt_enabled,
+    mode: s.stt_mode || "hold",
+    engine: s.stt_engine || "whisper",
+    model: s.stt_model || "base",
+    threshold: Number(s.stt_volume_threshold) || 0.02,
+    silence: (Number(s.stt_silence_duration_ms) || 800) / 1000,
+  });
+  if (!s.stt_enabled) stt.dispose();
+  updateMicButton();
 }
 
 function setAppearanceActive(app) {
@@ -115,6 +132,53 @@ async function loadTtsVoices() {
     console.error(e);
   }
 }
+
+async function loadSttModels(selectId) {
+  const sel = $("set-stt-model");
+  if (!sel) return;
+  const engine = $("set-stt-engine")?.value || "whisper";
+  try {
+    const models = (await api("/api/stt/models")).filter((m) => m.engine === engine);
+    sel.innerHTML = "";
+    for (const m of models) {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = m.engine + ": " + m.label + (m.available ? "" : " (model missing)");
+      sel.appendChild(opt);
+    }
+    const wanted = selectId || state.settings?.stt_model;
+    if (wanted) sel.value = wanted;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// Keep the mic button's look in sync with the STT state.
+function updateMicButton() {
+  const btn = $("btn-mic");
+  const icon = btn.querySelector("i");
+  const s = stt.state;
+  btn.classList.remove("btn-primary", "btn-danger", "btn-outline-secondary");
+  if (s === "recording") {
+    btn.classList.add("btn-danger");
+    icon.className = "bi bi-stop-circle-fill";
+    btn.title = "Recording — release to transcribe";
+  } else if (s === "listening") {
+    btn.classList.add("btn-primary");
+    icon.className = "bi bi-mic-fill";
+    btn.title = "Listening — speak now (click to stop)";
+  } else if (s === "transcribing") {
+    btn.classList.add("btn-outline-secondary");
+    icon.className = "bi bi-hourglass-split";
+    btn.title = "Transcribing\u2026";
+  } else {
+    btn.classList.add("btn-outline-secondary");
+    icon.className = "bi bi-mic";
+    btn.title = state.settings && state.settings.stt_mode === "continuous"
+      ? "Tap to start listening"
+      : "Hold to talk";
+  }
+}
 function collectSettings() {
   const s = {
     show_thinking: $("set-thinking").checked,
@@ -127,6 +191,12 @@ function collectSettings() {
     discord_enabled: $("set-discord").checked,
     piper_tts_enabled: $("set-piper-tts").checked,
     piper_voice: $("set-piper-voice").value,
+    stt_enabled: $("set-stt").checked,
+    stt_mode: $("set-stt-mode").value,
+    stt_engine: $("set-stt-engine").value,
+    stt_model: $("set-stt-model").value,
+    stt_volume_threshold: parseFloat($("set-stt-threshold").value),
+    stt_silence_duration_ms: parseInt($("set-stt-silence").value, 10),
     max_tool_calls: parseInt($("set-max-tool-calls").value, 10) || 20,
     max_context_tokens: parseInt($("set-max-context-tokens").value, 10) || 32768,
     compaction_threshold: parseFloat($("set-compaction-threshold").value) || 0.65,
@@ -447,9 +517,10 @@ function setStreamingUI(on) {
   $("btn-send").classList.toggle("d-none", on);
   $("btn-stop").classList.toggle("d-none", !on);
 }
-
-async function stopStreaming() {
-  if (!state.streaming) return;
+// Interrupts whatever the app is currently doing — TTS playback and the
+// in-flight chat turn — so the user can barge in (Stop button or speech).
+// Safe to call when nothing is active.
+function interruptGeneration() {
   tts.stop();
   const abort = state.chatAbort;
   if (abort) abort.abort(); // close the SSE stream; the catch path resets the UI
@@ -457,6 +528,11 @@ async function stopStreaming() {
     // Tell the backend to cooperatively cancel the in-flight generation.
     api(`/api/sessions/${state.activeId}/abort`, { method: "POST" }).catch(() => {});
   }
+}
+
+async function stopStreaming() {
+  if (!state.streaming) return;
+  interruptGeneration();
 }
 
 async function sendMessage() {
@@ -469,10 +545,7 @@ async function sendMessage() {
   // hard-stop TTS, and let the new turn supersede it. The backend allows one
   // active generation per session; the old run stops at its next event and
   // does not save a partial assistant reply.
-  if (state.chatAbort) {
-    state.chatAbort.abort();
-    tts.stop();
-  }
+  interruptGeneration();
 
   const container = $("messages");
   const hint = container.querySelector(".empty-hint");
@@ -647,12 +720,45 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("set-appearance-dark").addEventListener("click", () => setAppearanceActive("dark"));
   $("btn-send").addEventListener("click", sendMessage);
   $("btn-stop").addEventListener("click", stopStreaming);
+  // Mic button: hold-to-talk (press/release) or continuous (tap to toggle).
+  const micBtn = $("btn-mic");
+  micBtn.addEventListener("pointerdown", (ev) => {
+    ev.preventDefault();
+    if (state.settings && state.settings.stt_mode === "continuous") return;
+    stt.holdStart();
+  });
+  const micUp = (ev) => {
+    ev.preventDefault();
+    if (state.settings && state.settings.stt_mode !== "hold") return;
+    stt.holdEnd(); // no-op unless a hold capture is active
+  };
+  window.addEventListener("pointerup", micUp);
+  window.addEventListener("pointercancel", micUp);
+  micBtn.addEventListener("click", (ev) => {
+    if (!(state.settings && state.settings.stt_mode === "continuous")) return;
+    ev.preventDefault();
+    stt.continuousToggle();
+  });
+  stt.onStateChange = updateMicButton;
+  // Speech start always interrupts TTS + the in-flight turn (barge-in).
+  stt.onSpeechStart = interruptGeneration;
+  // Continuous mode: fill the input, then auto-send.
+  stt.onUtterance = async (text, autoSend) => {
+    $("input").value = text;
+    updateMicButton();
+    if (autoSend) await sendMessage(); // continuous only; hold stays for edit
+  };
+  stt.onError = (msg) => {
+    console.warn("stt:", msg);
+    updateMicButton();
+  };
   $("input").addEventListener("keydown", (ev) => {
     if (ev.key === "Enter" && !ev.shiftKey) {
       ev.preventDefault();
       sendMessage();
     }
   });
+  $("set-stt-engine").addEventListener("change", () => loadSttModels());
 
   try {
     const settings = await api("/api/settings"); // persisted settings stick across reloads
@@ -662,6 +768,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   await loadThemes();
   await loadTtsVoices();
+  await loadSttModels(state.settings?.stt_model);
   if (state.settings) applySettings(state.settings); // restore select value
   loadContextLimit();
 

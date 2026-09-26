@@ -6,3 +6,4 @@ sessions/
 files/*
 !files/.gitkeep
 models/piper/*.onnx
+models/stt/*

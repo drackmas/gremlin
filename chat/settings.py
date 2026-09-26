@@ -14,11 +14,15 @@ from dotenv import dotenv_values, set_key
 from utils import atomic_write_json
 
 from tts import VOICES
+from stt import ENGINES, STT_MODEL_IDS
 
 log = logging.getLogger("gremlin.settings")
 
 _APPEARANCES = ("light", "dark")
 _PIPER_VOICE_IDS = tuple(v.id for v in VOICES)
+_STT_MODES = ("hold", "continuous")
+_STT_ENGINES = tuple(ENGINES)
+_STT_MODEL_IDS = tuple(STT_MODEL_IDS)
 
 
 class SettingsError(ValueError):
@@ -68,13 +72,21 @@ class SettingsStore:
                     raise SettingsError("appearance must be 'light' or 'dark'")
                 if key == "piper_voice" and value not in _PIPER_VOICE_IDS:
                     raise SettingsError(f"piper_voice must be one of: {', '.join(_PIPER_VOICE_IDS)}")
+                if key == "stt_mode" and value not in _STT_MODES:
+                    raise SettingsError("stt_mode must be 'hold' or 'continuous'")
+                if key == "stt_engine" and value not in _STT_ENGINES:
+                    raise SettingsError(f"stt_engine must be one of: {', '.join(_STT_ENGINES)}")
+                if key == "stt_model" and value not in _STT_MODEL_IDS:
+                    raise SettingsError(f"stt_model must be one of: {', '.join(_STT_MODEL_IDS)}")
             elif isinstance(default, int):
                 if not isinstance(value, int) or isinstance(value, bool):
                     raise SettingsError(f"{key} must be an integer")
                 if value < 1:
                     raise SettingsError(f"{key} must be a positive integer")
+                if key == "stt_silence_duration_ms" and not (100 <= value <= 10_000):
+                    raise SettingsError(f"{key} must be between 100 and 10000 milliseconds")
             elif isinstance(default, float):
-                # Fractions like compaction_threshold: accept int/float in (0, 1].
+                # Fractions (volumes, ratios) must stay in (0, 1].
                 if isinstance(value, bool) or not isinstance(value, (int, float)):
                     raise SettingsError(f"{key} must be a number between 0 and 1")
                 if not (0 < value <= 1):

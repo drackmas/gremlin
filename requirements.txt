@@ -8,6 +8,8 @@ mcp~=2.1
 pytest
 python-dotenv
 piper-tts
+onnx-asr[cpu,hub]
+faster-whisper
 
 # dev / tooling
 ruff

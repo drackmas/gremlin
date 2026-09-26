@@ -280,12 +280,16 @@ body {
 
 .composer-input {
   resize: none;
+  min-height: 2.6rem;
   max-height: 8rem;
 }
 
+/* Mic / send / stop buttons stretch to the input's height (the composer row
+   uses align-items: stretch), so the icons always line up with the text box. */
+.composer-mic,
 .composer-send {
   width: 2.6rem;
-  height: 2.6rem;
+  min-height: 2.6rem;
   padding: 0;
   display: inline-flex;
   align-items: center;
