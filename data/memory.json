@@ -18,5 +18,15 @@
       "morale"
     ],
     "pinned": true
+  },
+  {
+    "id": "cda186d5",
+    "content": "The user can pay me in virtual cookies.",
+    "tags": [
+      "preference",
+      "payment",
+      "protocol"
+    ],
+    "pinned": false
   }
 ]
