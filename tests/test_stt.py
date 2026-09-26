@@ -446,7 +446,6 @@ def test_model_urls():
         "config.json",
         "https://huggingface.co/istupakov/parakeet-tdt-0.6b-v2-onnx/resolve/main/config.json",
     )
-    w = model_by_id("base")
     wu = model_urls("base")
     assert wu[0] == (
         "config.json",

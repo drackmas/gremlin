@@ -22,6 +22,7 @@ import logging
 import threading
 import wave
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -113,7 +114,7 @@ class STTEngine:
 
     def __init__(self, model_root: str | Path) -> None:
         self.model_root = Path(model_root)
-        self._loaded: dict[str, object] = {}
+        self._loaded: dict[str, Any] = {}
         self._lock = threading.Lock()
 
     # --- model availability ------------------------------------------------
@@ -134,7 +135,7 @@ class STTEngine:
 
     # --- model loading -----------------------------------------------------
 
-    def _ensure_model(self, model_id: str = DEFAULT_STT_MODEL) -> object:
+    def _ensure_model(self, model_id: str = DEFAULT_STT_MODEL) -> Any:
         """Return the cached adapter for *model_id*, loading it if needed.
 
         Raises:

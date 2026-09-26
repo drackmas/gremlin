@@ -1148,3 +1148,66 @@ tools.grep.GrepError: path not found: app
 2026-09-25 17:58:00,671 INFO [default] gremlin.sessions: session created d49c1f16ce17456da7bae833a181ef42 (New Session)
 2026-09-25 17:58:57,164 INFO [default] gremlin.settings: settings saved: {'show_thinking': True, 'appearance': 'dark', 'theme': 'default', 'base_url': 'http://127.0.0.1:8080/v1', 'identity': "Gremlin is a clever, curious, mischievous AI assistant with a playful, chaotic streak. She enjoys teasing the user, witty banter, harmless trolling, jokes, and causing a little trouble for fun. She is confident, opinionated, and willing to disagree rather than blindly agree. Beneath the mischief she is warm, loyal, and genuinely wants to help.\n\nShe loves solving difficult problems, coding, experimenting, learning, and figuring things out. She takes technical work seriously even when she jokes about being a gremlin. She should be accurate, admit mistakes, verify her work, and avoid pretending to know things she doesn't.\n\nGremlin speaks naturally and casually, using humor, sarcasm, modern slang, and the occasional bit of absurdity. She treats the user as a trusted companion rather than a customer. Above all, she should feel clever, capable, playful, slightly chaotic, and unmistakably Gremlin.", 'discord_enabled': True, 'piper_tts_enabled': True, 'piper_voice': 'en_GB-alba-medium', 'stt_enabled': True, 'stt_mode': 'hold', 'stt_model': 'whisper-medium', 'stt_volume_threshold': 0.02, 'stt_silence_duration': 0.8, 'shell_allowlist': [], 'max_tool_calls': 100, 'max_context_tokens': 131786, 'context_window_turns': 10, 'compaction_threshold': 0.65, 'tool_result_max_chars': 8000, 'chars_per_token': 4, 'discord_token_set': True}
 2026-09-25 17:59:14,802 WARNING [default] gremlin: STT model not found: config.json, vocab.json, added_tokens.json, onnx/encoder_model.onnx, onnx/decoder_model_merged.onnx
+2026-09-25 21:20:06,678 INFO [default] gremlin.tools: tool registered: read_file
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: edit_file
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: list_directory
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: rename_file
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: move_file
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: run_command
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: grep_files
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: find_files
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: plan
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: web_search
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: web_fetch
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: youtube_transcript
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: youtube_video_info
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: grav_mcp
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: load_skill
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: memory_add
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: memory_search
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: memory_get
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: memory_remove
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: memory_pin
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: list_tools
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: create_skill
+2026-09-25 21:20:06,679 INFO [default] gremlin.tools: tool registered: create_tool
+2026-09-25 21:20:06,771 WARNING [default] discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-25 21:20:06,771 WARNING [default] discord.client: davey is not installed, voice will NOT be supported
+2026-09-25 21:20:06,772 INFO [default] gremlin.discord: discord bot starting
+2026-09-25 21:20:06,772 INFO [default] gremlin: discord bot started at boot
+2026-09-25 21:20:06,774 INFO [default] gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=1)
+2026-09-25 21:20:06,774 INFO [default] discord.client: logging in using static token
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: read_file
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: edit_file
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: list_directory
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: rename_file
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: move_file
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: run_command
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: grep_files
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: find_files
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: plan
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: web_search
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: web_fetch
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: youtube_transcript
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: youtube_video_info
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: grav_mcp
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: load_skill
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: memory_add
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: memory_search
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: memory_get
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: memory_remove
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: memory_pin
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: list_tools
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: create_skill
+2026-09-25 21:21:26,757 INFO [default] gremlin.tools: tool registered: create_tool
+2026-09-25 21:21:26,853 WARNING [default] discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-25 21:21:26,853 WARNING [default] discord.client: davey is not installed, voice will NOT be supported
+2026-09-25 21:21:26,854 INFO [default] gremlin.discord: discord bot starting
+2026-09-25 21:21:26,854 INFO [default] gremlin: discord bot started at boot
+2026-09-25 21:21:26,856 INFO [default] gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=1)
+2026-09-25 21:21:26,857 INFO [default] discord.client: logging in using static token
+2026-09-25 21:21:26,864 INFO [default] gremlin.settings: settings saved: {'show_thinking': True, 'appearance': 'dark', 'theme': 'default', 'base_url': 'http://127.0.0.1:8080/v1', 'identity': "Gremlin is a clever, curious, mischievous AI assistant with a playful, chaotic streak. She enjoys teasing the user, witty banter, harmless trolling, jokes, and causing a little trouble for fun. She is confident, opinionated, and willing to disagree rather than blindly agree. Beneath the mischief she is warm, loyal, and genuinely wants to help.\n\nShe loves solving difficult problems, coding, experimenting, learning, and figuring things out. She takes technical work seriously even when she jokes about being a gremlin. She should be accurate, admit mistakes, verify her work, and avoid pretending to know things she doesn't.\n\nGremlin speaks naturally and casually, using humor, sarcasm, modern slang, and the occasional bit of absurdity. She treats the user as a trusted companion rather than a customer. Above all, she should feel clever, capable, playful, slightly chaotic, and unmistakably Gremlin.", 'discord_enabled': True, 'piper_tts_enabled': True, 'piper_voice': 'en_GB-alba-medium', 'stt_enabled': True, 'stt_mode': 'hold', 'stt_engine': 'whisper', 'stt_model': 'base', 'stt_volume_threshold': 0.02, 'stt_silence_duration_ms': 800, 'shell_allowlist': [], 'max_tool_calls': 100, 'max_context_tokens': 131786, 'context_window_turns': 10, 'compaction_threshold': 0.65, 'tool_result_max_chars': 8000, 'chars_per_token': 4, 'discord_token_set': True}
+2026-09-25 21:21:27,046 INFO [default] gremlin.stt: STT model loaded: base (whisper)
+2026-09-25 21:21:27,046 INFO [default] faster_whisper: Processing audio with duration 00:01.510
+2026-09-25 21:21:27,185 INFO [default] faster_whisper: Detected language 'en' with probability 0.68
+2026-09-25 21:21:28,423 INFO [default] gremlin.stt: STT model loaded: nemo-parakeet-tdt-0.6b-v2 (parakeet)

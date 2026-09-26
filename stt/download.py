@@ -1,16 +1,18 @@
-"""Download Whisper ONNX models from Hugging Face into ``models/stt/``.
+"""Download STT models from Hugging Face into ``models/stt/``.
 
-Each catalog model (:data:`stt.MODELS`) is five files served from its
-``onnx-community`` repository — ``config.json``, ``vocab.json``,
-``added_tokens.json`` and the two ``onnx/*.onnx`` weights. Files that already
-exist are skipped, so a re-run only fetches what is missing.
+Each catalog model (:data:`stt.MODELS`) is a set of files served from its
+own repository (``Systran/faster-whisper-*`` for the faster-whisper
+CTranslate2 models, ``istupakov/parakeet-tdt-0.6b-v*-onnx`` for the
+Parakeet ONNX builds).  Files that already exist are skipped, so a re-run
+only fetches what is missing.
 
 Usage:
-    python -m stt.download                  # every model in the catalog
-    python -m stt.download whisper-tiny     # just the named models
+    python -m stt.download                        # every model in the catalog
+    python -m stt.download base                   # just the named models
 
-Alternatively, ``huggingface_hub`` (installed with the ``onnx-asr[hub]``
-extra) can fetch the same files on demand; see ``models/stt/README.md``.
+The models are already copied into this repository (see
+``models/stt/README.md``), so this is only needed for fresh checkouts or
+new catalog entries.
 """
 
 from __future__ import annotations

@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from unittest import mock
 
+from models.base import ModelBackend, ModelEvent
+
 
 def _chat_sse(text: str = "hello from model"):
     """Build a fake streaming response: one text delta + done."""
@@ -93,9 +95,6 @@ def test_chat_unknown_session_404(client, cfg):
     assert res.status_code == 404
 
 
-from models.base import ModelBackend, ModelEvent
-
-
 class _LocalBackend(ModelBackend):
     """Offline backend: one text event then done (no network in tests)."""
 
@@ -128,7 +127,6 @@ def test_abort_endpoint_cancels_active_turn(client, app, cfg):
 
 
 def test_abort_endpoint_no_active_run(client, app, cfg):
-    manager = app.extensions["gremlin_manager"]
     sid = client.post("/api/sessions", json={"title": "t"}).get_json()["id"]
     res = client.post(f"/api/sessions/{sid}/abort")
     assert res.status_code == 200
