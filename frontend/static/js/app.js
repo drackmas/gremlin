@@ -75,7 +75,7 @@ function applySettings(s) {
   $("set-stt").checked = !!s.stt_enabled;
   $("set-stt-mode").value = s.stt_mode || "hold";
   $("set-stt-engine").value = s.stt_engine || "whisper";
-  $("set-stt-threshold").value = s.stt_volume_threshold ?? 0.02;
+  $("set-stt-threshold").value = s.stt_volume_threshold ?? 0.01;
   $("set-stt-silence").value = s.stt_silence_duration_ms ?? 800;
   $("btn-mic").classList.toggle("d-none", !s.stt_enabled);
   stt.configure({
@@ -83,7 +83,7 @@ function applySettings(s) {
     mode: s.stt_mode || "hold",
     engine: s.stt_engine || "whisper",
     model: s.stt_model || "base",
-    threshold: Number(s.stt_volume_threshold) || 0.02,
+    threshold: Number(s.stt_volume_threshold) || 0.01,
     silence: (Number(s.stt_silence_duration_ms) || 800) / 1000,
   });
   if (!s.stt_enabled) stt.dispose();

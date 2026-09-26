@@ -589,18 +589,46 @@ _NODE_HARNESS = r"""
   feed(0.5);
   if (fetched.length !== 1) fail("no capture after stopping");
 
+  // --- Near-threshold speech must not trigger premature end ---------------
+  // Simulates the user scenario: voice RMS hovers around the threshold.
+  // A single below-threshold chunk must NOT arm the silence clock; only
+  // SILENCE_STREAK consecutive quiet chunks do.
+  stt.configure({ enabled: true, mode: "continuous", model: "base", threshold: 0.02, silence: 0.25 });
+  await stt.continuousToggle();
+  await tick();
+  if (!stt.listening) fail("not listening for near-threshold test");
+
+  // Feed a mix of above-threshold (amp 0.04 -> RMS ~0.028) and
+  // below-threshold (amp 0.02 -> RMS ~0.014) chunks. The utterance should
+  // start on the first above-threshold chunk and keep going despite the
+  // intermittent below-threshold dips.
+  for (let i = 0; i < 6; i++) {
+    feed(0.04); // above threshold
+    feed(0.02); // below threshold (single blip, must not arm clock)
+    await tick(5);
+  }
+  // Still recording, no transcription yet.
+  if (fetched.length !== 1) fail("near-threshold dips must not end the utterance (got " + fetched.length + " fetches)");
+
+  // Now feed sustained silence: enough consecutive quiet chunks to arm the
+  // clock, then past the configured 250 ms silence duration.
+  for (let i = 0; i < 30; i++) { feed(0.01); await tick(10); } // ~0.3 s silence
+  await tick();
+  if (fetched.length !== 2) fail("sustained silence must end the utterance (got " + fetched.length + " fetches)");
+  stt.continuousToggle(); // stop listening
+
   // --- Hold mode: capture between press and release, never auto-send ------
   stt.configure({ enabled: true, mode: "hold", model: "base", threshold: 0.1, silence: 0.25 });
   await stt.holdStart();
   await tick();
   if (stt.state !== "recording") fail("hold must record immediately");
-  if (speechStarts !== 3) fail("hold press must fire the barge-in hook");
+  if (speechStarts !== 4) fail("hold press must fire the barge-in hook");
   for (let i = 0; i < 4; i++) feed(0.5); // ~1 s of speech
   stt.holdEnd();
   await tick(50);
-  if (fetched.length !== 2) fail("hold must transcribe on release");
-  if (utterances.length !== 2) fail("hold utterance hook did not fire");
-  if (utterances[1].autoSend !== false) fail("hold mode must not auto-send");
+  if (fetched.length !== 3) fail("hold must transcribe on release");
+  if (utterances.length !== 3) fail("hold utterance hook did not fire");
+  if (utterances[2].autoSend !== false) fail("hold mode must not auto-send");
 
   // --- A quiet hold capture is dropped, not transcribed --------------------
   await stt.holdStart();
@@ -609,7 +637,7 @@ _NODE_HARNESS = r"""
   feed(0.01);
   stt.holdEnd();
   await tick(50);
-  if (fetched.length !== 2) fail("quiet hold capture must not be transcribed");
+  if (fetched.length !== 3) fail("quiet hold capture must not be transcribed");
 
   console.log("OK");
 })().catch((e) => { console.error("FAIL " + (e && e.message)); process.exit(1); });

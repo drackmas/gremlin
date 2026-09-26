@@ -17,7 +17,7 @@ const stt = (() => {
   const TARGET_RATE = 16000;
   const MIN_SAMPLES = TARGET_RATE * 0.2; // 200 ms — shorter than this is dropped
 
-  let cfg = { enabled: false, mode: "hold", model: "base", threshold: 0.02, silence: 0.8 };
+  let cfg = { enabled: false, mode: "hold", model: "base", threshold: 0.01, silence: 0.8, debug: false };
 
   let ctx = null;      // AudioContext
   let holdQueued = false;   // press arrived while the mic graph was being set up
@@ -29,10 +29,25 @@ const stt = (() => {
   let recording = false; // accumulating an utterance
   let buf = new Float32Array(0);
   let silenceSince = 0;  // performance.now() when level dropped below threshold
+  let silenceStreak = 0; // consecutive below-threshold chunks (debounce)
+  let noiseFloor = 0;    // calibrated ambient noise level (RMS)
+  let calibSamples = []; // RMS values collected during calibration
+  let calibCount = 0;    // calibration samples received so far
   let dropUntil = 0;     // ignore samples until this time (TTS tail decay)
   let stateName = "idle"; // "idle" | "listening" | "recording" | "transcribing"
 
   const hooks = { speechStart: null, utterance: null, state: null, error: null };
+
+  const SILENCE_STREAK = 3;     // consecutive silent chunks before clock arms
+  const CALIBRATION_CHUNKS = 5; // ~460 ms of ambient sampling at 44.1 kHz / 4096
+
+  /** Threshold to use for voice/silence decisions.
+   *  Once noiseFloor is calibrated, the effective floor is raised to
+   *  1.5× the ambient level so soft speech isn't misread as silence. */
+  function effectiveThreshold() {
+    if (noiseFloor > 0) return Math.max(cfg.threshold, noiseFloor * 1.5);
+    return cfg.threshold;
+  }
 
   function configure(c) {
     Object.assign(cfg, c);
@@ -84,6 +99,17 @@ const stt = (() => {
     let sum = 0;
     for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
     const rms = Math.sqrt(sum / data.length);
+
+    // Collect ambient RMS samples for noise-floor calibration.
+    if (calibCount < CALIBRATION_CHUNKS) {
+      calibSamples.push(rms);
+      calibCount++;
+      if (calibCount >= CALIBRATION_CHUNKS) {
+        calibSamples.sort((a, b) => a - b);
+        noiseFloor = calibSamples[Math.floor(calibSamples.length * 0.25)];
+        if (cfg.debug) console.debug("[stt] noise floor calibrated:", noiseFloor.toFixed(4));
+      }
+    }
     if (recording && performance.now() >= dropUntil) {
       const nb = new Float32Array(buf.length + data.length);
       nb.set(buf);
@@ -96,16 +122,32 @@ const stt = (() => {
 
   function onRms(rms) {
     const now = performance.now();
+    const thr = effectiveThreshold();
     if (!recording) {
-      if (rms >= cfg.threshold) startUtterance();
+      if (rms >= thr) startUtterance();
       return;
     }
-    if (rms >= cfg.threshold) {
+    if (rms >= thr) {
       silenceSince = 0;
-    } else if (!silenceSince) {
-      silenceSince = now;
-    } else if (now - silenceSince >= cfg.silence * 1000) {
-      endUtterance();
+      silenceStreak = 0;
+    } else {
+      silenceStreak++;
+      // Arm the silence clock only after N consecutive quiet chunks so a
+      // single low-RMS blip (consonant, mic pop) can't start the countdown.
+      if (silenceStreak >= SILENCE_STREAK && !silenceSince) {
+        silenceSince = now;
+      }
+      if (silenceSince && now - silenceSince >= cfg.silence * 1000) {
+        endUtterance();
+      }
+    }
+    if (cfg.debug) {
+      console.debug(
+        "[stt] rms=%.4f thr=%.4f rec=%s sil=%s streak=%d",
+        rms, thr, recording,
+        silenceSince ? (now - silenceSince).toFixed(0) + "ms" : "-",
+        silenceStreak,
+      );
     }
   }
 
@@ -115,6 +157,7 @@ const stt = (() => {
     buf = new Float32Array(0);
     recording = true;
     silenceSince = 0;
+    silenceStreak = 0;
     // If we just interrupted playback, drop its tail from the recording.
     dropUntil = wasSpeaking ? performance.now() + 250 : 0;
     setState("recording");
@@ -123,6 +166,7 @@ const stt = (() => {
   function endUtterance() {
     recording = false;
     silenceSince = 0;
+    silenceStreak = 0;
     const samples = buf;
     buf = new Float32Array(0);
     if (samples.length < MIN_SAMPLES) {
@@ -249,6 +293,7 @@ const stt = (() => {
     recording = true;
     buf = new Float32Array(0);
     silenceSince = 0;
+    silenceStreak = 0;
     dropUntil = wasSpeaking ? performance.now() + 250 : 0;
     setState("recording");
   }
@@ -282,6 +327,10 @@ const stt = (() => {
       recording = false;
       buf = new Float32Array(0);
       silenceSince = 0;
+      silenceStreak = 0;
+      noiseFloor = 0;
+      calibSamples = [];
+      calibCount = 0;
       setState("listening");
     } catch (e) {
       fail(e.message || "microphone unavailable");
@@ -292,6 +341,10 @@ const stt = (() => {
     listening = false;
     recording = false;
     buf = new Float32Array(0);
+    silenceStreak = 0;
+    noiseFloor = 0;
+    calibSamples = [];
+    calibCount = 0;
     setState("idle");
   }
 
@@ -299,6 +352,10 @@ const stt = (() => {
     listening = false;
     recording = false;
     buf = new Float32Array(0);
+    silenceStreak = 0;
+    noiseFloor = 0;
+    calibSamples = [];
+    calibCount = 0;
     if (stream) {
       for (const t of stream.getTracks()) t.stop();
       stream = null;

@@ -108,7 +108,7 @@ class AppConfig:
         "stt_mode": "hold",  # "hold" (press-and-hold) | "continuous" (always listening)
         "stt_engine": "whisper",  # "whisper" (faster-whisper) | "parakeet" (onnx-asr)
         "stt_model": DEFAULT_STT_MODEL,  # model id (see stt.MODELS)
-        "stt_volume_threshold": 0.02,  # RMS 0..1; quieter audio is ignored
+        "stt_volume_threshold": 0.01,  # RMS 0..1; quieter audio is ignored (lowered so soft speech isn't read as silence)
         "stt_silence_duration_ms": 800,  # ms of silence ending a continuous utterance
         # --- shell safety (opt-in) ----------------------------------------
         "shell_allowlist": [],  # allowed programs for run_command; empty = unrestricted
