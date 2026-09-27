@@ -9,3 +9,8 @@ models/piper/*.onnx
 models/stt/*
 library/*
 models/embed/
+data/knowledge/*
+data/gremlin.log
+!data/knowledge/eval/
+data/knowledge/eval/*
+!data/knowledge/eval/questions.json
