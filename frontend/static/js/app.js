@@ -75,7 +75,7 @@ function applySettings(s) {
   $("set-stt").checked = !!s.stt_enabled;
   $("set-stt-mode").value = s.stt_mode || "hold";
   $("set-stt-engine").value = s.stt_engine || "whisper";
-  $("set-stt-threshold").value = s.stt_volume_threshold ?? 0.01;
+  $("set-stt-threshold").value = s.stt_volume_threshold ?? 30;
   $("set-stt-silence").value = s.stt_silence_duration_ms ?? 800;
   $("btn-mic").classList.toggle("d-none", !s.stt_enabled);
   stt.configure({
@@ -83,7 +83,7 @@ function applySettings(s) {
     mode: s.stt_mode || "hold",
     engine: s.stt_engine || "whisper",
     model: s.stt_model || "base",
-    threshold: Number(s.stt_volume_threshold) || 0.01,
+    threshold: Number(s.stt_volume_threshold) || 30,
     silence: (Number(s.stt_silence_duration_ms) || 800) / 1000,
   });
   if (!s.stt_enabled) stt.dispose();
@@ -159,6 +159,9 @@ function updateMicButton() {
   const icon = btn.querySelector("i");
   const s = stt.state;
   btn.classList.remove("btn-primary", "btn-danger", "btn-outline-secondary");
+  // Show the volume meter whenever STT is active (listening or recording).
+  const meter = $("volume-meter");
+  if (meter) meter.classList.toggle("d-none", !(s === "recording" || s === "listening"));
   if (s === "recording") {
     btn.classList.add("btn-danger");
     icon.className = "bi bi-stop-circle-fill";
@@ -178,6 +181,18 @@ function updateMicButton() {
       ? "Tap to start listening"
       : "Hold to talk";
   }
+}
+
+// Update the volume meter fill, threshold marker, and label.
+function updateVolumeMeter(rms) {
+  const fill = $("volume-meter-fill");
+  const mark = $("volume-meter-threshold");
+  const label = $("volume-meter-label");
+  if (!fill) return;
+  const pct = stt.rmsToPct(rms);
+  fill.style.width = pct + "%";
+  if (mark) mark.style.left = ((state.settings?.stt_volume_threshold ?? 30) + "%");
+  if (label) label.textContent = pct.toFixed(0) + "%";
 }
 function collectSettings() {
   const s = {
@@ -752,6 +767,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.warn("stt:", msg);
     updateMicButton();
   };
+  stt.onLevel = updateVolumeMeter;
   $("input").addEventListener("keydown", (ev) => {
     if (ev.key === "Enter" && !ev.shiftKey) {
       ev.preventDefault();

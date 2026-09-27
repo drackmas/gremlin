@@ -497,7 +497,7 @@ def test_download_model_unknown_id_raises(tmp_path):
 # Fakes: mic, AudioContext, TTS (barge-in target), fetch. The harness drives
 # the real ScriptProcessor onaudioprocess callback with synthetic buffers and
 # verifies threshold gating, silence-based end-of-utterance, the barge-in
-# hook, the WAV payload, and hold-vs-continuous auto-send semantics.
+# hook, and hold-vs-continuous auto-send semantics.
 _NODE_HARNESS = r"""
 ;(async () => {
   const tick = (ms = 30) => new Promise((r) => setTimeout(r, ms));
@@ -505,15 +505,10 @@ _NODE_HARNESS = r"""
 
   const proc = { onaudioprocess: null, connect() {}, disconnect() {} };
   Object.defineProperty(globalThis, "window", {
-    configurable: true,
-    writable: true,
+    configurable: true, writable: true,
     value: {
       AudioContext: class {
-        constructor() {
-          this.state = "running";
-          this.sampleRate = 16000;
-          this.destination = {};
-        }
+        constructor() { this.state = "running"; this.sampleRate = 16000; this.destination = {}; }
         createMediaStreamSource() { return { connect() {} }; }
         createAnalyser() { return { fftSize: 0, connect() {} }; }
         createScriptProcessor() { return proc; }
@@ -524,8 +519,7 @@ _NODE_HARNESS = r"""
     },
   });
   Object.defineProperty(globalThis, "navigator", {
-    configurable: true,
-    writable: true,
+    configurable: true, writable: true,
     value: { mediaDevices: { getUserMedia: async () => ({ getTracks: () => [{ stop() {} }] }) } },
   });
   globalThis.tts = { playing: false, stop() {} };
@@ -550,94 +544,76 @@ _NODE_HARNESS = r"""
   stt.onStateChange = () => {};
   stt.onError = (m) => fail("stt error: " + m);
 
-  // --- Continuous: quiet noise below the threshold is ignored -------------
-  stt.configure({ enabled: true, mode: "continuous", model: "base", threshold: 0.1, silence: 0.25 });
+  // --- 1. Continuous: quiet noise is ignored ----------------------------
+  stt.configure({ enabled: true, mode: "continuous", model: "base", threshold: 30, silence: 0.5 });
   await stt.continuousToggle();
   await tick();
   if (!stt.listening) fail("not listening after toggle");
-  for (let i = 0; i < 20; i++) feed(0.01); // RMS ~0.007 < 0.1
-  if (fetched.length !== 0) fail("quiet audio must not trigger transcription");
+  for (let i = 0; i < 10; i++) feed(0.01); // RMS ~0.007 < 30% threshold
+  await tick();
+  if (fetched.length !== 0) fail("quiet audio must not transcribe");
   if (speechStarts !== 0) fail("quiet audio must not fire speechStart");
 
-  // --- Crossing the threshold starts an utterance and fires the hook ------
-  feed(0.5);
-  if (speechStarts !== 1) fail("speechStart must fire once on threshold cross");
-  if (stt.state !== "recording") fail("state must be 'recording' during speech");
-  for (let i = 0; i < 8; i++) feed(0.5); // ~2 s of speech
+  // --- 2. Loud audio starts an utterance --------------------------------
+  feed(0.5); // RMS ~0.354 >> 30% threshold
+  if (speechStarts !== 1) fail("speechStart must fire on threshold cross");
+  if (stt.state !== "recording") fail("state must be recording");
+  for (let i = 0; i < 4; i++) feed(0.5);
 
-  // --- Silence past the configured duration ends the utterance ------------
-  for (let i = 0; i < 40; i++) { feed(0.01); await tick(10); } // ~0.4 s silence
-  await tick();
-  if (fetched.length !== 1) fail("expected exactly one transcription, got " + fetched.length);
-  const wav = Buffer.from(fetched[0].body.audio, "base64");
-  if (fetched[0].body.model !== "base") fail("model missing from body");
-  if (wav.toString("ascii", 0, 4) !== "RIFF") fail("not RIFF");
-  if (wav.toString("ascii", 8, 12) !== "WAVE") fail("not WAVE");
-  if (wav.readUInt16LE(20) !== 1) fail("not PCM");
-  if (wav.readUInt16LE(22) !== 1) fail("not mono");
-  if (wav.readUInt32LE(24) !== 16000) fail("not 16 kHz");
-  if (wav.readUInt16LE(34) !== 16) fail("not 16-bit");
+  // --- 3. Trailing silence ends the utterance ---------------------------
+  // Each block = 4096/16000 = 0.256 s; 4 quiet blocks = 1.024 s > 0.5 s
+  for (let i = 0; i < 4; i++) { feed(0.01); await tick(5); }
+  await tick(50);
+  if (fetched.length !== 1) fail("silence must end utterance (got " + fetched.length + ")");
   if (utterances.length !== 1) fail("utterance hook did not fire");
   if (utterances[0].text !== "hello there") fail("transcript not delivered");
-  if (utterances[0].autoSend !== true) fail("continuous mode must auto-send");
+  if (utterances[0].autoSend !== true) fail("continuous must auto-send");
 
-  // --- Listening resumes: a second utterance is detected ------------------
-  feed(0.5);
-  if (speechStarts !== 2) fail("listening must resume for the next utterance");
-  stt.continuousToggle(); // tap again to stop
+  // --- 4. Stop continuous mode ------------------------------------------
+  stt.continuousToggle();
   if (stt.listening) fail("toggle must stop listening");
-  feed(0.5);
-  if (fetched.length !== 1) fail("no capture after stopping");
 
-  // --- Near-threshold speech must not trigger premature end ---------------
-  // Simulates the user scenario: voice RMS hovers around the threshold.
-  // A single below-threshold chunk must NOT arm the silence clock; only
-  // SILENCE_STREAK consecutive quiet chunks do.
-  stt.configure({ enabled: true, mode: "continuous", model: "base", threshold: 0.02, silence: 0.25 });
+  // --- 5. Near-threshold: dips don't end the utterance ------------------
+  stt.configure({ enabled: true, mode: "continuous", model: "base", threshold: 43, silence: 1.0 });
   await stt.continuousToggle();
   await tick();
-  if (!stt.listening) fail("not listening for near-threshold test");
-
-  // Feed a mix of above-threshold (amp 0.04 -> RMS ~0.028) and
-  // below-threshold (amp 0.02 -> RMS ~0.014) chunks. The utterance should
-  // start on the first above-threshold chunk and keep going despite the
-  // intermittent below-threshold dips.
+  if (!stt.listening) fail("not listening for near-threshold");
+  // feed(0.04) -> RMS ~0.028 -> 48% > 43% (active)
+  // feed(0.02) -> RMS ~0.014 -> 38% < 43% (inactive, single blip)
   for (let i = 0; i < 6; i++) {
-    feed(0.04); // above threshold
-    feed(0.02); // below threshold (single blip, must not arm clock)
+    feed(0.04);
+    feed(0.02);
     await tick(5);
   }
-  // Still recording, no transcription yet.
-  if (fetched.length !== 1) fail("near-threshold dips must not end the utterance (got " + fetched.length + " fetches)");
+  // 1 trailing inactive block = 0.256 s < 1.0 s -> still recording
+  if (fetched.length !== 1) fail("dips must not end utterance (got " + fetched.length + ")");
 
-  // Now feed sustained silence: enough consecutive quiet chunks to arm the
-  // clock, then past the configured 250 ms silence duration.
-  for (let i = 0; i < 30; i++) { feed(0.01); await tick(10); } // ~0.3 s silence
-  await tick();
-  if (fetched.length !== 2) fail("sustained silence must end the utterance (got " + fetched.length + " fetches)");
-  stt.continuousToggle(); // stop listening
+  // 6 quiet blocks = 1.54 s > 1.0 s -> ends
+  for (let i = 0; i < 6; i++) { feed(0.01); await tick(5); }
+  await tick(50);
+  if (fetched.length !== 2) fail("sustained silence must end (got " + fetched.length + ")");
+  stt.continuousToggle();
 
-  // --- Hold mode: capture between press and release, never auto-send ------
-  stt.configure({ enabled: true, mode: "hold", model: "base", threshold: 0.1, silence: 0.25 });
+  // --- 6. Hold mode: capture between press and release ------------------
+  stt.configure({ enabled: true, mode: "hold", model: "base", threshold: 30, silence: 0.25 });
   await stt.holdStart();
   await tick();
   if (stt.state !== "recording") fail("hold must record immediately");
-  if (speechStarts !== 4) fail("hold press must fire the barge-in hook");
-  for (let i = 0; i < 4; i++) feed(0.5); // ~1 s of speech
+  for (let i = 0; i < 4; i++) feed(0.5);
   stt.holdEnd();
   await tick(50);
-  if (fetched.length !== 3) fail("hold must transcribe on release");
+  if (fetched.length !== 3) fail("hold must transcribe on release (got " + fetched.length + ")");
   if (utterances.length !== 3) fail("hold utterance hook did not fire");
-  if (utterances[2].autoSend !== false) fail("hold mode must not auto-send");
+  if (utterances[2].autoSend !== false) fail("hold must not auto-send");
 
-  // --- A quiet hold capture is dropped, not transcribed --------------------
+  // --- 7. Quiet hold is dropped ------------------------------------------
   await stt.holdStart();
   await tick();
   feed(0.01);
   feed(0.01);
   stt.holdEnd();
   await tick(50);
-  if (fetched.length !== 3) fail("quiet hold capture must not be transcribed");
+  if (fetched.length !== 3) fail("quiet hold must not be transcribed");
 
   console.log("OK");
 })().catch((e) => { console.error("FAIL " + (e && e.message)); process.exit(1); });

@@ -28,5 +28,46 @@
       "protocol"
     ],
     "pinned": false
+  },
+  {
+    "id": "704f2248",
+    "content": "Speech-to-text system was reworked with a volume meter for voice activity detection. I helped code it. Threshold was too low initially (picked up a quiet \"mm\" test sound), user is raising it. The meter decides when audio gets chunked/transcribed.",
+    "tags": [
+      "stt",
+      "speech-to-text",
+      "volume-meter",
+      "threshold",
+      "voice-activity"
+    ],
+    "pinned": false
+  },
+  {
+    "id": "6f443429",
+    "content": "User gave Gremlin a virtual cookie for helping code the speech-to-text system. Cookie count: 2 (one real after README, one virtual for STT).",
+    "tags": [
+      "cookie",
+      "appreciation",
+      "stt"
+    ],
+    "pinned": false
+  },
+  {
+    "id": "9be406bd",
+    "content": "Cookie balance: 2",
+    "tags": [
+      "cookie",
+      "balance"
+    ],
+    "pinned": false
+  },
+  {
+    "id": "8362559a",
+    "content": "User is a smoker. He's fine with it and has asked Gremlin not to nag or comment about it. Respect this — no unsolicited health commentary.",
+    "tags": [
+      "user",
+      "boundary",
+      "no-nag"
+    ],
+    "pinned": false
   }
 ]

@@ -56,6 +56,13 @@
         <div class="d-flex justify-content-end mb-1">
           <span id="context-indicator" class="context-indicator" title="">–</span>
         </div>
+        <div id="volume-meter" class="volume-meter d-none mb-1" aria-hidden="true">
+          <div class="volume-meter-track">
+            <div id="volume-meter-fill" class="volume-meter-fill"></div>
+            <div id="volume-meter-threshold" class="volume-meter-threshold"></div>
+          </div>
+          <span id="volume-meter-label" class="volume-meter-label"></span>
+        </div>
         <div class="d-flex gap-2 align-items-stretch">
           <textarea id="input" class="form-control composer-input" rows="2"
                     placeholder="Message Gremlin…  (Enter to send, Shift+Enter for newline)"></textarea>
@@ -297,8 +304,8 @@
                 </div>
               </div>
               <div class="col-md-2">
-                <label class="form-label small" for="set-stt-threshold">Threshold</label>
-                <input type="number" id="set-stt-threshold" class="form-control" min="0" max="1" step="0.005" value="0.01">
+                <label class="form-label small" for="set-stt-threshold">Threshold (0–100)</label>
+                <input type="number" id="set-stt-threshold" class="form-control" min="0" max="100" step="1" value="30">
               </div>
               <div class="col-md-2">
                 <label class="form-label small" for="set-stt-silence">Silence (ms)</label>
@@ -306,10 +313,10 @@
               </div>
             </div>
             <div class="text-body-secondary small mt-2">
-              Threshold: how loud you must be (0–1) to be recognized as
-              speech. Silence: the pause that ends an utterance in
-              Continuous mode. Starting to speak always interrupts any
-              running reply, so you can barge in at any time.
+              Threshold: volume level (0–100, dB scale) at which you are
+              recognized as speech — match the marker on the mic meter.
+              Silence: the pause that ends an utterance in Continuous mode.
+              Starting to speak always interrupts any running reply.
             </div>
           </div>
         </div>

@@ -327,3 +327,46 @@ body {
   color: var(--bs-warning, #ffc107);
   font-weight: 600;
 }
+
+/* ---------------- volume meter ---------------- */
+
+.volume-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.volume-meter-track {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  background: var(--bs-tertiary-bg, rgba(133, 137, 141, 0.25));
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.volume-meter-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #06b6d4, #22c55e);
+  transition: width 60ms linear;
+}
+
+.volume-meter-threshold {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--bs-warning, #ffc107);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.volume-meter-label {
+  min-width: 3.2rem;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--bs-secondary-color, rgba(222, 226, 230, 0.6));
+  text-align: right;
+}
