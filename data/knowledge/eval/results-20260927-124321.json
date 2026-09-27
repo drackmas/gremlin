@@ -1,0 +1,109 @@
+{
+  "k": 5,
+  "recall_at_k": 0.833,
+  "passed": 5,
+  "total": 6,
+  "by_topic": {
+    "plans": 1.0,
+    "transcripts": 1.0,
+    "videos": 0.0
+  },
+  "results": [
+    {
+      "id": "transcript-word-switches",
+      "query": "which YouTuber discovered the 500 new word switches in the King James Bible appendix?",
+      "expect": [
+        "Word Switches in KJV"
+      ],
+      "topic": "transcripts",
+      "top_k": [
+        "transcripts/EYA Censored _ Supernatural Bible Changes/2023-06-03_PROOF of 500+ NEW Word Switches in KJV BIBLE (Rerun Sept 2016).txt",
+        "transcripts/EYA Censored _ Supernatural Bible Changes/2023-06-03_PROOF of 500+ NEW Word Switches in KJV BIBLE (Rerun Sept 2016).txt",
+        "transcripts/EYA Censored _ Supernatural Bible Changes/2021-09-03_What Christians Need to Know and Share - Bible Changes, Mandela Effect (Rerun).txt",
+        "transcripts/EYA Censored _ Supernatural Bible Changes/2021-09-03_What Christians Need to Know and Share - Bible Changes, Mandela Effect (Rerun).txt",
+        "transcripts/EYA Censored _ Supernatural Bible Changes/2022-05-17_Variations of KJV Bible Changes, a Comparison - Mandela Effect.txt"
+      ],
+      "pass": true
+    },
+    {
+      "id": "transcript-abrahamic-accords",
+      "query": "what did the owner say about the Abrahamic Accords and Trump?",
+      "expect": [
+        "Abrahamic Accords"
+      ],
+      "topic": "transcripts",
+      "top_k": [
+        "transcripts/EYA Censored _ Supernatural Bible Changes/2025-05-17_Abrahamic Accords - Trump - Bible Prophecy.txt",
+        "transcripts/EYA Censored _ Supernatural Bible Changes/2026-05-08_Donald Trump & Israel.txt",
+        "transcripts/EYA Censored _ Supernatural Bible Changes/2024-11-13_Golan Heights, Trump Train, Noahide Laws.txt",
+        "transcripts/EYA Censored _ Supernatural Bible Changes/2025-02-21_President Trump\u2019s Counter Revolutionary Leadership First 30 Days.txt",
+        "transcripts/EYA Censored _ Supernatural Bible Changes/2026-05-08_Donald Trump & Israel.txt"
+      ],
+      "pass": true
+    },
+    {
+      "id": "video-brian",
+      "query": "in the video about Brian, what does the speaker call him?",
+      "expect": [
+        "Brian"
+      ],
+      "topic": "videos",
+      "top_k": [
+        "EYA - INCONTINENCE equals THE END Mandela Effect Bible Changes on 20200214.mp3",
+        "videos/README.md",
+        "EYA - INCONTINENCE equals THE END Mandela Effect Bible Changes on 20200214.mp3",
+        "EYA - INCONTINENCE equals THE END Mandela Effect Bible Changes on 20200214.mp3",
+        "EYA - INCONTINENCE equals THE END Mandela Effect Bible Changes on 20200214.mp3"
+      ],
+      "pass": false
+    },
+    {
+      "id": "plan-embed-model",
+      "query": "which embedding model does the plan specify for the knowledge base?",
+      "expect": [
+        "db-plan-final"
+      ],
+      "topic": "plans",
+      "top_k": [
+        "db-plan-part-2.txt",
+        "db-plan-final.txt",
+        "db-plan-part-2.txt",
+        "db-plan-final.txt",
+        "db-plan.txt"
+      ],
+      "pass": true
+    },
+    {
+      "id": "plan-benchmark-scale",
+      "query": "at what corpus size does the plan say to benchmark sqlite-vec against numpy?",
+      "expect": [
+        "db-plan-final"
+      ],
+      "topic": "plans",
+      "top_k": [
+        "db-plan.txt",
+        "db-plan.txt",
+        "db-plan-final.txt",
+        "db-plan-part-2.txt",
+        "db-plan-final.txt"
+      ],
+      "pass": true
+    },
+    {
+      "id": "plan-index-property",
+      "query": "what property does the plan give the knowledge index that makes it safe to delete and rebuild?",
+      "expect": [
+        "db-plan-final"
+      ],
+      "topic": "plans",
+      "top_k": [
+        "db-plan-part-2.txt",
+        "db-plan-final.txt",
+        "db-plan-final.txt",
+        "db-plan-final.txt",
+        "db-plan-part-2.txt"
+      ],
+      "pass": true
+    }
+  ]
+}

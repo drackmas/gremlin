@@ -87,6 +87,31 @@
         <div class="card mb-3">
           <div class="card-body d-flex align-items-center justify-content-between">
             <div>
+              <div class="fw-semibold">Knowledge</div>
+              <div class="text-body-secondary small">
+                Let Gremlin search your library in <code>library/</code>
+                (books, transcripts, documents, audio/video).
+              </div>
+            </div>
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input" type="checkbox" role="switch" id="set-knowledge">
+              <label class="form-check-label" for="set-knowledge"></label>
+            </div>
+          </div>
+          <div class="card-body border-top py-2 d-flex align-items-center justify-content-between gap-2">
+            <div class="text-body-secondary small">
+              Re-index from the files in <code>library/</code>.
+              Runs only when you click it.
+            </div>
+            <button id="btn-knowledge-sync" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-arrow-repeat me-1"></i>Sync
+            </button>
+          </div>
+          <pre id="knowledge-sync-report" class="m-0 p-2 small d-none" style="white-space: pre-wrap"></pre>
+        </div>
+        <div class="card mb-3">
+          <div class="card-body d-flex align-items-center justify-content-between">
+            <div>
               <div class="fw-semibold">Show thinking</div>
               <div class="text-body-secondary small">Display the model's reasoning steps above each answer.</div>
             </div>

@@ -243,6 +243,24 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
             log.info("discord bot stopped from settings toggle")
         return jsonify(saved)
 
+    # --- knowledge library (sync is ON-PURPOSE only; the index is disposable) -
+    @app.post("/api/knowledge/sync")
+    def knowledge_sync():
+        from knowledge.config import KnowledgeConfig
+        from knowledge.sync import sync
+
+        kcfg = KnowledgeConfig(
+            root=cfg.knowledge_dir,
+            source_dir=cfg.knowledge_source_dir,
+            models_dir=cfg.models_dir,
+        )
+        try:
+            report = sync(kcfg)
+        except Exception as e:
+            log.exception("knowledge sync failed")
+            return jsonify({"error": f"sync failed: {e}"}), 500
+        return jsonify({"report": report.details()})
+
     # --- TTS (Piper, local voices; selection via settings piper_voice) -----
     @app.get("/api/tts/voices")
     def tts_voices():

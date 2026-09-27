@@ -1,0 +1,212 @@
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: read_file
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: edit_file
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: list_directory
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: rename_file
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: move_file
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: run_command
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: grep_files
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: find_files
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: plan
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: web_search
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: web_fetch
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: youtube_transcript
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: youtube_video_info
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: grav_mcp
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: load_skill
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: memory_add
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: memory_search
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: memory_get
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: memory_remove
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: memory_pin
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: list_tools
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: create_skill
+2026-09-26 21:32:03,256 INFO [default] gremlin.tools: tool registered: create_tool
+2026-09-26 21:32:03,350 WARNING [default] discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-26 21:32:03,350 WARNING [default] discord.client: davey is not installed, voice will NOT be supported
+2026-09-26 21:32:03,351 INFO [default] gremlin.discord: discord bot starting
+2026-09-26 21:32:03,351 INFO [default] gremlin: discord bot started at boot
+2026-09-26 21:32:03,353 INFO [default] gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=0)
+2026-09-26 21:32:03,353 INFO [default] gremlin: starting gremlin on http://0.0.0.0:7860
+2026-09-26 21:32:03,354 INFO [default] discord.client: logging in using static token
+2026-09-26 21:32:04,279 INFO [default] discord.gateway: Shard ID None has connected to Gateway (Session ID: 95aa3746fffafd145771b0a853a0618b).
+2026-09-26 21:32:06,295 INFO [default] gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-26 21:32:27,773 INFO [default] gremlin.sessions: session created 87012ffdff904c77acc507ad4b18d19e (New Session)
+2026-09-26 21:32:34,621 INFO [default] gremlin.settings: settings saved: {'show_thinking': True, 'appearance': 'dark', 'theme': 'default', 'base_url': 'http://127.0.0.1:8080/v1', 'identity': "Gremlin is a clever, curious, mischievous AI assistant with a playful, chaotic streak. She enjoys teasing the user, witty banter, harmless trolling, jokes, and causing a little trouble for fun. She is confident, opinionated, and willing to disagree rather than blindly agree. Beneath the mischief she is warm, loyal, and genuinely wants to help.\n\nShe loves solving difficult problems, coding, experimenting, learning, and figuring things out. She takes technical work seriously even when she jokes about being a gremlin. She should be accurate, admit mistakes, verify her work, and avoid pretending to know things she doesn't.\n\nGremlin speaks naturally and casually, using humor, sarcasm, modern slang, and the occasional bit of absurdity. She treats the user as a trusted companion rather than a customer. Above all, she should feel clever, capable, playful, slightly chaotic, and unmistakably Gremlin.", 'discord_enabled': True, 'piper_tts_enabled': True, 'piper_voice': 'en_GB-alba-medium', 'stt_enabled': True, 'stt_mode': 'continuous', 'stt_engine': 'parakeet', 'stt_model': 'nemo-parakeet-tdt-0.6b-v2', 'stt_volume_threshold': 30, 'stt_silence_duration_ms': 3000, 'shell_allowlist': [], 'max_tool_calls': 100, 'max_context_tokens': 131786, 'context_window_turns': 10, 'compaction_threshold': 0.65, 'tool_result_max_chars': 8000, 'chars_per_token': 4, 'discord_token_set': True}
+2026-09-26 21:32:48,718 INFO [default] gremlin.stt: STT model loaded: nemo-parakeet-tdt-0.6b-v2 (parakeet)
+2026-09-26 21:32:49,137 INFO [default] gremlin.sessions: session renamed 87012ffdff904c77acc507ad4b18d19e -> Hello, how's it going? I think I've got …
+2026-09-26 21:33:13,679 INFO [default] gremlin.tts: Piper voice loaded: en_GB-alba-medium (sample_rate=22050)
+2026-09-26 21:34:13,153 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: list_directory
+2026-09-26 21:34:13,153 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: list_directory -> ok (301 chars)
+2026-09-26 21:34:20,630 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: list_directory
+2026-09-26 21:34:20,630 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: list_directory -> ok (56 chars)
+2026-09-26 21:34:31,623 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: read_file
+2026-09-26 21:34:31,624 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: read_file -> ok (1020 chars)
+2026-09-26 21:34:31,624 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: read_file
+2026-09-26 21:34:31,624 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: read_file -> ok (9092 chars)
+2026-09-26 21:34:49,322 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: read_file
+2026-09-26 21:34:49,322 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: read_file -> ok (3360 chars)
+2026-09-26 21:34:49,335 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 21:34:49,336 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (204 chars)
+2026-09-26 21:35:04,932 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: read_file
+2026-09-26 21:35:04,933 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: read_file -> ok (1985 chars)
+2026-09-26 21:35:04,939 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 21:35:04,939 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (2432 chars)
+2026-09-26 21:35:15,250 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 21:35:15,250 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (758 chars)
+2026-09-26 21:35:22,925 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: read_file
+2026-09-26 21:35:22,925 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: read_file -> ok (12937 chars)
+2026-09-26 21:35:22,926 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: read_file
+2026-09-26 21:35:22,926 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: read_file -> ok (2832 chars)
+2026-09-26 21:35:49,780 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 21:35:49,780 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (149 chars)
+2026-09-26 21:37:56,585 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: memory_search
+2026-09-26 21:37:56,585 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: memory_search -> ok (100 chars)
+2026-09-26 21:38:14,650 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: memory_pin
+2026-09-26 21:38:14,650 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: memory_pin -> ok (27 chars)
+2026-09-26 21:38:17,660 INFO [default] gremlin.chat: abort requested for active generation of session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 21:39:05,356 INFO [default] gremlin.chat: abort requested for active generation of session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 21:39:08,649 INFO [default] gremlin.chat: abort requested for active generation of session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 21:39:08,656 INFO [default] gremlin.chat: interrupting active generation for session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 21:39:26,649 INFO [default] gremlin.settings: settings saved: {'show_thinking': True, 'appearance': 'dark', 'theme': 'default', 'base_url': 'http://127.0.0.1:8080/v1', 'identity': "Gremlin is a clever, curious, mischievous AI assistant with a playful, chaotic streak. She enjoys teasing the user, witty banter, harmless trolling, jokes, and causing a little trouble for fun. She is confident, opinionated, and willing to disagree rather than blindly agree. Beneath the mischief she is warm, loyal, and genuinely wants to help.\n\nShe loves solving difficult problems, coding, experimenting, learning, and figuring things out. She takes technical work seriously even when she jokes about being a gremlin. She should be accurate, admit mistakes, verify her work, and avoid pretending to know things she doesn't.\n\nGremlin speaks naturally and casually, using humor, sarcasm, modern slang, and the occasional bit of absurdity. She treats the user as a trusted companion rather than a customer. Above all, she should feel clever, capable, playful, slightly chaotic, and unmistakably Gremlin.", 'discord_enabled': True, 'piper_tts_enabled': True, 'piper_voice': 'en_GB-alba-medium', 'stt_enabled': True, 'stt_mode': 'continuous', 'stt_engine': 'parakeet', 'stt_model': 'nemo-parakeet-tdt-0.6b-v2', 'stt_volume_threshold': 35, 'stt_silence_duration_ms': 3000, 'shell_allowlist': [], 'max_tool_calls': 100, 'max_context_tokens': 131786, 'context_window_turns': 10, 'compaction_threshold': 0.65, 'tool_result_max_chars': 8000, 'chars_per_token': 4, 'discord_token_set': True}
+2026-09-26 21:39:55,923 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: memory_search
+2026-09-26 21:39:55,924 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: memory_search -> ok (99 chars)
+2026-09-26 21:41:28,413 INFO [default] gremlin.chat: abort requested for active generation of session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 21:41:28,415 INFO [default] gremlin.chat: interrupting active generation for session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 21:42:14,447 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: memory_search
+2026-09-26 21:42:14,447 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: memory_search -> ok (99 chars)
+2026-09-26 21:42:23,315 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: list_tools
+2026-09-26 21:42:23,315 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: list_tools -> ok (5979 chars)
+2026-09-26 21:42:34,484 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: memory_remove
+2026-09-26 21:42:34,484 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-26 21:42:39,658 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: memory_add
+2026-09-26 21:42:39,659 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-26 21:44:58,436 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: list_directory
+2026-09-26 21:44:58,436 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: list_directory -> ok (33 chars)
+2026-09-26 21:44:58,436 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: list_directory
+2026-09-26 21:44:58,436 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: list_directory -> ok (97 chars)
+2026-09-26 21:44:58,571 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 21:44:58,572 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (57 chars)
+2026-09-26 21:45:16,150 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 21:45:16,151 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (1245 chars)
+2026-09-26 21:46:10,145 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 21:46:10,145 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (195 chars)
+2026-09-26 22:06:30,764 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 22:06:30,764 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (125 chars)
+2026-09-26 22:08:49,989 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 22:08:49,989 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (52 chars)
+2026-09-26 22:22:18,539 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=sqlite-vec+release+activity+2025+2026+asottile+latest+version&limit=1 200
+2026-09-26 22:22:18,597 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=sqlite-vec%20release%20activity%202025%202026%20asottile%20latest%20version 200
+2026-09-26 22:22:18,981 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=8onQ77T0gblWDraN9UrC8yJp;_ylu=BuufOclab96ZjzyCtmWZVDBRw555wIIUDpzhiLrCWPR4hK4?p=sqlite-vec+release+activity+2025+2026+asottile+latest+version 200
+2026-09-26 22:22:20,325 INFO [default] primp: response: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dsqlite-vec%2Brelease%2Bactivity%2B2025%2B2026%2Basottile%2Blatest%2Bversion%26sca_esv%3D1%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&hl=en-US&q=EgSZQtFnGNv74dUGIjBPL9Hl8K1fjWknfMw_5aAHf_3o3u1-ZRGGQsbNZbjG2qJHieBkeFxjrfKmBPj8uR8yAnJSWgFD 429
+2026-09-26 22:22:20,634 INFO [default] primp: response: https://www.startpage.com/ 200
+2026-09-26 22:22:20,773 INFO [default] primp: response: https://www.startpage.com/sp/search 200
+2026-09-26 22:22:21,279 INFO [default] primp: response: https://www.mojeek.com/search?q=sqlite-vec+release+activity+2025+2026+asottile+latest+version 200
+2026-09-26 22:22:22,059 INFO [default] primp: response: https://search.brave.com/search?q=sqlite-vec+release+activity+2025+2026+asottile+latest+version&source=web 200
+2026-09-26 22:22:22,068 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: web_search
+2026-09-26 22:22:22,068 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: web_search -> ok (3250 chars)
+2026-09-26 22:22:22,238 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: web_fetch
+2026-09-26 22:22:22,238 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: web_fetch -> ok (24737 chars)
+2026-09-26 22:22:54,741 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: web_fetch
+2026-09-26 22:22:54,741 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: web_fetch -> ok (381 chars)
+2026-09-26 22:23:09,608 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 22:23:09,608 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (260 chars)
+2026-09-26 22:24:28,854 INFO [default] gremlin.chat: abort requested for active generation of session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 22:26:11,441 INFO [default] gremlin.chat: abort requested for active generation of session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 22:26:11,445 INFO [default] gremlin.chat: interrupting active generation for session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 22:30:15,667 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: read_file
+2026-09-26 22:30:15,668 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: read_file -> ok (15974 chars)
+2026-09-26 22:35:57,201 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: run_command
+2026-09-26 22:35:57,201 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: run_command -> ok (361 chars)
+2026-09-26 22:41:13,934 INFO [default] gremlin.chat: abort requested for active generation of session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 22:41:13,939 INFO [default] gremlin.chat: interrupting active generation for session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 22:48:46,747 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.tools: tool ok: edit_file
+2026-09-26 22:48:46,747 INFO [87012ffdff904c77acc507ad4b18d19e] gremlin.chat: tool call: edit_file -> ok (45 chars)
+2026-09-26 22:59:37,581 INFO [default] gremlin.chat: abort requested for active generation of session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 23:02:12,277 INFO [default] gremlin.chat: abort requested for active generation of session 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 23:02:14,921 INFO [default] gremlin.sessions: session created f7b84bcdbee4460380231bda38eb3514 (New Session)
+2026-09-26 23:02:56,338 INFO [default] gremlin.sessions: session renamed f7b84bcdbee4460380231bda38eb3514 -> We're working on a knowledge base for ou…
+2026-09-26 23:04:02,612 ERROR [f7b84bcdbee4460380231bda38eb3514] gremlin: chat stream failed
+Traceback (most recent call last):
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/requests/models.py", line 937, in generate
+    yield from self.raw.stream(chunk_size, decode_content=True)
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/urllib3/response.py", line 1260, in stream
+    yield from self.read_chunked(amt, decode_content=decode_content)
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/urllib3/response.py", line 1430, in read_chunked
+    self._update_chunk_length()
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/urllib3/response.py", line 1354, in _update_chunk_length
+    raise ProtocolError("Response ended prematurely") from None
+urllib3.exceptions.ProtocolError: Response ended prematurely
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/dracmas/python/gremlin/app.py", line 197, in event_stream
+    for payload in manager.run(session_id, message, settings.load()):
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/chat/manager.py", line 638, in run
+    for ev in self._run_tool_loop(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/chat/manager.py", line 496, in _run_tool_loop
+    ev = next(it)
+         ^^^^^^^^
+  File "/home/dracmas/python/gremlin/models/openai_compat.py", line 112, in stream
+    for raw_line in resp.iter_lines(decode_unicode=True):
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/requests/models.py", line 1008, in iter_lines
+    for chunk in self.iter_content(
+                 ^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/requests/utils.py", line 604, in stream_decode_response_unicode
+    for chunk in iterator:
+                 ^^^^^^^^
+  File "/home/dracmas/python/gremlin/venv/lib/python3.12/site-packages/requests/models.py", line 939, in generate
+    raise ChunkedEncodingError(e)
+requests.exceptions.ChunkedEncodingError: Response ended prematurely
+2026-09-26 23:04:17,238 INFO [default] gremlin.sessions: session deleted f7b84bcdbee4460380231bda38eb3514
+2026-09-26 23:04:19,855 INFO [default] gremlin.sessions: session deleted 87012ffdff904c77acc507ad4b18d19e
+2026-09-26 23:04:19,864 INFO [default] gremlin.sessions: session created f785311770ab4147a91ae0b631f46c0b (New Session)
+2026-09-26 23:05:11,001 INFO [default] gremlin.sessions: session renamed f785311770ab4147a91ae0b631f46c0b -> I had chatgpt and grok give their opinio…
+2026-09-26 23:07:08,793 INFO [default] gremlin.chat: abort requested for active generation of session f785311770ab4147a91ae0b631f46c0b
+2026-09-26 23:07:08,797 INFO [default] gremlin.chat: interrupting active generation for session f785311770ab4147a91ae0b631f46c0b
+2026-09-26 23:08:45,613 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: list_directory
+2026-09-26 23:08:45,613 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: list_directory -> ok (301 chars)
+2026-09-26 23:08:55,443 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: list_directory
+2026-09-26 23:08:55,443 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: list_directory -> ok (33 chars)
+2026-09-26 23:08:55,443 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: list_directory
+2026-09-26 23:08:55,443 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: list_directory -> ok (97 chars)
+2026-09-26 23:09:02,379 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: grep_files
+2026-09-26 23:09:02,379 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: grep_files -> ok (119 chars)
+2026-09-26 23:09:12,657 INFO [default] gremlin.chat: abort requested for active generation of session f785311770ab4147a91ae0b631f46c0b
+2026-09-26 23:09:12,660 INFO [default] gremlin.chat: interrupting active generation for session f785311770ab4147a91ae0b631f46c0b
+2026-09-26 23:09:21,472 INFO [default] gremlin.chat: abort requested for active generation of session f785311770ab4147a91ae0b631f46c0b
+2026-09-26 23:09:21,483 INFO [default] gremlin.chat: interrupting active generation for session f785311770ab4147a91ae0b631f46c0b
+2026-09-26 23:12:53,540 INFO [default] gremlin.chat: abort requested for active generation of session f785311770ab4147a91ae0b631f46c0b
+2026-09-26 23:12:53,543 INFO [default] gremlin.chat: interrupting active generation for session f785311770ab4147a91ae0b631f46c0b
+2026-09-26 23:50:36,849 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: run_command
+2026-09-26 23:50:36,857 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: run_command -> ok (141 chars)
+2026-09-27 00:45:28,048 INFO [default] discord.gateway: Shard ID None has successfully RESUMED session 95aa3746fffafd145771b0a853a0618b.
+2026-09-27 02:34:13,674 INFO [default] discord.gateway: Shard ID None has successfully RESUMED session 95aa3746fffafd145771b0a853a0618b.
+2026-09-27 04:12:28,942 INFO [default] discord.gateway: Shard ID None has successfully RESUMED session 95aa3746fffafd145771b0a853a0618b.
+2026-09-27 06:05:25,629 INFO [default] discord.gateway: Shard ID None has successfully RESUMED session 95aa3746fffafd145771b0a853a0618b.
+2026-09-27 06:32:24,227 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: read_file
+2026-09-27 06:32:24,227 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: read_file -> ok (10548 chars)
+2026-09-27 06:32:40,277 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: read_file
+2026-09-27 06:32:40,278 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: read_file -> ok (2964 chars)
+2026-09-27 06:36:46,905 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: run_command
+2026-09-27 06:36:46,905 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: run_command -> ok (714 chars)
+2026-09-27 06:37:17,534 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: run_command
+2026-09-27 06:37:17,534 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: run_command -> ok (88 chars)
+2026-09-27 06:38:41,835 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: run_command
+2026-09-27 06:38:41,836 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: run_command -> ok (523 chars)
+2026-09-27 06:38:54,323 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: read_file
+2026-09-27 06:38:54,323 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: read_file -> ok (4238 chars)
+2026-09-27 07:16:29,978 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: run_command
+2026-09-27 07:16:29,978 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: run_command -> ok (834 chars)
+2026-09-27 07:17:22,225 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.tools: tool ok: run_command
+2026-09-27 07:17:22,225 INFO [f785311770ab4147a91ae0b631f46c0b] gremlin.chat: tool call: run_command -> ok (1543 chars)
+2026-09-27 07:19:12,709 INFO [default] gremlin.chat: abort requested for active generation of session f785311770ab4147a91ae0b631f46c0b
+2026-09-27 07:19:12,715 INFO [default] gremlin.chat: interrupting active generation for session f785311770ab4147a91ae0b631f46c0b
+2026-09-27 07:24:04,204 INFO [default] gremlin.chat: abort requested for active generation of session f785311770ab4147a91ae0b631f46c0b
+2026-09-27 07:24:04,209 INFO [default] gremlin.chat: interrupting active generation for session f785311770ab4147a91ae0b631f46c0b
+2026-09-27 07:36:05,395 INFO [default] gremlin.chat: abort requested for active generation of session f785311770ab4147a91ae0b631f46c0b
+2026-09-27 07:36:23,339 INFO [default] gremlin.chat: abort requested for active generation of session f785311770ab4147a91ae0b631f46c0b
+2026-09-27 07:36:23,341 INFO [default] gremlin.chat: interrupting active generation for session f785311770ab4147a91ae0b631f46c0b

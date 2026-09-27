@@ -86,11 +86,15 @@ class SettingsStore:
                 if key == "stt_silence_duration_ms" and not (100 <= value <= 10_000):
                     raise SettingsError(f"{key} must be between 100 and 10000 milliseconds")
             elif isinstance(default, float):
-                # Fractions (volumes, ratios) must stay in (0, 1].
                 if isinstance(value, bool) or not isinstance(value, (int, float)):
-                    raise SettingsError(f"{key} must be a number between 0 and 1")
-                if not (0 < value <= 1):
-                    raise SettingsError(f"{key} must be a fraction in (0, 1]")
+                    raise SettingsError(f"{key} must be a number")
+                if key == "stt_volume_threshold":
+                    if not (0 <= value <= 100):
+                        raise SettingsError("stt_volume_threshold must be between 0 and 100")
+                else:
+                    # Fractions (volumes, ratios) must stay in (0, 1].
+                    if not (0 < value <= 1):
+                        raise SettingsError(f"{key} must be a fraction in (0, 1]")
             elif isinstance(default, list):
                 # shell_allowlist: accept a list of strings or a comma string.
                 if isinstance(value, str):

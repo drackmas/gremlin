@@ -7,3 +7,5 @@ files/*
 !files/.gitkeep
 models/piper/*.onnx
 models/stt/*
+library/*
+models/embed/

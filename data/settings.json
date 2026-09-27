@@ -12,7 +12,7 @@
   "stt_mode": "continuous",
   "stt_engine": "parakeet",
   "stt_model": "nemo-parakeet-tdt-0.6b-v2",
-  "stt_volume_threshold": 0.3,
+  "stt_volume_threshold": 35,
   "stt_silence_duration_ms": 3000,
   "shell_allowlist": [],
   "max_tool_calls": 100,

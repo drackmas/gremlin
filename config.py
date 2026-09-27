@@ -93,6 +93,24 @@ class AppConfig:
     def stt_dir(self) -> Path:
         return self.root / "models" / "stt"
 
+    @property
+    def models_dir(self) -> Path:
+        return self.root / "models"
+
+    @property
+    def knowledge_source_dir(self) -> Path:
+        """Dedicated source folder for the knowledge library (``library/``).
+
+        This is NOT the personal work area (``files/``): the owner curates
+        exactly what goes in here, and sync reconciles the index to it.
+        """
+        return self.root / "library"
+
+    @property
+    def knowledge_dir(self) -> Path:
+        """Disposable knowledge index (markdown cache, samples, eval, db)."""
+        return self.data_dir / "knowledge"
+
     # --- defaults ------------------------------------------------------
     DEFAULT_SETTINGS: ClassVar[dict] = {
         "show_thinking": True,
@@ -105,10 +123,11 @@ class AppConfig:
         "piper_tts_enabled": False,  # speak assistant replies with local Piper TTS (toggle in settings)
         "piper_voice": DEFAULT_VOICE,  # Piper voice id (see tts.VOICES); picked in settings
         "stt_enabled": False,  # transcribe microphone input to text (toggle in settings)
+        "knowledge_enabled": False,  # expose search_knowledge to Gremlin (toggle in settings)
         "stt_mode": "hold",  # "hold" (press-and-hold) | "continuous" (always listening)
         "stt_engine": "whisper",  # "whisper" (faster-whisper) | "parakeet" (onnx-asr)
         "stt_model": DEFAULT_STT_MODEL,  # model id (see stt.MODELS)
-        "stt_volume_threshold": 0.01,  # RMS 0..1; quieter audio is ignored (lowered so soft speech isn't read as silence)
+        "stt_volume_threshold": 30.0,  # dB-scale percentage 0-100; blocks below this level are treated as silence
         "stt_silence_duration_ms": 800,  # ms of silence ending a continuous utterance
         # --- shell safety (opt-in) ----------------------------------------
         "shell_allowlist": [],  # allowed programs for run_command; empty = unrestricted
@@ -140,6 +159,11 @@ def ensure_dirs(cfg: AppConfig) -> None:
         cfg.stt_dir,
         cfg.skills_dir,
         cfg.transcripts_dir,
+        cfg.knowledge_source_dir,
+        cfg.knowledge_dir,
+        cfg.knowledge_dir / "markdown",
+        cfg.knowledge_dir / "samples",
+        cfg.knowledge_dir / "eval",
     ]
     for p in dirs:
         p.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,10 @@
+# samples: video
+
+## Brian is an idiot, 00:00:00
+(file: videos/Brian is an idiot.mp4)
+
+[00:00:00] Would you like to state anything for the record officially sir?
+...
+
+[00:00:03] I'm asking for Tristan the safety head, who I've met personally.
+...

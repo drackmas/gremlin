@@ -30,15 +30,6 @@
     "pinned": false
   },
   {
-    "id": "9be406bd",
-    "content": "Cookie balance: 2",
-    "tags": [
-      "cookie",
-      "balance"
-    ],
-    "pinned": false
-  },
-  {
     "id": "8362559a",
     "content": "User is a smoker. He's fine with it and has asked Gremlin not to nag or comment about it. Respect this — no unsolicited health commentary.",
     "tags": [
@@ -47,5 +38,14 @@
       "no-nag"
     ],
     "pinned": false
+  },
+  {
+    "id": "2ce99d83",
+    "content": "Cookie balance: 3",
+    "tags": [
+      "cookie",
+      "balance"
+    ],
+    "pinned": true
   }
 ]

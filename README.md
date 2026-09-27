@@ -146,6 +146,7 @@ All tools are registered in `ToolRegistry` (`tools/registry.py`) at startup by `
 | `list_tools` | `tools/meta.py` | List every registered tool with its schema and description. First step of the self-extension flow. |
 | `create_skill` | `tools/meta.py` | Write a new `skills/<slug>/SKILL.md` (instructions only). See *Self-extension*. |
 | `create_tool` | `tools/meta.py` | Write + register a new executable tool from Python source. See *Self-extension*. |
+| `search_knowledge` | `knowledge/` | Search the owner's personal knowledge library (books, transcripts, documents, transcribed audio/video) and return ranked passages with clean citations. **Gated**: only registered/visible when the `knowledge_enabled` setting is ON (default OFF — behavior identical to before). Hybrid vector + BM25 with reciprocal-rank fusion, filters (`source_type`, `topic`, `author`, `date_from`/`date_to`), a per-hit parent-context budget, and a total result budget. See *Knowledge library*. |
 
 ### Self-extension (meta tools)
 
@@ -218,6 +219,20 @@ Skills are instruction-only resources: `skills/<slug>/SKILL.md` with a small fro
 
 `SettingsStore` reads/writes `data/settings.json`. Keys: `show_thinking`, `appearance` (light/dark), `theme` (bootswatch slug), `base_url`, `model`, `identity` (persona text), `discord_enabled`, `max_tool_calls` (tool-loop iterations per turn). Context management: `max_context_tokens` (model context window, default 32768), `compaction_threshold` (fraction of the window that triggers auto-compaction, default 0.65), `context_window_turns` (recent turns kept verbatim after compaction, default 10), `tool_result_max_chars` (truncate stored tool results beyond this, default 8000), `chars_per_token` (chars-per-token divisor for the context estimator, default 4). Shell hardening: `shell_allowlist` (list of allowed base programs for `run_command`; empty by default = unrestricted — set it from **Settings** to opt in, or via the `GREMLIN_SHELL_ALLOWLIST` env var for front doors without a settings store). The Discord token is stored separately in `.env` via `python-dotenv`.
 
+### Knowledge library (`knowledge/` package)
+
+Local RAG over a dedicated library: drop files into `library/` (the personal work area `files/` is never indexed), click **Sync library** in settings (or run `python -m knowledge.sync`), and — with the **Knowledge** toggle ON — Gremlin can answer factual questions from the library with cited passages.
+
+- **Source of truth vs. index.** `library/` is the source of truth — a dedicated, curated folder, deliberately separate from the personal work area (`files/`). Everything under `data/knowledge/` (SQLite index, markdown cache, samples, eval results) is a *disposable index*: delete it and re-sync and you lose nothing. Deleting a file from `library/` and syncing drops it from the index.
+- **Sync is ON-PURPOSE only.** Never automatic, never file-watched, never run behind the owner's back. Every sync reports `N parsed / N failed / N flagged` (plus `N removed`); one bad file fails loudly in the report without stopping the rest.
+- **Ingest → Markdown.** Parsers in `knowledge/ingest/` (`txt`, `pdf`, `docx`, `doc`, `epub`, audio/video via local faster-whisper) normalize every source to markdown; media gets `[HH:MM:SS]` timestamps, PDFs get `<!--page:N-->` markers. OCR fallback flags `ocr_suspect` documents.
+- **Chunking.** Structure-aware: headings, page markers, and timestamps become unit boundaries. Parents (structural units, ~1500 tokens) are what a citation points at; child chunks (250–400 tokens) are what gets embedded. Char offsets always slice the source exactly.
+- **Search.** Two legs — sqlite-vec (all-MiniLM-L6-v2, 384-dim, ONNX/CPU via fastembed) and BM25 (FTS5) — fused with reciprocal-rank fusion. Filters: `source_type`, `topic`, `author`, `date_from`/`date_to`. Each hit carries budgeted parent context plus a clean citation (`Title (Year), Page/Time, 'Section'`); the total tool result has a hard char budget and never cuts a hit in half.
+- **Metadata for plain text.** Filename first (`manners-of-women-1908-ch3.txt` → title + year), then an optional `<same-name>.txt.meta` sidecar (`author:`, `date:`, `topic:` lines) as the escape hatch. Greppable from the folder alone.
+- **Human review gate.** After every sync, sample chunks per source type are rewritten to `data/knowledge/samples/` for review before trusting the index.
+- **Eval.** `data/knowledge/eval/questions.json` holds the draft question set (grows with the library); `python -m knowledge.eval` prints recall@k overall and per topic, and saves a timestamped results file. Store choice (sqlite-vec vs. numpy) was settled by `python -m knowledge.benchmark` at the plan's 250k target.
+- **Settings.** Two controls: the **Knowledge** toggle (`knowledge_enabled`, default OFF — when OFF the tool is not exposed to Gremlin at all, and behavior is identical to before) and the **Sync library** button, which runs the exact same code path as `python -m knowledge.sync` and shows the report inline. The gate is checked at dispatch time, so the toggle takes effect immediately without a restart.
+
 ## File map
 
 ```
@@ -264,6 +279,22 @@ gremlin/
 ├── planning/
 │   └── store.py            # Plan/Phase/Task dataclasses, PlanStore: plan.json persistence, transitions, checkpoints
 │
+├── knowledge/              # Local RAG over library/ (disposable index under data/knowledge/)
+│   ├── config.py           # KnowledgeConfig: every tunable (chunking, budgets, models)
+│   ├── survey.py           # python -m knowledge.survey: corpus report (data/knowledge/survey.json)
+│   ├── ingest/             # Parsers -> markdown: txt, pdf, docx, doc, epub, media (whisper)
+│   ├── metadata.py         # Filename conventions + .meta sidecars
+│   ├── chunking.py         # Structure-aware parents/chunks (headings, pages, timestamps)
+│   ├── embed.py            # fastembed (all-MiniLM-L6-v2, ONNX/CPU)
+│   ├── store.py            # Single-file SQLite index (FTS5 + sqlite-vec)
+│   ├── bm25.py             # BM25 leg over FTS5
+│   ├── citations.py        # Clean citations from parent + document metadata
+│   ├── search.py           # Hybrid RRF search, filters, context/result budgets
+│   ├── sync.py             # python -m knowledge.sync: fail-loud reconcile + sample dump
+│   ├── tool.py             # search_knowledge tool (settings-gated)
+│   ├── eval.py             # python -m knowledge.eval: recall@k runner
+│   └── benchmark.py        # python -m knowledge.benchmark: sqlite-vec vs numpy
+│
 ├── skills/
 │   ├── loader.py           # SkillLoader: discover + read SKILL.md files
 │   ├── extension_builder/SKILL.md   # the self-extension workflow
@@ -286,8 +317,9 @@ gremlin/
 │   ├── static/js/tts.js    # sentence stream buffer + Web Audio playback
 │   └── static/css/         # app.css, bootstrap.min.css
 │
-├── files/transcripts/      # Cached YouTube transcripts (also files/videos/ for media)
-├── data/                   # settings.json, memory.json, gremlin.log, tasks/, generated_tools/
+├── files/transcripts/      # Cached YouTube transcripts (also files/videos/ for media) — personal work area, never indexed
+├── library/                # Knowledge library source: curated files the owner wants searchable (txt, md, pdf, docx, doc, epub, mp3, wav, m4a, mp4, webm)
+├── data/                   # settings.json, memory.json, gremlin.log, tasks/, generated_tools/, knowledge/ (disposable index: index.db, md/, samples/, eval/, survey.json)
 ├── sessions/               # Per-session JSON files
 └── tests/                  # pytest suite
 ```

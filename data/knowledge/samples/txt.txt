@@ -1,0 +1,20 @@
+# samples: txt
+
+## README.md, 'library/ — knowledge library source'
+(file: README.md)
+
+# library/ — knowledge library source
+
+Drop files you want Gremlin to be able to answer questions from in here, then
+click **Sync** in Settings → Knowledge (or run `python -m knowledge.sync`).
+The index under `data/knowledge/` is disposable; this folder is the source of
+truth.
+
+Supported: `.txt` `.md` `.pdf` `.docx` `.doc` `.epub` `.mp3` `.wav` `.m4a`
+`.mp4` `.webm`. Subfolders are fine and preserved in citations.
+
+Conventions for plain text:
+- Name it descriptively: `manners-of-women-1908-ch3.txt` → title + year.
+- Not enough? Add a sidecar `manners-of-women-1908-ch3.txt.meta` next to it:
+  `
+...

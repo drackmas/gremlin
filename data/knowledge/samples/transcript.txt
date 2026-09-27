@@ -1,0 +1,85 @@
+# samples: transcript
+
+## db plan (2026-09-26)
+(file: db-plan.txt)
+
+Status: PLANNING ONLY — nothing built yet. Asking for a second opinion.
+
+BACKGROUND
+----------
+- This is a self-hosted local AI assistant (Python/Flask, runs fully on one PC,
+  no cloud services). It has long-term "memory" (flat JSON facts, no search),
+  a chat UI, TTS, STT, and a folder of YouTube video transcripts.
+- The owner researches Bible-truth topics (Mandela Effect, Bible changes, etc.)
+  and wants the assistant to have REAL understanding of the research corpus,
+  so the assistant can answer "what do we already know about X?" from sources
+  instead of guessing.
+- Owner's position: mai
+...
+
+
+- Minimal moving parts: no cloud, no extra server daemons if avoidable.
+- Owner is not a DBA; the pipeline must be inspectable, debuggable, and
+  re-runnable. Data files should live in the project and be back-up-able.
+
+OPEN QUESTIONS (need answers before building)
+--------------------------------------------
+1. How many scanned (image-based) PDFs are in the document collection?
+   (Decides whether an OCR lane is required.)
+2. Is the corpus mostly stable or growing weekly? (Decides manual sync vs
+   folder watcher.)
+3. What fraction of the docs are .doc (legacy binary Word) vs .docx?
+
+BACKEND 
+...
+
+## What Christians Need to Know and Share - Bible Changes, Mandela Effect (Rerun) (2021-09-03)
+(file: transcripts/EYA Censored _ Supernatural Bible Changes/2021-09-03_What Christians Need to Know and Share - Bible Changes, Mandela Effect (Rerun).txt)
+
+Hi everyone. This is EYA. I want to
+begin by welcoming you to my channel, to
+this video.
+This is the first
+of a series of videos that we are doing
+directed to church leaders.
+Inclusive, of course, of pastors,
+elders, deacons, Bible teachers, those
+in Christian ministry across the earth.
+And we have a message to bring to you.
+We are seeing supernatural
+Bible changes happen right now. Bible
+prophecy is unfolding.
+And before you stop this video, I
+implore you,
+please listen to what we have to say.
+I've been walking with Jesus Christ for
+more than three decades. I've never
+fallen away.
+I have
+worn
+...
+
+
+Do you see the Bible changes?
+Our hearts are grieved and troubled as
+we have seen an attack on the Bible,
+digital,
+audio, paper Bibles.
+Bibles that we've owned for years and
+years are supernaturally changing.
+And we beg of you
+to please take the time to listen to
+what we're going to share with you
+right now and in subsequent videos in
+this series.
+I've been a Christian for for 43 years.
+Um
+and
+in my mid-20s, I I
+I you know, I read the the book The
+Great Planet The Late Great Planet
+Earth. And that really got me interested
+in end-time prophecy.
+So, I I've studied end-time prophecy
+more than mo
+...

@@ -64,6 +64,7 @@ function applySettings(s) {
   $("set-identity").value = s.identity || "";
   $("set-shell-allowlist").value = (s.shell_allowlist || []).join(", ");
   $("set-discord").checked = !!s.discord_enabled;
+  $("set-knowledge").checked = !!s.knowledge_enabled;
   const tokStatus = $("set-discord-token-status");
   if (tokStatus) tokStatus.textContent = s.discord_token_set ? "Token is configured." : "No token configured yet.";
   setAppearanceActive(s.appearance);
@@ -197,6 +198,7 @@ function updateVolumeMeter(rms) {
 function collectSettings() {
   const s = {
     show_thinking: $("set-thinking").checked,
+    knowledge_enabled: $("set-knowledge").checked,
     appearance: currentAppearance(),
     theme: $("set-theme").value,
     base_url: $("set-base-url").value.trim(),
@@ -239,6 +241,24 @@ async function saveSettings() {
     toast("Settings saved");
   } catch (e) {
     toast(`Could not save settings: ${e.message}`);
+  }
+}
+
+async function syncKnowledge() {
+  const btn = $("btn-knowledge-sync");
+  const report = $("knowledge-sync-report");
+  btn.disabled = true;
+  report.classList.remove("d-none");
+  report.textContent = "Syncing the library from library/ ... first run downloads models, can take a while.";
+  try {
+    const data = await api("/api/knowledge/sync", { method: "POST" });
+    report.textContent = data.report || "Done.";
+    toast("Knowledge sync complete");
+  } catch (e) {
+    report.textContent = `Sync failed: ${e.message}`;
+    toast(`Knowledge sync failed: ${e.message}`);
+  } finally {
+    btn.disabled = false;
   }
 }
 
@@ -731,6 +751,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   $("btn-back-to-chat").addEventListener("click", () => showView("chat"));
   $("btn-save-settings").addEventListener("click", saveSettings);
+  $("btn-knowledge-sync").addEventListener("click", syncKnowledge);
   $("set-appearance-light").addEventListener("click", () => setAppearanceActive("light"));
   $("set-appearance-dark").addEventListener("click", () => setAppearanceActive("dark"));
   $("btn-send").addEventListener("click", sendMessage);

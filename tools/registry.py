@@ -54,6 +54,7 @@ class Tool:
     description: str
     parameters: dict  # JSON schema for arguments
     handler: Callable[[dict], str]
+    visible: Callable[[], bool] | None = None
 
     def to_openai(self) -> dict:
         return {
@@ -157,14 +158,23 @@ class ToolRegistry:
         return self._tools[name]
 
     def names(self) -> list[str]:
-        return sorted(self._tools)
+        return [t.name for t in self.tools()]
 
     def tools(self) -> list[Tool]:
-        """All registered Tool objects in sorted-name order."""
-        return [self._tools[n] for n in sorted(self._tools)]
+        """All registered, currently visible Tool objects, sorted by name."""
+        return [self._tools[n] for n in sorted(self._tools) if self._visible(self._tools[n])]
+
+    @staticmethod
+    def _visible(tool: Tool) -> bool:
+        if tool.visible is None:
+            return True
+        try:
+            return bool(tool.visible())
+        except Exception:
+            return True
 
     def to_openai_tools(self) -> list[dict]:
-        return [t.to_openai() for t in (self._tools[n] for n in sorted(self._tools))]
+        return [t.to_openai() for t in self.tools()]
 
     def execute(self, name: str, args: Any) -> tuple[str, bool]:
         """Run a tool; returns (result_text, ok). Never raises for tool-level
@@ -178,6 +188,11 @@ class ToolRegistry:
             ), False
         try:
             tool = self.get(name)
+            if not self._visible(tool):
+                return (
+                    f"ERROR: tool {name} is disabled in settings. Do not retry it; "
+                    "tell the user which setting to change."
+                ), False
             args = validate_args(name, tool.parameters, args)
         except ToolError as e:
             log.warning("tool validation failed: %s", e)

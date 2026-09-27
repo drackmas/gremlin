@@ -20,6 +20,7 @@ from .grep import build_grep_tool, build_find_tool
 from .plan import build_plan_tool
 from .meta import build_meta_tools, load_generated_tools
 from .grav_mcp import build_grav_mcp_tool
+from knowledge.tool import build_knowledge_tool
 
 __all__ = [
     "Tool",
@@ -53,6 +54,8 @@ def build_registry(cfg, loader: SkillLoader | None = None, memory_store: MemoryS
     # Self-extension: the model can list/create skills and tools on demand.
     for tool in build_meta_tools(cfg, loader, registry):
         registry.register(tool)
+    # Knowledge library: gated by the KNOWLEDGE settings toggle (default OFF).
+    registry.register(build_knowledge_tool(cfg, settings_loader or (lambda: {})))
     # Re-register tools persisted from earlier sessions (never clobber built-ins).
     load_generated_tools(cfg, registry)
     return registry
