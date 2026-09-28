@@ -632,3 +632,48 @@ def test_frontend_stt_threshold_silence_and_hold(tmp_path):
     proc = subprocess.run([node, str(script)], capture_output=True, text=True, timeout=30)
     assert proc.returncode == 0, f"stdout={proc.stdout}\nstderr={proc.stderr}"
     assert "OK" in proc.stdout
+
+
+# Fakes for a NON-secure page (http://<lan-ip> as seen from a phone): the
+# browser does not expose navigator.mediaDevices at all.  stt.js must report
+# a clear, actionable error (not a raw TypeError) and never start listening.
+_NODE_HARNESS_INSECURE = r"""
+;(async () => {
+  const fail = (msg) => { console.error("FAIL " + msg); process.exit(1); };
+  Object.defineProperty(globalThis, "window", {
+    configurable: true, writable: true,
+    value: { AudioContext: class { } },
+  });
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true, writable: true,
+    value: {},  // no mediaDevices: non-secure context
+  });
+  globalThis.tts = { playing: false, stop() {} };
+  globalThis.fetch = () => Promise.resolve({ ok: false, status: 500, json: async () => ({}) });
+
+  let errMsg = null;
+  stt.onStateChange = () => {};
+  stt.onError = (m) => { errMsg = m; };
+  stt.configure({ enabled: true, mode: "hold", model: "base", threshold: 30, silence: 0.5 });
+  await stt.holdStart();
+  if (!errMsg) fail("expected an error in a non-secure context");
+  if (!/secure context/i.test(errMsg)) fail("error must mention the secure context, got: " + errMsg);
+  if (stt.listening) fail("must not be listening without a mic");
+  console.log("OK");
+})().catch((e) => { console.error("FAIL " + (e && e.message)); process.exit(1); });
+"""
+
+
+def test_frontend_stt_insecure_context_clear_error(tmp_path):
+    """On an http:// page (e.g. a phone on the LAN) navigator.mediaDevices is
+    undefined; stt.js must surface a clear error naming the secure-context
+    requirement and must not start listening."""
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node not available")
+    stt_js = Path(__file__).resolve().parent.parent / "frontend" / "static" / "js" / "stt.js"
+    script = tmp_path / "stt_insecure_test.js"
+    script.write_text(stt_js.read_text() + "\n" + _NODE_HARNESS_INSECURE)
+    proc = subprocess.run([node, str(script)], capture_output=True, text=True, timeout=30)
+    assert proc.returncode == 0, f"stdout={proc.stdout}\nstderr={proc.stderr}"
+    assert "OK" in proc.stdout

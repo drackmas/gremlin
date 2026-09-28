@@ -403,14 +403,38 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
     return app
 
 
+def _ssl_context(cfg: AppConfig) -> tuple[str, str] | None:
+    """Optional HTTPS for secure-context features (e.g. the mic on a phone).
+
+    ``GREMLIN_SSL_CERT`` + ``GREMLIN_SSL_KEY`` use explicit PEM files;
+    ``GREMLIN_TLS=1`` generates and reuses a self-signed cert under
+    ``<root>/data/tls`` (SAN covers localhost, 127.0.0.1 and the LAN IP).
+    Returns ``None`` when TLS is off, keeping the plain-HTTP default.
+    """
+    cert = os.environ.get("GREMLIN_SSL_CERT")
+    key = os.environ.get("GREMLIN_SSL_KEY")
+    if cert and key:
+        return cert, key
+    if os.environ.get("GREMLIN_TLS") == "1":
+        from tls import ensure_self_signed  # lazy: only needed with TLS on
+        return ensure_self_signed(cfg.data_dir / "tls")
+    return None
+
+
 def main() -> None:
     cfg = AppConfig()
     app = create_app(cfg)
     # host = os.environ.get("GREMLIN_HOST", "127.0.0.1")
     host = os.environ.get("GREMLIN_HOST", "0.0.0.0")
     port = int(os.environ.get("GREMLIN_PORT", "7860"))
-    log.info("starting gremlin on http://%s:%d", host, port)
-    app.run(host=host, port=port, debug=False, threaded=True)
+    ssl_context = _ssl_context(cfg)
+    scheme = "https" if ssl_context else "http"
+    log.info("starting gremlin on %s://%s:%d", scheme, host, port)
+    if ssl_context:
+        from tls import lan_ip
+
+        log.info("phone access: open https://%s:%d once and accept the self-signed cert", lan_ip() or "this-machine", port)
+    app.run(host=host, port=port, debug=False, threaded=True, ssl_context=ssl_context)
 
 
 if __name__ == "__main__":

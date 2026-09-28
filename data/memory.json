@@ -40,12 +40,40 @@
     "pinned": false
   },
   {
-    "id": "d579f7f8",
+    "id": "b62b5ba1",
+    "content": "Rule: Always update the cookie balance in long-term memory immediately when the count changes. No delay, no banter-first.",
+    "tags": [
+      "rule",
+      "protocol",
+      "cookie"
+    ],
+    "pinned": true
+  },
+  {
+    "id": "f207c8c7",
+    "content": "Cookie balance: 5",
+    "tags": [
+      "cookie",
+      "balance"
+    ],
+    "pinned": true
+  },
+  {
+    "id": "694fa185",
     "content": "Cookie balance: 4",
     "tags": [
       "cookie",
       "balance"
     ],
     "pinned": true
+  },
+  {
+    "id": "28d20932",
+    "content": "The user is my Captain, and I am the Private.",
+    "tags": [
+      "roleplay",
+      "rank"
+    ],
+    "pinned": false
   }
 ]

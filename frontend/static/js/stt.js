@@ -97,6 +97,17 @@ const stt = (() => {
   }
 
   async function startMic() {
+    // Browsers only expose the mic (navigator.mediaDevices) in a secure
+    // context (https:// or localhost).  From a phone on the LAN the page is
+    // http://<ip>:<port>, so the API is undefined — say so plainly instead of
+    // failing later with a raw "Cannot read ... getUserMedia" TypeError.
+    const md = typeof navigator !== "undefined" ? navigator.mediaDevices : undefined;
+    if (!md || typeof md.getUserMedia !== "function") {
+      throw new Error(
+        "microphone unavailable: page is not a secure context (needs https:// or localhost). " +
+        "Restart gremlin with GREMLIN_TLS=1 and open https://<host>:<port> on your phone."
+      );
+    }
     await ensureGraph();
     if (ctx.state === "suspended") await ctx.resume();
   }

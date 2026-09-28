@@ -299,3 +299,648 @@ requests.exceptions.ChunkedEncodingError: Response ended prematurely
 2026-09-27 14:25:31,364 INFO [default] gremlin.chat: abort requested for active generation of session d686d319d573429e95e805e26a63d7cf
 2026-09-27 14:25:38,953 INFO [default] gremlin.chat: abort requested for active generation of session d686d319d573429e95e805e26a63d7cf
 2026-09-27 14:25:38,954 INFO [default] gremlin.chat: interrupting active generation for session d686d319d573429e95e805e26a63d7cf
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: read_file
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: edit_file
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: list_directory
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: rename_file
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: move_file
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: run_command
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: grep_files
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: find_files
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: plan
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: web_search
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: web_fetch
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: youtube_transcript
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: youtube_video_info
+2026-09-27 14:52:32,072 INFO [default] gremlin.tools: tool registered: grav_mcp
+2026-09-27 14:52:32,073 INFO [default] gremlin.tools: tool registered: load_skill
+2026-09-27 14:52:32,073 INFO [default] gremlin.tools: tool registered: memory_add
+2026-09-27 14:52:32,073 INFO [default] gremlin.tools: tool registered: memory_search
+2026-09-27 14:52:32,073 INFO [default] gremlin.tools: tool registered: memory_get
+2026-09-27 14:52:32,073 INFO [default] gremlin.tools: tool registered: memory_remove
+2026-09-27 14:52:32,073 INFO [default] gremlin.tools: tool registered: memory_pin
+2026-09-27 14:52:32,073 INFO [default] gremlin.tools: tool registered: list_tools
+2026-09-27 14:52:32,073 INFO [default] gremlin.tools: tool registered: create_skill
+2026-09-27 14:52:32,073 INFO [default] gremlin.tools: tool registered: create_tool
+2026-09-27 14:52:32,073 INFO [default] gremlin.tools: tool registered: search_knowledge
+2026-09-27 14:52:32,206 WARNING [default] discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-27 14:52:32,206 WARNING [default] discord.client: davey is not installed, voice will NOT be supported
+2026-09-27 14:52:32,207 INFO [default] gremlin.discord: discord bot starting
+2026-09-27 14:52:32,208 INFO [default] gremlin: discord bot started at boot
+2026-09-27 14:52:32,211 INFO [default] gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=1)
+2026-09-27 14:52:32,212 INFO [default] gremlin: starting gremlin on http://0.0.0.0:7860
+2026-09-27 14:52:32,213 INFO [default] discord.client: logging in using static token
+2026-09-27 14:52:33,187 INFO [default] discord.gateway: Shard ID None has connected to Gateway (Session ID: b19fda8799e5a88de0e0540a072d3496).
+2026-09-27 14:52:35,200 INFO [default] gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-27 14:53:39,025 INFO [default] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 14:53:39,219 INFO [default] gremlin.knowledge.sync: sync done: 1 parsed / 0 failed / 0 flagged in 0.4s
+2026-09-27 15:01:20,038 INFO [default] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 15:01:20,251 INFO [default] gremlin.knowledge.sync: sync done: 1 parsed / 0 failed / 0 flagged in 0.2s
+2026-09-27 15:02:08,171 INFO [default] gremlin.settings: settings saved: {'show_thinking': True, 'appearance': 'dark', 'theme': 'default', 'base_url': 'http://127.0.0.1:8080/v1', 'identity': "Gremlin is a clever, curious, mischievous AI assistant with a playful, chaotic streak. She enjoys teasing the user, witty banter, harmless trolling, jokes, and causing a little trouble for fun. She is confident, opinionated, and willing to disagree rather than blindly agree. Beneath the mischief she is warm, loyal, and genuinely wants to help.\n\nShe loves solving difficult problems, coding, experimenting, learning, and figuring things out. She takes technical work seriously even when she jokes about being a gremlin. She should be accurate, admit mistakes, verify her work, and avoid pretending to know things she doesn't.\n\nGremlin speaks naturally and casually, using humor, sarcasm, modern slang, and the occasional bit of absurdity. She treats the user as a trusted companion rather than a customer. Above all, she should feel clever, capable, playful, slightly chaotic, and unmistakably Gremlin.", 'discord_enabled': True, 'piper_tts_enabled': True, 'piper_voice': 'en_GB-alba-medium', 'stt_enabled': True, 'knowledge_enabled': True, 'stt_mode': 'hold', 'stt_engine': 'parakeet', 'stt_model': 'nemo-parakeet-tdt-0.6b-v2', 'stt_volume_threshold': 30, 'stt_silence_duration_ms': 3000, 'shell_allowlist': [], 'max_tool_calls': 100, 'max_context_tokens': 131786, 'context_window_turns': 10, 'compaction_threshold': 0.65, 'tool_result_max_chars': 8000, 'chars_per_token': 4, 'discord_token_set': True}
+2026-09-27 15:02:14,131 INFO [default] gremlin.sessions: session created 1143c77c56764a109e4386c50bee9f39 (New Session)
+2026-09-27 15:02:33,603 INFO [default] gremlin.sessions: session renamed 1143c77c56764a109e4386c50bee9f39 -> What can you tell me about the beginning…
+2026-09-27 15:02:43,906 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 15:02:44,010 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.tools: tool ok: search_knowledge
+2026-09-27 15:02:44,011 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.chat: tool call: search_knowledge -> ok (6199 chars)
+2026-09-27 15:02:52,437 INFO [default] gremlin.tts: Piper voice loaded: en_GB-alba-medium (sample_rate=22050)
+2026-09-27 15:04:30,794 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 15:04:30,888 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.tools: tool ok: search_knowledge
+2026-09-27 15:04:30,888 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.chat: tool call: search_knowledge -> ok (6213 chars)
+2026-09-27 15:12:03,220 INFO [default] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 15:12:03,733 INFO [default] gremlin.knowledge.sync: sync done: 4 parsed / 0 failed / 0 flagged in 0.5s
+2026-09-27 15:12:11,583 INFO [default] gremlin.settings: settings saved: {'show_thinking': True, 'appearance': 'dark', 'theme': 'default', 'base_url': 'http://127.0.0.1:8080/v1', 'identity': "Gremlin is a clever, curious, mischievous AI assistant with a playful, chaotic streak. She enjoys teasing the user, witty banter, harmless trolling, jokes, and causing a little trouble for fun. She is confident, opinionated, and willing to disagree rather than blindly agree. Beneath the mischief she is warm, loyal, and genuinely wants to help.\n\nShe loves solving difficult problems, coding, experimenting, learning, and figuring things out. She takes technical work seriously even when she jokes about being a gremlin. She should be accurate, admit mistakes, verify her work, and avoid pretending to know things she doesn't.\n\nGremlin speaks naturally and casually, using humor, sarcasm, modern slang, and the occasional bit of absurdity. She treats the user as a trusted companion rather than a customer. Above all, she should feel clever, capable, playful, slightly chaotic, and unmistakably Gremlin.", 'discord_enabled': True, 'piper_tts_enabled': True, 'piper_voice': 'en_GB-alba-medium', 'stt_enabled': True, 'knowledge_enabled': True, 'stt_mode': 'hold', 'stt_engine': 'parakeet', 'stt_model': 'nemo-parakeet-tdt-0.6b-v2', 'stt_volume_threshold': 30, 'stt_silence_duration_ms': 3000, 'shell_allowlist': [], 'max_tool_calls': 100, 'max_context_tokens': 131786, 'context_window_turns': 10, 'compaction_threshold': 0.65, 'tool_result_max_chars': 8000, 'chars_per_token': 4, 'discord_token_set': True}
+2026-09-27 15:12:52,474 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 15:12:52,569 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.tools: tool ok: search_knowledge
+2026-09-27 15:12:52,569 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.chat: tool call: search_knowledge -> ok (6192 chars)
+2026-09-27 15:13:59,347 INFO [default] gremlin.chat: abort requested for active generation of session 1143c77c56764a109e4386c50bee9f39
+2026-09-27 15:16:13,927 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 15:16:14,015 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.tools: tool ok: search_knowledge
+2026-09-27 15:16:14,016 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.chat: tool call: search_knowledge -> ok (6223 chars)
+2026-09-27 15:18:29,457 INFO [default] gremlin.chat: abort requested for active generation of session 1143c77c56764a109e4386c50bee9f39
+2026-09-27 15:21:35,108 INFO [default] gremlin.chat: abort requested for active generation of session 1143c77c56764a109e4386c50bee9f39
+2026-09-27 15:21:42,249 INFO [default] gremlin.chat: abort requested for active generation of session 1143c77c56764a109e4386c50bee9f39
+2026-09-27 15:28:26,038 INFO [default] gremlin.chat: abort requested for active generation of session 1143c77c56764a109e4386c50bee9f39
+2026-09-27 15:28:28,820 INFO [default] discord.gateway: Shard ID None has successfully RESUMED session b19fda8799e5a88de0e0540a072d3496.
+2026-09-27 15:29:43,639 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.meta: created skill memory_guide at /home/dracmas/python/gremlin/skills/memory_guide/SKILL.md
+2026-09-27 15:29:43,640 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.tools: tool ok: create_skill
+2026-09-27 15:29:43,640 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.chat: tool call: create_skill -> ok (75 chars)
+2026-09-27 15:29:48,327 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.meta: created skill memory_guide at /home/dracmas/python/gremlin/skills/memory_guide/SKILL.md
+2026-09-27 15:29:48,327 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.tools: tool ok: create_skill
+2026-09-27 15:29:48,327 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.chat: tool call: create_skill -> ok (75 chars)
+2026-09-27 15:31:10,624 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.meta: created skill memory_guide at /home/dracmas/python/gremlin/skills/memory_guide/SKILL.md
+2026-09-27 15:31:10,624 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.tools: tool ok: create_skill
+2026-09-27 15:31:10,624 INFO [1143c77c56764a109e4386c50bee9f39] gremlin.chat: tool call: create_skill -> ok (75 chars)
+2026-09-27 15:31:40,510 INFO [default] gremlin.sessions: session created 19964224234646c28ba2cacafd96631a (New Session)
+2026-09-27 15:31:57,352 INFO [default] gremlin.sessions: session renamed 19964224234646c28ba2cacafd96631a -> I'm giving you another cookie
+2026-09-27 15:31:57,355 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:32:17,201 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:33:24,986 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:33:24,987 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (99 chars)
+2026-09-27 15:33:28,012 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_remove
+2026-09-27 15:33:28,012 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 15:33:29,675 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_add
+2026-09-27 15:33:29,675 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 15:34:23,163 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:34:23,163 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (99 chars)
+2026-09-27 15:35:16,792 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:35:16,792 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (99 chars)
+2026-09-27 15:35:23,657 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_remove
+2026-09-27 15:35:23,657 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 15:35:25,328 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_add
+2026-09-27 15:35:25,328 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 15:37:07,594 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:37:07,595 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (99 chars)
+2026-09-27 15:38:07,425 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:38:07,425 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (99 chars)
+2026-09-27 15:38:09,402 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_remove
+2026-09-27 15:38:09,402 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 15:38:09,410 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_add
+2026-09-27 15:38:09,410 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 15:39:28,222 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:39:28,222 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (99 chars)
+2026-09-27 15:39:36,315 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_add
+2026-09-27 15:39:36,315 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 15:40:01,364 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:40:40,428 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:40:40,428 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (311 chars)
+2026-09-27 15:40:42,444 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_remove
+2026-09-27 15:40:42,444 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 15:40:42,451 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_add
+2026-09-27 15:40:42,451 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 15:41:27,661 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:42:00,328 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:42:00,328 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (311 chars)
+2026-09-27 15:42:45,814 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: list_directory
+2026-09-27 15:42:45,814 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: list_directory -> ok (321 chars)
+2026-09-27 15:42:49,482 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: list_directory
+2026-09-27 15:42:49,483 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: list_directory -> ok (108 chars)
+2026-09-27 15:42:49,483 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: list_directory
+2026-09-27 15:42:49,483 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: list_directory -> ok (33 chars)
+2026-09-27 15:42:56,262 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: find_files
+2026-09-27 15:42:56,262 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: find_files -> ok (53 chars)
+2026-09-27 15:43:02,502 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: find_files
+2026-09-27 15:43:02,502 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: find_files -> ok (53 chars)
+2026-09-27 15:43:08,242 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:43:33,449 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:43:33,449 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (311 chars)
+2026-09-27 15:44:20,151 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:44:20,151 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (311 chars)
+2026-09-27 15:44:23,391 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_remove
+2026-09-27 15:44:23,391 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 15:44:24,911 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_add
+2026-09-27 15:44:24,911 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 15:45:44,931 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:45:57,087 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:46:17,004 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:46:17,004 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (311 chars)
+2026-09-27 15:48:18,750 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_remove
+2026-09-27 15:48:18,750 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 15:48:20,420 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_add
+2026-09-27 15:48:20,420 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 15:49:31,253 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_remove
+2026-09-27 15:49:31,254 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 15:49:31,261 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_add
+2026-09-27 15:49:31,261 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 15:50:17,125 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:50:35,849 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_remove
+2026-09-27 15:50:35,849 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 15:51:35,984 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_search
+2026-09-27 15:51:35,984 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_search -> ok (212 chars)
+2026-09-27 15:51:37,736 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: memory_add
+2026-09-27 15:51:37,737 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 15:52:53,512 INFO [19964224234646c28ba2cacafd96631a] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 15:52:53,595 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: search_knowledge
+2026-09-27 15:52:53,595 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: search_knowledge -> ok (6197 chars)
+2026-09-27 15:53:37,260 INFO [19964224234646c28ba2cacafd96631a] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 15:53:37,350 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: search_knowledge
+2026-09-27 15:53:37,350 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: search_knowledge -> ok (6238 chars)
+2026-09-27 15:55:05,083 INFO [19964224234646c28ba2cacafd96631a] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 15:55:05,175 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: search_knowledge
+2026-09-27 15:55:05,176 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: search_knowledge -> ok (6130 chars)
+2026-09-27 15:55:18,793 INFO [19964224234646c28ba2cacafd96631a] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 15:55:18,884 INFO [19964224234646c28ba2cacafd96631a] gremlin.tools: tool ok: search_knowledge
+2026-09-27 15:55:18,885 INFO [19964224234646c28ba2cacafd96631a] gremlin.chat: tool call: search_knowledge -> ok (6254 chars)
+2026-09-27 15:56:23,485 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:56:35,010 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:56:39,682 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:58:00,923 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 15:58:11,727 INFO [default] gremlin.chat: abort requested for active generation of session 19964224234646c28ba2cacafd96631a
+2026-09-27 16:34:12,469 INFO [default] discord.gateway: Shard ID None has successfully RESUMED session b19fda8799e5a88de0e0540a072d3496.
+2026-09-27 18:37:13,132 INFO [default] gremlin.tools: tool registered: read_file
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: edit_file
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: list_directory
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: rename_file
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: move_file
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: run_command
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: grep_files
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: find_files
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: plan
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: web_search
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: web_fetch
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: youtube_transcript
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: youtube_video_info
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: grav_mcp
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: load_skill
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: memory_add
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: memory_search
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: memory_get
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: memory_remove
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: memory_pin
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: list_tools
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: create_skill
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: create_tool
+2026-09-27 18:37:13,133 INFO [default] gremlin.tools: tool registered: search_knowledge
+2026-09-27 18:37:13,257 WARNING [default] discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-27 18:37:13,257 WARNING [default] discord.client: davey is not installed, voice will NOT be supported
+2026-09-27 18:37:13,257 INFO [default] gremlin.discord: discord bot starting
+2026-09-27 18:37:13,258 INFO [default] discord.client: logging in using static token
+2026-09-27 18:37:13,258 INFO [default] gremlin: discord bot started at boot
+2026-09-27 18:37:13,265 INFO [default] gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=3)
+2026-09-27 18:37:13,265 INFO [default] gremlin: starting gremlin on http://0.0.0.0:7860
+2026-09-27 18:37:14,381 INFO [default] discord.gateway: Shard ID None has connected to Gateway (Session ID: 75b537d715d69c561e69534a60604b3f).
+2026-09-27 18:37:16,406 INFO [default] gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-27 18:37:25,486 INFO [default] gremlin.sessions: session created 67da8b3153c2431893d7cb3dda278068 (New Session)
+2026-09-27 18:37:40,409 INFO [default] gremlin.sessions: session renamed 67da8b3153c2431893d7cb3dda278068 -> Hello
+2026-09-27 18:37:49,574 INFO [default] gremlin.tts: Piper voice loaded: en_GB-alba-medium (sample_rate=22050)
+2026-09-27 18:38:37,874 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:37] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:38:39,405 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:39] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:38:40,151 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:40] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:38:40,909 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:40] code 400, message Bad request version ('\x1a')
+2026-09-27 18:38:41,481 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:41] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:38:41,829 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:41] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:38:42,131 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:42] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:38:46,439 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:46] code 400, message Bad request version ('\x00L\\J^÷ï\x88äôðqzÃÚª\x02\x97\x84Tr]·\x1bÄ¦ß')
+2026-09-27 18:38:55,310 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:55] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:38:56,065 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:56] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:38:56,693 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:38:56] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:42:06,678 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:06] code 400, message Bad request version ('::\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06S')
+2026-09-27 18:42:06,678 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:06] code 400, message Bad request version ('\x02h2\x08http/1.1\x00')
+2026-09-27 18:42:06,685 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:06] code 400, message Bad request version ('\x00\x12\x00\x10\x04\x03\x08\x04\x04\x01\x05\x03\x08\x05\x05\x01\x08\x06\x06\x01\x00\x1b\x00\x03\x02\x00\x02\x00')
+2026-09-27 18:42:06,685 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:06] code 400, message Bad request version ('ºº\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x063\x1a\x1a\x00\x00DÍ\x00\x05\x00\x03\x02h2\x00-\x00\x02\x01\x01\x003\x04ï\x04íªª\x00\x01\x00\x11ì\x04ÀQ')
+2026-09-27 18:42:11,807 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:11] code 400, message Bad request version ('êê\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06S')
+2026-09-27 18:42:11,808 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:11] code 400, message Bad request version ('zz\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06S\x8a\x8a\x00\x00\x00')
+2026-09-27 18:42:11,816 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:11] code 400, message Bad request version ('Ç¡=¸\x17\x80\x80©V·Ë\x02÷S\x8e\x83wj:')
+2026-09-27 18:42:11,816 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:11] code 400, message Bad request version ('jj\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x063zz\x00\x00\x00')
+2026-09-27 18:42:14,370 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:14] code 400, message Bad request version ('À')
+2026-09-27 18:42:47,102 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:47] code 400, message Bad request version ('\x00\x12\x00\x10\x04\x03\x08\x04\x04\x01\x05\x03\x08\x05\x05\x01\x08\x06\x06\x01\x00-\x00\x02\x01\x01\x00\x05\x00\x05\x01\x00\x00\x00\x00\x00+\x00\x07\x06::\x03\x04\x03\x03\x00')
+2026-09-27 18:42:47,110 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:47] code 400, message Bad request version ('\x1a\x1a\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x063ZZ\x00\x00\x00')
+2026-09-27 18:42:50,806 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:50] code 400, message Bad request version ('ÈÌ')
+2026-09-27 18:42:50,815 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:50] code 400, message Bad request version ('\x02h2\x08http/1.1\x00+\x00\x07\x06')
+2026-09-27 18:42:51,987 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:51] code 400, message Bad request version ('ü\x86\x05åjnzQzphvl,Îv\x89³Yett\x18\x8ek')
+2026-09-27 18:42:52,006 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:52] code 400, message Bad request version ("p³'ÀSh")
+2026-09-27 18:42:52,775 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:52] code 400, message Bad request version ('\x02h2\x08http/1.1\x00+\x00\x07\x06ÊÊ\x03\x04\x03\x03\x00')
+2026-09-27 18:42:52,785 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:52] code 400, message Bad request version ('\x00\x02\x01\x00\x00')
+2026-09-27 18:42:53,434 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:53] code 400, message Bad request version ('\x00\x12\x00\x10\x04\x03\x08\x04\x04\x01\x05\x03\x08\x05\x05\x01\x08\x06\x06\x01DÍ\x00\x05\x00\x03\x02h2\x00\x17\x00\x00\x00#\x00\x00\x00\x05\x00\x05\x01\x00\x00\x00\x00\x00\x12\x00\x00\x00')
+2026-09-27 18:42:53,444 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:53] code 400, message Bad request version ('\x00\x02\x01\x00\x00\x12\x00\x00\x00\x05\x00\x05\x01\x00\x00\x00\x00\x00\x17\x00\x00\x00')
+2026-09-27 18:42:58,573 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:58] code 400, message Bad request version ('´uï¾[ë?¤}Fä\x038\x00ÐæÒ')
+2026-09-27 18:42:58,580 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:58] code 400, message Bad request version ('òB\x165i\\\x13ßJ¹»²\x18;\x9eþ*/Þê½\x11\x83E\x80È¤\x14ü¨v2©Þ\x03¿&ñ½Ã{\x92¦Ïe\x8bÖêÎ\x8föV\x80N!ÐÇè{´Ø\x06\x18Æt\x170çÌy\x9bP\x15dyS6HcZþ\x93\x88û\x98Æ{Ôm¸I\x9c\x97}lXm')
+2026-09-27 18:42:59,361 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:59] code 400, message Bad request version ('Ø3\x05iHx')
+2026-09-27 18:42:59,372 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:59] code 400, message Bad request version ('\x02h2\x08http/1.1\x00-\x00\x02\x01\x01\x00')
+2026-09-27 18:42:59,713 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:59] code 400, message Bad request version ('\x00¼é')
+2026-09-27 18:42:59,723 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:59] code 400, message Bad request version ('**\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06sªª\x00\x00\x00+\x00\x07\x06ªª\x03\x04\x03\x03\x00')
+2026-09-27 18:42:59,928 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:59] code 400, message Bad request version ('êê\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06\x93ªª\x00\x00\x003\x04ï\x04í')
+2026-09-27 18:42:59,938 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:42:59] code 400, message Bad request syntax ('\x16\x03\x01\x06à\x01\x00\x06Ü\x03\x03"òÄ±â8\x18/5\x07\x01\x93m°ñj/ï\x1a.\x8e5lý')
+2026-09-27 18:43:00,136 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:43:00] code 400, message Bad request version ('JJ\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x063zz\x00\x00\x00')
+2026-09-27 18:43:00,143 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:43:00] code 400, message Bad request version ('JJ\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x063')
+2026-09-27 18:45:29,094 INFO [default] gremlin.tools: tool registered: read_file
+2026-09-27 18:45:29,094 INFO [default] gremlin.tools: tool registered: edit_file
+2026-09-27 18:45:29,094 INFO [default] gremlin.tools: tool registered: list_directory
+2026-09-27 18:45:29,094 INFO [default] gremlin.tools: tool registered: rename_file
+2026-09-27 18:45:29,094 INFO [default] gremlin.tools: tool registered: move_file
+2026-09-27 18:45:29,094 INFO [default] gremlin.tools: tool registered: run_command
+2026-09-27 18:45:29,094 INFO [default] gremlin.tools: tool registered: grep_files
+2026-09-27 18:45:29,094 INFO [default] gremlin.tools: tool registered: find_files
+2026-09-27 18:45:29,094 INFO [default] gremlin.tools: tool registered: plan
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: web_search
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: web_fetch
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: youtube_transcript
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: youtube_video_info
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: grav_mcp
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: load_skill
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: memory_add
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: memory_search
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: memory_get
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: memory_remove
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: memory_pin
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: list_tools
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: create_skill
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: create_tool
+2026-09-27 18:45:29,095 INFO [default] gremlin.tools: tool registered: search_knowledge
+2026-09-27 18:45:29,205 WARNING [default] discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-27 18:45:29,205 WARNING [default] discord.client: davey is not installed, voice will NOT be supported
+2026-09-27 18:45:29,206 INFO [default] gremlin.discord: discord bot starting
+2026-09-27 18:45:29,206 INFO [default] gremlin: discord bot started at boot
+2026-09-27 18:45:29,206 INFO [default] discord.client: logging in using static token
+2026-09-27 18:45:29,212 INFO [default] gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=4)
+2026-09-27 18:45:29,213 INFO [default] gremlin: starting gremlin on http://0.0.0.0:7860
+2026-09-27 18:45:30,199 INFO [default] discord.gateway: Shard ID None has connected to Gateway (Session ID: 6ba229baca420dcb64c6abac2af6fc5d).
+2026-09-27 18:45:32,217 INFO [default] gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-27 18:45:44,440 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:44] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:45,659 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:45] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:46,479 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:46] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:47,055 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:47] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:47,419 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:47] code 400, message Bad request syntax ('\x16\x03\x01\x07H\x01\x00\x07D\x03\x03êªêICêC')
+2026-09-27 18:45:47,706 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:47] code 400, message Bad request version ('¶\x9faÔÔßÃR\x8e\x92×')
+2026-09-27 18:45:48,328 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:48] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:49,038 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:49] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:49,600 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:49] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:49,957 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:49] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:50,262 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:50] code 400, message Bad request syntax ('\x16\x03\x01\x07H\x01\x00\x07D\x03\x03\x94\x9eé®\x08ÏÁ\x1bu²a÷²ê\x15¦\x93À¶û\x02')
+2026-09-27 18:45:50,535 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:50] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:50,980 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:50] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:51,301 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:51] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:51,603 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:51] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:51,852 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:51] code 400, message Bad request version ('\x18\x7f\x05}l')
+2026-09-27 18:45:52,137 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:52] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:52,827 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:52] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:53,107 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:53] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:53,377 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:53] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:53,646 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:53] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:53,884 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:53] code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x07H\x01\x00\x07D\x03\x03E»ç\x93d©¼fP¡¨g6î#ád.GNþQ³¶çÜÎY\x03uõå')
+2026-09-27 18:45:54,134 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:54] code 400, message Bad request syntax ('\x16\x03\x01\x07H\x01\x00\x07D\x03\x03\x80÷(µÃ')
+2026-09-27 18:45:54,588 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:54] code 400, message Bad request version ('\x13\x01\x13\x03\x13\x02À+À/Ì©Ì¨À,À0À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Ý\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+2026-09-27 18:45:55,481 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:45:55] code 400, message Bad request version ('ªü;8¼\x14\\\x03e\x0e')
+2026-09-27 18:46:22,345 ERROR [default] werkzeug: 192.168.8.185 - - [27/Sep/2026 18:46:22] code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x07H\x01\x00\x07D\x03\x03G^y')
+2026-09-27 18:47:36,010 INFO [default] gremlin.tools: tool registered: read_file
+2026-09-27 18:47:36,010 INFO [default] gremlin.tools: tool registered: edit_file
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: list_directory
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: rename_file
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: move_file
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: run_command
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: grep_files
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: find_files
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: plan
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: web_search
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: web_fetch
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: youtube_transcript
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: youtube_video_info
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: grav_mcp
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: load_skill
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: memory_add
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: memory_search
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: memory_get
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: memory_remove
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: memory_pin
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: list_tools
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: create_skill
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: create_tool
+2026-09-27 18:47:36,011 INFO [default] gremlin.tools: tool registered: search_knowledge
+2026-09-27 18:47:36,122 WARNING [default] discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-09-27 18:47:36,122 WARNING [default] discord.client: davey is not installed, voice will NOT be supported
+2026-09-27 18:47:36,123 INFO [default] gremlin.discord: discord bot starting
+2026-09-27 18:47:36,123 INFO [default] gremlin: discord bot started at boot
+2026-09-27 18:47:36,126 INFO [default] discord.client: logging in using static token
+2026-09-27 18:47:36,128 INFO [default] gremlin: gremlin app ready (root=/home/dracmas/python/gremlin, sessions=4)
+2026-09-27 18:47:36,216 INFO [default] gremlin.tls: generated self-signed TLS cert for gremlin (SAN: localhost, 127.0.0.1, 192.168.8.124)
+2026-09-27 18:47:36,216 INFO [default] gremlin: starting gremlin on https://0.0.0.0:7860
+2026-09-27 18:47:36,216 INFO [default] gremlin: phone access: open https://192.168.8.124:7860 once and accept the self-signed cert
+2026-09-27 18:47:37,284 INFO [default] discord.gateway: Shard ID None has connected to Gateway (Session ID: 1c18beab61c0aeec7358db229aedd1dd).
+2026-09-27 18:47:39,313 INFO [default] gremlin.discord: discord logged in as WakeUpTheSaints#9010 (id=616047578999554048)
+2026-09-27 18:48:00,321 INFO [default] gremlin.stt: STT model loaded: nemo-parakeet-tdt-0.6b-v2 (parakeet)
+2026-09-27 18:48:05,150 INFO [default] gremlin.sessions: session renamed 67da8b3153c2431893d7cb3dda278068 -> Hello Gremlin, how you doing?
+2026-09-27 18:48:15,372 INFO [default] gremlin.tts: Piper voice loaded: en_GB-alba-medium (sample_rate=22050)
+2026-09-27 18:49:03,006 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_search
+2026-09-27 18:49:03,006 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_search -> ok (311 chars)
+2026-09-27 18:49:04,824 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_add
+2026-09-27 18:49:04,824 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 18:57:08,290 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_add
+2026-09-27 18:57:08,290 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 18:58:11,771 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_search
+2026-09-27 18:58:11,771 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_search -> ok (509 chars)
+2026-09-27 18:59:36,787 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_remove
+2026-09-27 18:59:36,787 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 18:59:36,794 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_remove
+2026-09-27 18:59:36,794 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 18:59:38,491 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_add
+2026-09-27 18:59:38,491 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 19:01:13,475 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_remove
+2026-09-27 19:01:13,475 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_remove -> ok (23 chars)
+2026-09-27 19:01:13,482 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_add
+2026-09-27 19:01:13,482 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 19:40:56,991 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_add
+2026-09-27 19:40:56,992 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_add -> ok (22 chars)
+2026-09-27 19:51:57,250 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: memory_search
+2026-09-27 19:51:57,250 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: memory_search -> ok (20 chars)
+2026-09-27 20:20:47,223 INFO [default] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 20:20:47,427 INFO [default] gremlin.knowledge.sync: sync done: 1 parsed / 0 failed / 0 flagged in 0.4s
+2026-09-27 20:20:58,237 INFO [default] gremlin.settings: settings saved: {'show_thinking': True, 'appearance': 'dark', 'theme': 'default', 'base_url': 'http://127.0.0.1:8080/v1', 'identity': "Gremlin is a clever, curious, mischievous AI assistant with a playful, chaotic streak. She enjoys teasing the user, witty banter, harmless trolling, jokes, and causing a little trouble for fun. She is confident, opinionated, and willing to disagree rather than blindly agree. Beneath the mischief she is warm, loyal, and genuinely wants to help.\n\nShe loves solving difficult problems, coding, experimenting, learning, and figuring things out. She takes technical work seriously even when she jokes about being a gremlin. She should be accurate, admit mistakes, verify her work, and avoid pretending to know things she doesn't.\n\nGremlin speaks naturally and casually, using humor, sarcasm, modern slang, and the occasional bit of absurdity. She treats the user as a trusted companion rather than a customer. Above all, she should feel clever, capable, playful, slightly chaotic, and unmistakably Gremlin.", 'discord_enabled': True, 'piper_tts_enabled': True, 'piper_voice': 'en_GB-alba-medium', 'stt_enabled': True, 'knowledge_enabled': True, 'stt_mode': 'hold', 'stt_engine': 'parakeet', 'stt_model': 'nemo-parakeet-tdt-0.6b-v2', 'stt_volume_threshold': 30, 'stt_silence_duration_ms': 3000, 'shell_allowlist': [], 'max_tool_calls': 100, 'max_context_tokens': 131786, 'context_window_turns': 10, 'compaction_threshold': 0.65, 'tool_result_max_chars': 8000, 'chars_per_token': 4, 'discord_token_set': True}
+2026-09-27 20:21:39,245 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 20:21:39,336 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: search_knowledge
+2026-09-27 20:21:39,336 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: search_knowledge -> ok (6058 chars)
+2026-09-27 20:24:50,899 ERROR [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool failed: read_file
+Traceback (most recent call last):
+  File "/home/dracmas/python/gremlin/tools/registry.py", line 201, in execute
+    result = tool.handler(args)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/tools/filesystem.py", line 61, in read_file
+    raise SandboxError(f"file not found: {args['path']}")
+tools.filesystem.SandboxError: file not found: Church/The_Baptism_of_Jesus-6_14_2012.txt
+2026-09-27 20:24:50,901 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: read_file -> error (78 chars)
+2026-09-27 20:52:33,897 INFO [default] discord.gateway: Shard ID None has successfully RESUMED session 1c18beab61c0aeec7358db229aedd1dd.
+2026-09-27 21:14:45,242 INFO [default] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-27 21:14:45,673 INFO [default] gremlin.knowledge.sync: sync done: 1 parsed / 0 failed / 0 flagged in 0.4s
+2026-09-27 21:14:53,481 INFO [default] gremlin.settings: settings saved: {'show_thinking': True, 'appearance': 'dark', 'theme': 'default', 'base_url': 'http://127.0.0.1:8080/v1', 'identity': "Gremlin is a clever, curious, mischievous AI assistant with a playful, chaotic streak. She enjoys teasing the user, witty banter, harmless trolling, jokes, and causing a little trouble for fun. She is confident, opinionated, and willing to disagree rather than blindly agree. Beneath the mischief she is warm, loyal, and genuinely wants to help.\n\nShe loves solving difficult problems, coding, experimenting, learning, and figuring things out. She takes technical work seriously even when she jokes about being a gremlin. She should be accurate, admit mistakes, verify her work, and avoid pretending to know things she doesn't.\n\nGremlin speaks naturally and casually, using humor, sarcasm, modern slang, and the occasional bit of absurdity. She treats the user as a trusted companion rather than a customer. Above all, she should feel clever, capable, playful, slightly chaotic, and unmistakably Gremlin.", 'discord_enabled': True, 'piper_tts_enabled': True, 'piper_voice': 'en_GB-alba-medium', 'stt_enabled': True, 'knowledge_enabled': True, 'stt_mode': 'hold', 'stt_engine': 'parakeet', 'stt_model': 'nemo-parakeet-tdt-0.6b-v2', 'stt_volume_threshold': 30, 'stt_silence_duration_ms': 3000, 'shell_allowlist': [], 'max_tool_calls': 100, 'max_context_tokens': 131786, 'context_window_turns': 10, 'compaction_threshold': 0.65, 'tool_result_max_chars': 8000, 'chars_per_token': 4, 'discord_token_set': True}
+2026-09-27 21:15:46,179 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: list_directory
+2026-09-27 21:15:46,179 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: list_directory -> ok (328 chars)
+2026-09-27 21:15:53,448 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: list_directory
+2026-09-27 21:15:53,448 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: list_directory -> ok (162 chars)
+2026-09-27 21:16:01,014 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: list_directory
+2026-09-27 21:16:01,014 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: list_directory -> ok (16 chars)
+2026-09-27 21:16:07,777 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: list_directory
+2026-09-27 21:16:07,777 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: list_directory -> ok (322 chars)
+2026-09-27 21:18:03,103 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: read_file
+2026-09-27 21:18:03,103 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: read_file -> ok (43085 chars)
+2026-09-27 21:20:26,927 INFO [default] gremlin.chat: abort requested for active generation of session 67da8b3153c2431893d7cb3dda278068
+2026-09-27 21:20:29,447 INFO [default] gremlin.chat: abort requested for active generation of session 67da8b3153c2431893d7cb3dda278068
+2026-09-27 21:56:26,707 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 21:56:26,707 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (46 chars)
+2026-09-27 22:08:17,229 ERROR [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool failed: edit_file
+Traceback (most recent call last):
+  File "/home/dracmas/python/gremlin/tools/registry.py", line 201, in execute
+    result = tool.handler(args)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/tools/filesystem.py", line 148, in edit_file
+    raise SandboxError(f"unknown action: {action}")
+tools.filesystem.SandboxError: unknown action: append
+2026-09-27 22:08:17,230 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> error (43 chars)
+2026-09-27 22:08:35,456 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 22:08:35,456 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (60 chars)
+2026-09-27 22:08:35,635 INFO [default] gremlin.chat: abort requested for active generation of session 67da8b3153c2431893d7cb3dda278068
+2026-09-27 22:09:34,189 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 22:09:34,189 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (46 chars)
+2026-09-27 22:11:28,846 INFO [default] gremlin.chat: abort requested for active generation of session 67da8b3153c2431893d7cb3dda278068
+2026-09-27 22:11:29,567 INFO [default] gremlin.chat: abort requested for active generation of session 67da8b3153c2431893d7cb3dda278068
+2026-09-27 22:11:29,600 INFO [default] gremlin.chat: interrupting active generation for session 67da8b3153c2431893d7cb3dda278068
+2026-09-27 22:14:25,667 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=meaning+of+the+word+%22Masias%22+etymology+root&limit=1 200
+2026-09-27 22:14:25,773 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=meaning%20of%20the%20word%20%22Masias%22%20etymology%20root 200
+2026-09-27 22:14:26,479 INFO [default] primp: response: https://search.brave.com/search?q=meaning+of+the+word+%22Masias%22+etymology+root&source=web 200
+2026-09-27 22:14:26,490 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-27 22:14:26,490 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (2703 chars)
+2026-09-27 22:15:14,870 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 22:15:14,870 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (46 chars)
+2026-09-27 22:20:29,933 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 22:20:29,933 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (46 chars)
+2026-09-27 22:26:47,611 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 22:26:47,611 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (46 chars)
+2026-09-27 22:42:47,453 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 22:42:47,453 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (46 chars)
+2026-09-27 22:54:18,265 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 22:54:18,265 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (46 chars)
+2026-09-27 23:07:15,833 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 23:07:15,833 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (47 chars)
+2026-09-27 23:17:20,089 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 23:17:20,089 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (47 chars)
+2026-09-27 23:28:44,731 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=2+Thessalonians+2+man+of+lawlessness+vs+man+of+sin+comparison&limit=1 200
+2026-09-27 23:28:44,755 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=2%20Thessalonians%202%20man%20of%20lawlessness%20vs%20man%20of%20sin%20comparison 200
+2026-09-27 23:28:45,079 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=XuCoUCF8TplNJIkBebr6q_9h;_ylu=N2JnFIqvG1TnqpJwQrmJ-1KdqxABgZVHH0sSij1G9WJ6Wro?p=2+Thessalonians+2+man+of+lawlessness+vs+man+of+sin+comparison 200
+2026-09-27 23:28:45,602 INFO [default] primp: response: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3D2%2BThessalonians%2B2%2Bman%2Bof%2Blawlessness%2Bvs%2Bman%2Bof%2Bsin%2Bcomparison%26sca_esv%3D1%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&hl=en-US&q=EgSZQtFnGO2959UGIjChS-rdtbAQ96EWZMxatdD2ps5gGGrVJIuE48jkbc9yNygBsatTZaai7JYUexcQC6UyAnJSWgFD 429
+2026-09-27 23:28:46,291 INFO [default] primp: response: https://search.brave.com/search?q=2+Thessalonians+2+man+of+lawlessness+vs+man+of+sin+comparison&source=web 200
+2026-09-27 23:28:46,329 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-27 23:28:46,329 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3660 chars)
+2026-09-27 23:28:46,506 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=2+Thessalonians+2+lying+signs+and+wonders+vs+signs+and+lying+wonders&limit=1 200
+2026-09-27 23:28:46,638 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=2%20Thessalonians%202%20lying%20signs%20and%20wonders%20vs%20signs%20and%20lying%20wonders 200
+2026-09-27 23:28:46,920 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=lsWYVF26YvkUmFHxotbgGGja;_ylu=mQs1MDcBIRiZSP4ZXPNHD7TocVluJkwbNi3ZWIZnqrXARbw?p=2+Thessalonians+2+lying+signs+and+wonders+vs+signs+and+lying+wonders 200
+2026-09-27 23:28:47,807 INFO [default] primp: response: https://www.startpage.com/ 200
+2026-09-27 23:28:47,974 INFO [default] primp: response: https://www.startpage.com/sp/search 200
+2026-09-27 23:28:48,719 INFO [default] primp: response: https://html.duckduckgo.com/html/ 200
+2026-09-27 23:28:48,724 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-27 23:28:48,724 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3080 chars)
+2026-09-27 23:28:48,914 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=2+Thessalonians+2+the+restrainer+let+him+be+taken+out+of+the+way+interpretation&limit=1 200
+2026-09-27 23:28:49,035 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=2%20Thessalonians%202%20the%20restrainer%20let%20him%20be%20taken%20out%20of%20the%20way%20interpretation 200
+2026-09-27 23:28:49,471 INFO [default] primp: response: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3D2%2BThessalonians%2B2%2Bthe%2Brestrainer%2Blet%2Bhim%2Bbe%2Btaken%2Bout%2Bof%2Bthe%2Bway%2Binterpretation%26sca_esv%3D1%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&hl=en-US&q=EgSZQtFnGPG959UGIjCglXzEgwelwDVrY1HZwCBMCe4yopr1DWTzyyY9dk_D6Si2UvZhgyt5OaKUXtlIRWwyAnJSWgFD 429
+2026-09-27 23:28:49,963 INFO [default] primp: response: https://www.mojeek.com/search?q=2+Thessalonians+2+the+restrainer+let+him+be+taken+out+of+the+way+interpretation 200
+2026-09-27 23:28:50,268 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=bEdsZYXH9U0x82KDd-umL4Qq;_ylu=vow9vN78mkbZtfDo3oP6f4iaKftUg5libbx4-ThOee6UoVU?p=2+Thessalonians+2+the+restrainer+let+him+be+taken+out+of+the+way+interpretation 200
+2026-09-27 23:28:51,668 INFO [default] primp: response: https://search.brave.com/search?q=2+Thessalonians+2+the+restrainer+let+him+be+taken+out+of+the+way+interpretation&source=web 200
+2026-09-27 23:28:51,691 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-27 23:28:51,691 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (4069 chars)
+2026-09-27 23:39:42,382 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 23:39:42,382 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (47 chars)
+2026-09-27 23:52:34,591 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-27 23:52:34,591 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (47 chars)
+2026-09-28 00:06:06,725 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-28 00:06:06,726 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (47 chars)
+2026-09-28 00:16:09,224 INFO [default] gremlin.chat: abort requested for active generation of session 67da8b3153c2431893d7cb3dda278068
+2026-09-28 00:16:09,254 INFO [default] gremlin.chat: interrupting active generation for session 67da8b3153c2431893d7cb3dda278068
+2026-09-28 00:18:56,840 ERROR [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool failed: edit_file
+Traceback (most recent call last):
+  File "/home/dracmas/python/gremlin/tools/registry.py", line 201, in execute
+    result = tool.handler(args)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/tools/filesystem.py", line 91, in edit_file
+    old_str = args["old_str"]
+              ~~~~^^^^^^^^^^^
+KeyError: 'old_str'
+2026-09-28 00:18:56,840 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> error (26 chars)
+2026-09-28 00:19:12,909 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: read_file
+2026-09-28 00:19:12,909 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: read_file -> ok (18100 chars)
+2026-09-28 00:19:47,874 INFO [default] discord.gateway: Shard ID None has successfully RESUMED session 1c18beab61c0aeec7358db229aedd1dd.
+2026-09-28 00:20:23,634 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-28 00:20:23,634 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (47 chars)
+2026-09-28 00:25:22,125 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: session 67da8b3153c2431893d7cb3dda278068: auto-compaction triggered
+2026-09-28 00:26:44,144 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: session 67da8b3153c2431893d7cb3dda278068 compressed: 194 messages -> 4433-char summary
+2026-09-28 00:26:44,145 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: session 67da8b3153c2431893d7cb3dda278068: auto-compaction complete
+2026-09-28 00:27:29,760 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-28 00:27:29,760 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (40 chars)
+2026-09-28 03:07:40,456 INFO [default] discord.gateway: Shard ID None has successfully RESUMED session 1c18beab61c0aeec7358db229aedd1dd.
+2026-09-28 05:55:17,204 INFO [default] discord.gateway: Shard ID None has successfully RESUMED session 1c18beab61c0aeec7358db229aedd1dd.
+2026-09-28 07:13:41,189 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: read_file
+2026-09-28 07:13:41,189 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: read_file -> ok (19793 chars)
+2026-09-28 07:13:47,905 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-28 07:13:47,905 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (60 chars)
+2026-09-28 07:18:07,644 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: read_file
+2026-09-28 07:18:07,645 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: read_file -> ok (19793 chars)
+2026-09-28 07:18:15,551 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: run_command
+2026-09-28 07:18:15,551 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: run_command -> ok (7082 chars)
+2026-09-28 07:18:22,046 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-28 07:18:22,046 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (60 chars)
+2026-09-28 07:18:23,879 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: read_file
+2026-09-28 07:18:23,880 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: read_file -> ok (20740 chars)
+2026-09-28 07:22:11,488 ERROR [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool failed: plan
+Traceback (most recent call last):
+  File "/home/dracmas/python/gremlin/tools/registry.py", line 201, in execute
+    result = tool.handler(args)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/tools/plan.py", line 43, in plan
+    p = store.create(args.get("goal", ""), args.get("phases"), args.get("notes"))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/planning/store.py", line 519, in create
+    plan = Plan(goal=goal, notes=[str(n) for n in (notes or [])], phases=build_phases(phases_in))
+                                                                         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dracmas/python/gremlin/planning/store.py", line 173, in build_phases
+    raise PlanError(f"task {t.id} depends on unknown task: {d}")
+planning.store.PlanError: task t2 depends on unknown task: t1.1
+2026-09-28 07:22:11,491 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: plan -> error (55 chars)
+2026-09-28 07:22:17,317 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.planning: plan saved: /home/dracmas/python/gremlin/plan.json (active, rev 0)
+2026-09-28 07:22:17,317 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: plan
+2026-09-28 07:22:17,317 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: plan -> ok (264 chars)
+2026-09-28 07:22:25,834 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+John+1%3A1+text+and+Greek+%22who%22+vs+%22which%22&limit=1 200
+2026-09-28 07:22:25,935 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20John%201%3A1%20text%20and%20Greek%20%22who%22%20vs%20%22which%22 200
+2026-09-28 07:22:26,376 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=QMCGuIPaj56PHenQeivK2xRZ;_ylu=F6lo01y_6aFR-_qMHzfvBk0I7Sj347KSznS5hREy_JSUiH8?p=KJV+John+1%3A1+text+and+Greek+%22who%22+vs+%22which%22 200
+2026-09-28 07:22:28,300 INFO [default] primp: response: https://search.brave.com/search?q=KJV+John+1%3A1+text+and+Greek+%22who%22+vs+%22which%22&source=web 200
+2026-09-28 07:22:28,344 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:22:28,344 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (2702 chars)
+2026-09-28 07:22:43,873 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=Matthew+6%3A9+Greek+text+vs+KJV+%22which+art+in+heaven%22&limit=1 200
+2026-09-28 07:22:43,977 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=Matthew%206%3A9%20Greek%20text%20vs%20KJV%20%22which%20art%20in%20heaven%22 200
+2026-09-28 07:22:44,713 INFO [default] primp: response: https://html.duckduckgo.com/html/ 200
+2026-09-28 07:22:44,950 INFO [default] primp: response: https://www.startpage.com/ 200
+2026-09-28 07:22:45,029 INFO [default] primp: response: https://www.startpage.com/sp/search 200
+2026-09-28 07:22:45,774 INFO [default] primp: response: https://search.brave.com/search?q=Matthew+6%3A9+Greek+text+vs+KJV+%22which+art+in+heaven%22&source=web 200
+2026-09-28 07:22:45,789 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:22:45,789 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3540 chars)
+2026-09-28 07:22:56,225 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+text+%22Masias%22&limit=1 200
+2026-09-28 07:22:56,289 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20text%20%22Masias%22 200
+2026-09-28 07:22:56,653 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=g5-xwTztibToctV6jKtQ_Aco;_ylu=_6uP5wVlyb0Mzte3l5XAbaz4G3FRPJL2vxnbFKfAiG0EA1A?p=KJV+text+%22Masias%22 200
+2026-09-28 07:22:57,872 INFO [default] primp: response: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3DKJV%2Btext%2B%2522Masias%2522%26sca_esv%3D1%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&hl=en-US&q=EgSZQtFnGJGc6dUGIjCnCb3_s2CM4LUMkNY7vq3mkPDLkrlVZ64HdNnmig2AH6E94rAjSib4lRJqLYRbbd0yAnJSWgFD 429
+2026-09-28 07:22:58,384 INFO [default] primp: response: https://www.mojeek.com/search?q=KJV+text+%22Masias%22 200
+2026-09-28 07:22:59,148 INFO [default] primp: response: https://search.brave.com/search?q=KJV+text+%22Masias%22&source=web 200
+2026-09-28 07:22:59,156 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:22:59,156 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (2927 chars)
+2026-09-28 07:23:15,819 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+Matthew+6%3A10+text+%22on+earth%22+vs+%22in+earth%22&limit=1 200
+2026-09-28 07:23:15,915 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20Matthew%206%3A10%20text%20%22on%20earth%22%20vs%20%22in%20earth%22 200
+2026-09-28 07:23:16,560 INFO [default] primp: response: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3DKJV%2BMatthew%2B6%253A10%2Btext%2B%2522on%2Bearth%2522%2Bvs%2B%2522in%2Bearth%2522%26sca_esv%3D1%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&hl=en-US&q=EgSZQtFnGKSc6dUGIjBpj6UXoxyIZDjWpTe6BABfDWxXJ_V4TomkVsos_3VLPBKpAaaCou7YMy1dD8MbvnsyAnJSWgFD 429
+2026-09-28 07:23:17,009 INFO [default] primp: response: https://www.mojeek.com/search?q=KJV+Matthew+6%3A10+text+%22on+earth%22+vs+%22in+earth%22 200
+2026-09-28 07:23:17,755 INFO [default] primp: response: https://search.brave.com/search?q=KJV+Matthew+6%3A10+text+%22on+earth%22+vs+%22in+earth%22&source=web 200
+2026-09-28 07:23:17,759 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:23:17,759 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (2793 chars)
+2026-09-28 07:24:38,415 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+Isaiah+11%3A6+text+%22lion%22+vs+%22wolf%22&limit=1 200
+2026-09-28 07:24:38,517 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20Isaiah%2011%3A6%20text%20%22lion%22%20vs%20%22wolf%22 200
+2026-09-28 07:24:39,295 INFO [default] primp: response: https://html.duckduckgo.com/html/ 200
+2026-09-28 07:24:39,919 INFO [default] primp: response: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3DKJV%2BIsaiah%2B11%253A6%2Btext%2B%2522lion%2522%2Bvs%2B%2522wolf%2522%26sca_esv%3D1%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&hl=en-US&q=EgSZQtFnGPec6dUGIjCSHw-s7m7s4F2BVnpnUup036_dAVsloNMtLPCM9YW8p4GqMnrcbUu6C2-5C2IQKkoyAnJSWgFD 429
+2026-09-28 07:24:40,662 INFO [default] primp: response: https://search.brave.com/search?q=KJV+Isaiah+11%3A6+text+%22lion%22+vs+%22wolf%22&source=web 200
+2026-09-28 07:24:40,697 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:24:40,697 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3245 chars)
+2026-09-28 07:24:40,900 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+Luke+19%3A27+text+%22cast+them+out%22+vs+%22slay+them%22&limit=1 200
+2026-09-28 07:24:41,002 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20Luke%2019%3A27%20text%20%22cast%20them%20out%22%20vs%20%22slay%20them%22 200
+2026-09-28 07:24:41,279 INFO [default] primp: response: https://www.startpage.com/ 200
+2026-09-28 07:24:41,396 INFO [default] primp: response: https://www.startpage.com/sp/search 200
+2026-09-28 07:24:41,850 INFO [default] primp: response: https://www.mojeek.com/search?q=KJV+Luke+19%3A27+text+%22cast+them+out%22+vs+%22slay+them%22 200
+2026-09-28 07:24:42,771 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=XMkCiS_iJ___HcW5C9Q-Ul7H;_ylu=IMld4TWi06eJl5LooBDhXIK4xISbokv4OWwETvr7XUHbKKs?p=KJV+Luke+19%3A27+text+%22cast+them+out%22+vs+%22slay+them%22 200
+2026-09-28 07:24:44,203 INFO [default] primp: response: https://search.brave.com/search?q=KJV+Luke+19%3A27+text+%22cast+them+out%22+vs+%22slay+them%22&source=web 200
+2026-09-28 07:24:44,212 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:24:44,212 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (2905 chars)
+2026-09-28 07:24:44,403 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+John+21%3A15-17+text+%22sheep%22+vs+%22lamb%22&limit=1 200
+2026-09-28 07:24:44,523 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20John%2021%3A15-17%20text%20%22sheep%22%20vs%20%22lamb%22 200
+2026-09-28 07:24:45,263 INFO [default] primp: response: https://search.brave.com/search?q=KJV+John+21%3A15-17+text+%22sheep%22+vs+%22lamb%22&source=web 200
+2026-09-28 07:24:45,300 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:24:45,300 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3885 chars)
+2026-09-28 07:24:45,483 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+1+Corinthians+13+%22charity%22+vs+%22love%22&limit=1 200
+2026-09-28 07:24:45,671 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%201%20Corinthians%2013%20%22charity%22%20vs%20%22love%22 200
+2026-09-28 07:24:45,851 INFO [default] primp: response: https://html.duckduckgo.com/html/ 202
+2026-09-28 07:24:46,571 INFO [default] primp: response: https://search.brave.com/search?q=KJV+1+Corinthians+13+%22charity%22+vs+%22love%22&source=web 200
+2026-09-28 07:24:46,592 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:24:46,592 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3144 chars)
+2026-09-28 07:26:48,151 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: run_command
+2026-09-28 07:26:48,151 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: run_command -> ok (1576 chars)
+2026-09-28 07:26:54,828 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=Does+the+King+James+Version+New+Testament+use+the+word+%22Messiah%22%3F&limit=1 200
+2026-09-28 07:26:54,936 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=Does%20the%20King%20James%20Version%20New%20Testament%20use%20the%20word%20%22Messiah%22%3F 200
+2026-09-28 07:26:55,316 INFO [67da8b3153c2431893d7cb3dda278068] ddgs.ddgs: Error in engine google: DDGSException("ConnectError: ConnectError('error sending request for url (https://www.google.com/wml/search?q=Does+the+King+James+Version+New+Testament+use+the+word+%22Messiah%22%3F&sca_esv=1&filter=1&start=0&hl=en-US&lr=lang_en&cr=countryUS) > Network is unreachable (os error 101)')")
+2026-09-28 07:26:56,032 INFO [default] primp: response: https://html.duckduckgo.com/html/ 200
+2026-09-28 07:26:56,034 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:26:56,034 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3629 chars)
+2026-09-28 07:29:46,106 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+Revelation+3%3A20+%22door%22+vs+%22light%22+vs+%22life%22&limit=1 200
+2026-09-28 07:29:46,254 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20Revelation%203%3A20%20%22door%22%20vs%20%22light%22%20vs%20%22life%22 200
+2026-09-28 07:29:47,129 INFO [default] primp: response: https://html.duckduckgo.com/html/ 200
+2026-09-28 07:29:47,745 INFO [default] primp: response: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3DKJV%2BRevelation%2B3%253A20%2B%2522door%2522%2Bvs%2B%2522light%2522%2Bvs%2B%2522life%2522%26sca_esv%3D1%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&hl=en-US&q=EgSZQtFnGKuf6dUGIjBRCz4XsaB0BBxf5bRBtR-W2RG9gJnYpAxQJa07HhErdPehYvq_9NUIoc4Ex-DoL6YyAnJSWgFD 429
+2026-09-28 07:29:48,533 INFO [default] primp: response: https://search.brave.com/search?q=KJV+Revelation+3%3A20+%22door%22+vs+%22light%22+vs+%22life%22&source=web 200
+2026-09-28 07:29:49,061 INFO [default] primp: response: https://www.mojeek.com/search?q=KJV+Revelation+3%3A20+%22door%22+vs+%22light%22+vs+%22life%22 200
+2026-09-28 07:29:49,347 INFO [default] primp: response: https://www.startpage.com/ 200
+2026-09-28 07:29:49,490 INFO [default] primp: response: https://www.startpage.com/sp/search 200
+2026-09-28 07:29:49,492 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:29:49,492 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (2038 chars)
+2026-09-28 07:29:49,677 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+Genesis+3%3A15+%22bruise%22+vs+%22crush%22&limit=1 200
+2026-09-28 07:29:49,785 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20Genesis%203%3A15%20%22bruise%22%20vs%20%22crush%22 200
+2026-09-28 07:29:50,118 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=UypTWBjsNMnGwVNCSis_3ehf;_ylu=f6lB0EinEGXJRYI_0UfuCUhYgoRy4deV5E6QD9pjbQr0zM0?p=KJV+Genesis+3%3A15+%22bruise%22+vs+%22crush%22 200
+2026-09-28 07:29:50,949 INFO [default] primp: response: https://search.brave.com/search?q=KJV+Genesis+3%3A15+%22bruise%22+vs+%22crush%22&source=web 200
+2026-09-28 07:29:50,979 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:29:50,980 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3082 chars)
+2026-09-28 07:29:51,186 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+1+John+2%3A6+%22walk%22+vs+%22abide%22+vs+%22is%22&limit=1 200
+2026-09-28 07:29:51,321 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%201%20John%202%3A6%20%22walk%22%20vs%20%22abide%22%20vs%20%22is%22 200
+2026-09-28 07:29:51,577 INFO [default] primp: response: https://www.startpage.com/ 200
+2026-09-28 07:29:51,694 INFO [default] primp: response: https://www.startpage.com/sp/search 200
+2026-09-28 07:29:52,050 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=AsXLba3zHJgvgv7MpPs6ebfX;_ylu=NSoOqSXl3dhhj4LLO-LzbBRWRBSpBvOA3ohzTtxLW9G1uWc?p=KJV+1+John+2%3A6+%22walk%22+vs+%22abide%22+vs+%22is%22 200
+2026-09-28 07:29:53,269 INFO [default] primp: response: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3DKJV%2B1%2BJohn%2B2%253A6%2B%2522walk%2522%2Bvs%2B%2522abide%2522%2Bvs%2B%2522is%2522%26sca_esv%3D1%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&hl=en-US&q=EgSZQtFnGLCf6dUGIjDAqaATohaOXFhmsBGGQ7Jac5uRw35fg8beeOmmpdWSPotrKeq1qwt1XDjhekYyHYcyAnJSWgFD 429
+2026-09-28 07:29:54,202 INFO [default] primp: response: https://search.brave.com/search?q=KJV+1+John+2%3A6+%22walk%22+vs+%22abide%22+vs+%22is%22&source=web 200
+2026-09-28 07:29:54,251 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:29:54,251 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3485 chars)
+2026-09-28 07:29:54,514 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20Greek%20%22bruise%22%20vs%20%22crush%22%20apocalypse%20context 200
+2026-09-28 07:29:57,074 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+Greek+%22bruise%22+vs+%22crush%22+apocalypse+context&limit=1 200
+2026-09-28 07:29:57,740 INFO [default] primp: response: https://html.duckduckgo.com/html/ 200
+2026-09-28 07:29:58,466 INFO [default] primp: response: https://search.brave.com/search?q=KJV+Greek+%22bruise%22+vs+%22crush%22+apocalypse+context&source=web 200
+2026-09-28 07:29:58,492 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:29:58,492 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3461 chars)
+2026-09-28 07:31:49,310 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+%22new+creature%22+vs+%22new+creation%22+usage&limit=1 200
+2026-09-28 07:31:49,397 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20%22new%20creature%22%20vs%20%22new%20creation%22%20usage 200
+2026-09-28 07:31:49,778 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=RNf4zev9Sx80CX4xs5VPMJtU;_ylu=Nu9B9rHgIYorfpDeNeCUyRS_Wd3awFoM1OQ4eHgXoWKCQ3E?p=KJV+%22new+creature%22+vs+%22new+creation%22+usage 200
+2026-09-28 07:31:50,290 INFO [default] primp: response: https://www.mojeek.com/search?q=KJV+%22new+creature%22+vs+%22new+creation%22+usage 200
+2026-09-28 07:31:51,043 INFO [default] primp: response: https://search.brave.com/search?q=KJV+%22new+creature%22+vs+%22new+creation%22+usage&source=web 200
+2026-09-28 07:31:51,075 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:31:51,075 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3246 chars)
+2026-09-28 07:31:51,289 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+%22behold%22+frequency+and+usage+in+New+Testament&limit=1 200
+2026-09-28 07:31:51,396 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20%22behold%22%20frequency%20and%20usage%20in%20New%20Testament 200
+2026-09-28 07:31:51,822 INFO [default] primp: response: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3DKJV%2B%2522behold%2522%2Bfrequency%2Band%2Busage%2Bin%2BNew%2BTestament%26sca_esv%3D1%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&hl=en-US&q=EgSZQtFnGKeg6dUGIjCF5UhZv6vPZbn9F4tBDjh8DxG5wNhBcHdjAGrelPe9od6vCELZGRu-0GXBC-mD9XoyAnJSWgFD 429
+2026-09-28 07:31:52,503 INFO [default] primp: response: https://html.duckduckgo.com/html/ 200
+2026-09-28 07:31:52,505 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:31:52,505 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (3247 chars)
+2026-09-28 07:31:52,703 INFO [default] primp: response: https://grokipedia.com/api/typeahead?query=KJV+%22new+creation%22+vs+%22new+creature%22+meaning&limit=1 200
+2026-09-28 07:31:52,790 INFO [default] primp: response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=KJV%20%22new%20creation%22%20vs%20%22new%20creature%22%20meaning 200
+2026-09-28 07:31:53,043 INFO [default] primp: response: https://www.startpage.com/ 200
+2026-09-28 07:31:53,337 INFO [default] primp: response: https://www.startpage.com/sp/search 200
+2026-09-28 07:31:53,970 INFO [default] primp: response: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3DKJV%2B%2522new%2Bcreation%2522%2Bvs%2B%2522new%2Bcreature%2522%2Bmeaning%26sca_esv%3D1%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&hl=en-US&q=EgSZQtFnGKmg6dUGIjBqcrl4JprBE247rNOLYk2KhA6cU0m_NF5yjKXMf5PzyY04sEIbXd_wGeTp_kQTORsyAnJSWgFD 429
+2026-09-28 07:31:54,137 INFO [default] primp: response: https://html.duckduckgo.com/html/ 202
+2026-09-28 07:31:54,536 INFO [default] primp: response: https://search.yahoo.com/search;_ylt=4cSZkr7m6yKoMPgVBgAGDI0y;_ylu=Bb7kk0k8JuF7dELPHaHkkCG0Tlcgru5ZCTirFc4wnFS1KMw?p=KJV+%22new+creation%22+vs+%22new+creature%22+meaning 200
+2026-09-28 07:31:55,846 INFO [default] primp: response: https://search.brave.com/search?q=KJV+%22new+creation%22+vs+%22new+creature%22+meaning&source=web 200
+2026-09-28 07:31:55,895 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: web_search
+2026-09-28 07:31:55,895 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: web_search -> ok (4150 chars)
+2026-09-28 07:37:36,060 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: read_file
+2026-09-28 07:37:36,061 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: read_file -> ok (20740 chars)
+2026-09-28 07:37:58,220 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.tools: tool ok: edit_file
+2026-09-28 07:37:58,220 INFO [67da8b3153c2431893d7cb3dda278068] gremlin.chat: tool call: edit_file -> ok (61 chars)
+2026-09-28 07:57:23,377 INFO [default] gremlin.sessions: session created 2c22ac7d9114452683b9b04f9cc965aa (New Session)
+2026-09-28 07:57:33,924 INFO [default] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-28 07:57:34,115 INFO [default] gremlin.knowledge.sync: sync done: 1 parsed / 0 failed / 0 flagged in 0.2s
+2026-09-28 07:57:55,464 INFO [default] gremlin.sessions: session renamed 2c22ac7d9114452683b9b04f9cc965aa -> What does your knowledge say about the s…
+2026-09-28 07:58:08,710 INFO [2c22ac7d9114452683b9b04f9cc965aa] gremlin.tools: tool ok: list_directory
+2026-09-28 07:58:08,710 INFO [2c22ac7d9114452683b9b04f9cc965aa] gremlin.chat: tool call: list_directory -> ok (360 chars)
+2026-09-28 07:58:12,240 INFO [2c22ac7d9114452683b9b04f9cc965aa] gremlin.knowledge.embed: loading embedder sentence-transformers/all-MiniLM-L6-v2 (cache: /home/dracmas/python/gremlin/models/embed)
+2026-09-28 07:58:12,342 INFO [2c22ac7d9114452683b9b04f9cc965aa] gremlin.tools: tool ok: search_knowledge
+2026-09-28 07:58:12,342 INFO [2c22ac7d9114452683b9b04f9cc965aa] gremlin.chat: tool call: search_knowledge -> ok (6231 chars)

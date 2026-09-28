@@ -359,6 +359,16 @@ python app.py
 
 Configure the model base URL and name in the settings page (persisted to `data/settings.json`). The sidebar supports rename, manual history compression, and delete per session.
 
+**Phone access (HTTPS)**: browsers only allow microphone access in a *secure context* (`https://` or `localhost`). On the machine itself `http://127.0.0.1` works, but from a phone on the LAN the page is `http://<lan-ip>:7860` and the mic button silently does nothing. Serve HTTPS so the phone gets a secure context:
+
+```bash
+GREMLIN_TLS=1 python app.py
+# → generates a self-signed cert in data/tls/ (SAN: localhost, 127.0.0.1, LAN IP)
+# → https://127.0.0.1:7860 (desktop) and https://<lan-ip>:7860 (phone)
+```
+
+Open the `https://` URL once in the phone browser and accept the self-signed certificate; speech-to-text then works as on desktop. To use your own certificate instead, set `GREMLIN_SSL_CERT` and `GREMLIN_SSL_KEY` (PEM paths).
+
 ### CLI
 
 ```bash
@@ -422,7 +432,9 @@ Supports `stream: true` for SSE. Session continuity via `X-Gremlin-Session` head
 |---|---|
 | `GREMLIN_ROOT` | Override project root (defaults to the `config.py` directory) |
 | `GREMLIN_MODEL` | Default model name (fallback when settings has none) |
-| `GREMLIN_HOST` / `GREMLIN_PORT` | Web UI bind address (default `127.0.0.1:7860`) |
+| `GREMLIN_HOST` / `GREMLIN_PORT` | Web UI bind address (default `0.0.0.0:7860`) |
+| `GREMLIN_TLS` | Serve the Web UI over HTTPS with a generated self-signed cert (`1`) — needed for mic/STT on a phone |
+| `GREMLIN_SSL_CERT` / `GREMLIN_SSL_KEY` | Explicit PEM cert/key paths for HTTPS (overrides `GREMLIN_TLS`) |
 | `GREMLIN_BRIDGE` / `GREMLIN_BRIDGE_KEY` | Enable the API bridge (`1`) / its bearer key |
 | `GREMLIN_SHELL_ALLOWLIST` | Comma-separated program allow-list for `run_command` (fallback when no settings store) |
 | `GREMLIN_DISCORD_TOKEN` | Discord bot token |

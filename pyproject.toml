@@ -33,6 +33,7 @@ dependencies = [
     "python-dotenv",
     "piper-tts",
     "onnx-asr[cpu,hub]",
+    "cryptography",
 ]
 
 [project.optional-dependencies]
@@ -47,7 +48,7 @@ gremlin-app = "app:main"
 # --- flat layout --------------------------------------------------------
 # Top-level modules installed onto sys.path as-is.
 [tool.setuptools]
-py-modules = ["app", "cli", "config", "utils", "discord_bot"]
+py-modules = ["app", "cli", "config", "tls", "utils", "discord_bot"]
 
 [tool.setuptools.packages.find]
 # Explicit: only the real Python packages, never the data / asset dirs.

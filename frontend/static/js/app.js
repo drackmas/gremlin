@@ -555,19 +555,24 @@ function setStreamingUI(on) {
 // Interrupts whatever the app is currently doing — TTS playback and the
 // in-flight chat turn — so the user can barge in (Stop button or speech).
 // Safe to call when nothing is active.
-function interruptGeneration() {
+async function interruptGeneration() {
   tts.stop();
   const abort = state.chatAbort;
   if (abort) abort.abort(); // close the SSE stream; the catch path resets the UI
   if (state.activeId) {
-    // Tell the backend to cooperatively cancel the in-flight generation.
-    api(`/api/sessions/${state.activeId}/abort`, { method: "POST" }).catch(() => {});
+    // Await the server-side cancel before the caller starts a new turn. The
+    // abort and the new /chat request are separate HTTP requests processed in
+    // parallel: if the abort lands after the new turn has claimed the session,
+    // it cancels the NEW turn and the message gets no response at all.
+    try {
+      await api(`/api/sessions/${state.activeId}/abort`, { method: "POST" });
+    } catch (_) {}
   }
 }
 
 async function stopStreaming() {
   if (!state.streaming) return;
-  interruptGeneration();
+  await interruptGeneration();
 }
 
 async function sendMessage() {
@@ -580,7 +585,7 @@ async function sendMessage() {
   // hard-stop TTS, and let the new turn supersede it. The backend allows one
   // active generation per session; the old run stops at its next event and
   // does not save a partial assistant reply.
-  interruptGeneration();
+  await interruptGeneration();
 
   const container = $("messages");
   const hint = container.querySelector(".empty-hint");
@@ -615,6 +620,7 @@ async function sendMessage() {
   let pendingText = refs.text; // empty blinking placeholder, kept last until filled
   let lastPart = null;
   let lastKind = null;
+  let gotDone = false; // true once the stream yields its final "done" event
 
   const place = (node) => {
     if (pendingText && pendingText.textContent === "") {
@@ -676,6 +682,14 @@ async function sendMessage() {
     }
   }
 
+  // The stream ended without a "done" event and nothing was shown: the
+  // connection dropped (server crash, network blip). Say so instead of
+  // leaving an empty assistant bubble.
+  if (!gotDone && !abort.signal.aborted && refs.bubble.textContent.trim() === "") {
+    refs.bubble.appendChild(el("div", "msg-error text-danger small", "stream ended before completion"));
+    tts.stop();
+  }
+
   function handleEvent(ev) {
     if (ev.type === "thinking") {
       if (!state.settings || !state.settings.show_thinking) return;
@@ -725,6 +739,7 @@ async function sendMessage() {
         renderContextIndicator();
       }
     } else if (ev.type === "done") {
+      gotDone = true;
       refreshSessions().catch(() => {});
       tts.flush();
     }
@@ -786,6 +801,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
   stt.onError = (msg) => {
     console.warn("stt:", msg);
+    toast(`Mic: ${msg}`);
     updateMicButton();
   };
   stt.onLevel = updateVolumeMeter;

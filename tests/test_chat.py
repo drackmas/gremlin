@@ -186,6 +186,23 @@ def test_model_error_yields_error_event(cfg):
     assert "model exploded" in last["text"]
 
 
+def test_empty_model_response_yielded_as_error(cfg):
+    """A completion with no text, thinking, or tool calls must surface an
+    error event (and a stored marker) instead of ending the turn with an
+    empty bubble and no error — the user-visible "no response" case."""
+    sessions, manager = make_manager(cfg, FakeBackend([[ModelEvent("done")]]))
+    s = sessions.create("t")
+    events = list(manager.run(s["id"], "hi", SETTINGS))
+    assert any(e["type"] == "error" for e in events)
+    err = next(e for e in events if e["type"] == "error")
+    assert "empty response" in err["message"]
+    assert events[-1]["type"] == "done"
+    assert events[-1]["stop_reason"] == "completed"
+    stored = sessions.get(s["id"])["messages"][1]
+    assert "empty response" in stored["content"]
+    assert stored["timeline"][-1]["text"].startswith("(error:")
+
+
 def test_tool_loop_exhaustion(cfg):
     backend = FakeBackend(
         [[ModelEvent("tool_call", tool_call_id=f"c{i}", name="list_directory", arguments={}), ModelEvent("done")] for i in range(20)]

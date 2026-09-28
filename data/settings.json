@@ -10,7 +10,7 @@
   "piper_voice": "en_GB-alba-medium",
   "stt_enabled": true,
   "knowledge_enabled": true,
-  "stt_mode": "continuous",
+  "stt_mode": "hold",
   "stt_engine": "parakeet",
   "stt_model": "nemo-parakeet-tdt-0.6b-v2",
   "stt_volume_threshold": 30,

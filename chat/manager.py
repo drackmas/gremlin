@@ -656,6 +656,11 @@ class ChatManager:
                 # turn needs it), but no partial assistant reply is saved.
                 return
 
+            if not state["error"] and not state["content_parts"] and not state["tool_calls"]:
+                # The model completed without producing any answer text or
+                # tool calls. Surface it instead of ending the turn with an
+                # empty bubble and no error (the user sees "no response").
+                state["error"] = "model returned an empty response"
             assistant_msg = self._build_assistant_message(
                 state["content_parts"], state["tool_calls"], timeline, state["error"]
             )
