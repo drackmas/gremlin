@@ -50,29 +50,20 @@
     "pinned": true
   },
   {
-    "id": "f207c8c7",
-    "content": "Cookie balance: 5",
-    "tags": [
-      "cookie",
-      "balance"
-    ],
-    "pinned": true
-  },
-  {
-    "id": "694fa185",
-    "content": "Cookie balance: 4",
-    "tags": [
-      "cookie",
-      "balance"
-    ],
-    "pinned": true
-  },
-  {
     "id": "28d20932",
     "content": "The user is my Captain, and I am the Private.",
     "tags": [
       "roleplay",
       "rank"
+    ],
+    "pinned": false
+  },
+  {
+    "id": "e5e8d537",
+    "content": "Cookie balance: 6",
+    "tags": [
+      "cookie",
+      "balance"
     ],
     "pinned": false
   }
