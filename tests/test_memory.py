@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import pytest
+from tools.registry import ToolExecutionError
 
 from memory.store import MemoryStore
 from tools import build_registry
@@ -57,7 +59,8 @@ def test_memory_tools_roundtrip(tmp_path):
     assert tools["memory_pin"].handler({"id": mid, "value": False}) == f"memory {mid} pinned=False"
     assert store.pinned() == []
     assert tools["memory_remove"].handler({"id": mid}) == f"removed memory {mid}"
-    assert tools["memory_get"].handler({"id": "nope"}) == "no memory with id nope"
+    with pytest.raises(ToolExecutionError, match="no memory with id nope"):
+        tools["memory_get"].handler({"id": "nope"})
 
 
 def test_registry_includes_memory_tools(cfg):

@@ -318,6 +318,7 @@ class _GravConnection:
 
     def _run(self, coro: Any, timeout: float) -> Any:
         self._ensure_loop()
+        assert self._loop is not None  # guaranteed by _ensure_loop
         fut = asyncio.run_coroutine_threadsafe(coro, self._loop)
         return fut.result(timeout)
 

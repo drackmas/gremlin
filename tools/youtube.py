@@ -18,7 +18,7 @@ import logging
 import re
 from typing import Any
 
-from .registry import Tool
+from .registry import Tool, ToolExecutionError
 from .sanitize import sanitize_untrusted
 
 from config import AppConfig
@@ -29,7 +29,7 @@ TRANSCRIPT_LIMIT = 24 * 1024  # max chars returned to the model
 LANG = "en"  # only English is ever requested
 
 
-class YoutubeError(Exception):
+class YoutubeError(ToolExecutionError):
     """Raised for bad URLs, network failures, or missing subtitles."""
 
 

@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any
 from utils import atomic_write_text
 
 from config import AppConfig
-from .registry import Tool, ToolRegistry
+from .registry import Tool, ToolError, ToolRegistry
 
 if TYPE_CHECKING:
     from skills.loader import SkillLoader
@@ -53,6 +53,8 @@ def _import_generated(path: Path, name: str) -> Any:
     """
     mod_name = f"_gremlin_generated_{name}"
     spec = importlib.util.spec_from_file_location(mod_name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load module from {path}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[mod_name] = module
     try:
@@ -126,7 +128,7 @@ def build_meta_tools(cfg: AppConfig, loader: SkillLoader, registry: ToolRegistry
         try:
             compile(code + "\n", f"{name}.py", "exec")
         except SyntaxError as e:
-            return f"ERROR: code has a syntax error (line {e.lineno}): {e.msg}"
+            raise ToolError(f"code has a syntax error (line {e.lineno}): {e.msg}")
 
         gen_dir = Path(cfg.generated_tools_dir)
         gen_dir.mkdir(parents=True, exist_ok=True)

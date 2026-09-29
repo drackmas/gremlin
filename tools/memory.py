@@ -6,7 +6,7 @@ import json
 
 from memory.store import MemoryStore
 
-from .registry import Tool
+from .registry import Tool, ToolExecutionError
 
 
 def build_memory_tools(store: MemoryStore) -> list[Tool]:
@@ -31,7 +31,7 @@ def build_memory_tools(store: MemoryStore) -> list[Tool]:
     def memory_get(args: dict) -> str:
         m = store.get(args["id"])
         if m is None:
-            return f"no memory with id {args['id']}"
+            raise ToolExecutionError(f"no memory with id {args['id']}")
         return json.dumps(_brief(m), ensure_ascii=False)
 
     def memory_remove(args: dict) -> str:
@@ -44,7 +44,7 @@ def build_memory_tools(store: MemoryStore) -> list[Tool]:
     def memory_pin(args: dict) -> str:
         value = bool(args.get("value", True))
         if not store.pin(args["id"], value=value):
-            return f"no memory with id {args['id']}"
+            raise ToolExecutionError(f"no memory with id {args['id']}")
         return f"memory {args['id']} pinned={value}"
 
     return [

@@ -56,6 +56,7 @@ def parse_pdf_file(path: Path, source_root: Path, cfg: KnowledgeConfig) -> Parse
         raise IngestError(f"{path.name}: cannot open PDF: {e}") from e
     parts: list[str] = []
     ocr_pages: list[int] = []
+    page_count = doc.page_count
     with doc:
         for i, page in enumerate(doc):
             n = i + 1
@@ -69,14 +70,14 @@ def parse_pdf_file(path: Path, source_root: Path, cfg: KnowledgeConfig) -> Parse
                 ocr = _ocr_page(page, cfg.ocr_dpi, cfg.ocr_lang)
                 parts.append(f"<!--page:{n}-->\n{ocr.strip()}")
                 ocr_pages.append(n)
-    if ocr_pages and len(ocr_pages) == doc.page_count:
+    if ocr_pages and len(ocr_pages) == page_count:
         parts[0] += "\n\n> (OCR: no extractable text layer found in this PDF)"
     markdown = "\n\n".join(parts).strip()
     if not markdown:
         raise IngestError(f"{path.name}: PDF contains no pages")
     warnings = []
     if ocr_pages:
-        warnings.append(f"OCR applied to {len(ocr_pages)}/{doc.page_count} pages")
+        warnings.append(f"OCR applied to {len(ocr_pages)}/{page_count} pages")
     return ParsedDoc(
         doc_id=doc_id_for(path.relative_to(source_root).as_posix()),
         source_path=path.relative_to(source_root).as_posix(),
@@ -85,7 +86,7 @@ def parse_pdf_file(path: Path, source_root: Path, cfg: KnowledgeConfig) -> Parse
         markdown=markdown,
         sha256=sha256_of(path),
         meta=derive_metadata(path),
-        page_count=doc.page_count,
+        page_count=page_count,
         ocr_suspect=bool(ocr_pages),
         warnings=warnings,
     )

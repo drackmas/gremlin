@@ -18,6 +18,8 @@ __all__ = [
     "IngestError",
     "ParsedDoc",
     "SUPPORTED_EXTENSIONS",
+    "MEDIA_EXTENSIONS",
+    "TEXT_EXTENSIONS",
     "doc_id_for",
     "parse_file",
     "sha256_of",
@@ -37,6 +39,14 @@ SUPPORTED_EXTENSIONS: dict[str, str] = {
     ".mp4": "video",
     ".webm": "video",
 }
+
+
+TEXT_EXTENSIONS: frozenset[str] = frozenset(
+    ext for ext, t in SUPPORTED_EXTENSIONS.items() if t == "text"
+)
+MEDIA_EXTENSIONS: frozenset[str] = frozenset(
+    ext for ext, t in SUPPORTED_EXTENSIONS.items() if t in ("audio", "video")
+)
 
 
 def source_type_for(path: Path) -> str | None:

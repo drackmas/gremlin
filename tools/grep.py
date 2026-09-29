@@ -12,13 +12,13 @@ import os
 import re
 from pathlib import Path
 
-from .filesystem import _resolve
-from .registry import Tool
+from .sandbox import _resolve
+from .registry import Tool, ToolExecutionError
 
 from config import AppConfig
 
 
-class GrepError(Exception):
+class GrepError(ToolExecutionError):
     """Raised when grep cannot run: bad pattern, bad path, no root."""
 
 

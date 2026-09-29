@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Iterator
 
@@ -36,13 +37,14 @@ class ModelEvent:
     usage: dict[str, Any] = field(default_factory=dict)
 
 
-class ModelBackend:
+class ModelBackend(ABC):
     """Interface every model provider adapter must implement."""
 
+    @abstractmethod
     def stream(
         self,
         messages: list[dict],
         tools: list[dict],
         model: str,
     ) -> Iterator[ModelEvent]:
-        raise NotImplementedError
+        """Yield normalized model events for one completion request."""

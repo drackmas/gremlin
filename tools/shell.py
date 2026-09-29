@@ -20,8 +20,7 @@ import os
 import re
 import shlex
 import subprocess
-
-from .filesystem import SandboxError
+from .sandbox import SandboxError
 from .registry import Tool
 
 from config import AppConfig

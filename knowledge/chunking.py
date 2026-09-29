@@ -95,11 +95,11 @@ def _find_units(lines: list[str], offs: list[int]) -> list[dict]:
         text = "\n".join(body).strip()
         if not text:
             if page is not None:
-                pending["page"] = page
+                pending["page"] = page  # type: ignore[assignment]
             if ts is not None:
-                pending["ts"] = ts
+                pending["ts"] = ts  # type: ignore[assignment]
             if heading:
-                pending["heading"] = heading
+                pending["heading"] = heading  # type: ignore[assignment]
             continue
         units.append(
             dict(

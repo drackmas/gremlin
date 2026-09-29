@@ -44,6 +44,15 @@ _TYPE_MAP = {
 }
 
 
+class ToolExecutionError(Exception):
+    """Base for all tool-handler execution failures.
+
+    The registry's :meth: catches this (and any
+    other exception) and converts it to a structured ERROR: ...
+    string so the model can recover.
+    """
+
+
 class ToolError(Exception):
     """Raised for unknown tools or schema violations."""
 

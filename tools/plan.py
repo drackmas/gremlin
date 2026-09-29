@@ -40,7 +40,7 @@ def build_plan_tool(cfg: AppConfig) -> Tool:
         action = args["action"]
 
         if action == "create":
-            p = store.create(args.get("goal", ""), args.get("phases"), args.get("notes"))
+            p = store.create(args.get("goal", ""), args.get("phases") or [], args.get("notes"))
             n_tasks = sum(len(ph.tasks) for ph in p.phases)
             return f"plan created: {p.goal} — {len(p.phases)} phase(s), {n_tasks} task(s); state persisted to plan.json"
 

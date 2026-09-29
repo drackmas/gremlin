@@ -129,7 +129,7 @@ def sync(kcfg: KnowledgeConfig, force: bool = False) -> SyncReport:
             r["source_path"]: r for r in index.documents()
         }
         for rel in sorted(set(by_rel) - set(files)):
-            index.delete_document(by_rel[rel]["doc_id"])
+            index.delete_document(by_rel[rel]["doc_id"])  # type: ignore[index]
             report.removed.append(rel)
             log.info("removed from index: %s", rel)
 

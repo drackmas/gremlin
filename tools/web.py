@@ -33,7 +33,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 from ddgs import DDGS
 
-from .registry import Tool
+from .registry import Tool, ToolExecutionError
 from .sanitize import sanitize_untrusted
 
 from config import AppConfig
@@ -56,7 +56,7 @@ _INTERNAL_SUFFIXES = (".local", ".internal", ".localhost", ".lan")
 _REDIRECT_STATUSES = frozenset({301, 302, 303, 307, 308})
 
 
-class WebError(Exception):
+class WebError(ToolExecutionError):
     """Raised for bad queries/URLs, SSRF rejections, network or parse failures."""
 
 

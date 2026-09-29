@@ -16,7 +16,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from ..config import KnowledgeConfig
 from ..metadata import derive_metadata
 from .models import ParsedDoc, doc_id_for, sha256_of
 

@@ -93,7 +93,7 @@ def survey(kcfg: KnowledgeConfig) -> list[SurveyEntry]:
             continue
         if path.suffix.lower() in TEXT_EXTENSIONS and path.name.endswith(".meta"):
             continue  # sidecars belong to their sibling file
-        stype = source_type_for(path, kcfg.source_dir)
+        stype = source_type_for(path)
         meta = derive_metadata(path)
         if not stype:
             parseable, note = False, "unsupported extension"
@@ -104,7 +104,7 @@ def survey(kcfg: KnowledgeConfig) -> list[SurveyEntry]:
         entries.append(
             SurveyEntry(
                 relpath=str(rel),
-                source_type=stype,
+                source_type=stype or "unknown",
                 size_bytes=path.stat().st_size,
                 title=meta.title,
                 date=meta.date,
