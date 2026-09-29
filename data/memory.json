@@ -59,8 +59,17 @@
     "pinned": false
   },
   {
-    "id": "e5e8d537",
-    "content": "Cookie balance: 6",
+    "id": "d55862c0",
+    "content": "DIRECTIVE: Whenever the user asks questions regarding theology, personal beliefs, philosophy, or any topic that seems specific to their personal study, research, or life experience, you MUST run `search_knowledge` first to see if they have a recorded perspective before providing a general-purpose answer. Do not wait for an explicit command to search the user's personal knowledge.",
+    "tags": [
+      "instruction",
+      "behavioral_directive"
+    ],
+    "pinned": true
+  },
+  {
+    "id": "740d45a8",
+    "content": "Cookie balance: 7",
     "tags": [
       "cookie",
       "balance"

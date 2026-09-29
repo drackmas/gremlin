@@ -16,15 +16,24 @@ from .store import Index
 
 _DESCRIPTION = """\
 Search the owner's personal knowledge library (books, transcripts, documents,
-transcribed audio/video) and retrieve relevant passages with citations.
+transcribed audio/video) and retrieve relevant passages with natural attribution.
 
-Use it for factual questions about the owner's files: quotes, names, dates,
-plans, testimony, video/audio content. Returns ranked hits, each with the
-matched passage, budgeted parent context, and a clean citation. Filters:
-source_type (transcript|txt|pdf|epub|docx|doc|audio|video), topic, author,
-date_from/date_to (YYYY-MM-DD or YYYY). An empty result is a normal result:
-retry with a shorter or differently-worded query, or conclude the library
-does not cover it. This tool retrieves and cites; it does not verify content.
+ALWAYS call this tool when the user asks about anything that could be in their
+library: quotes, names, dates, plans, opinions, testimony, video/audio content,
+or any factual claim about material they own. Do not answer from general knowledge
+or invent content from the library — search first, then answer from the returned
+passages using natural attribution (e.g., "In your notes on [topic]..." or "According to [Author]..."). 
+NEVER mention raw filenames, file paths, or file extensions (like .txt, .pdf, etc.) in your response. 
+Instead, use human-friendly descriptors from the metadata.
+
+Also call it when the question is ambiguous (could be library or general knowledge)
+and the library might help; prefer a quick search over guessing.
+
+Returns ranked hits with matched passage, parent context, and source metadata.
+Filters: source_type (transcript|txt|pdf|epub|docx|doc|audio|video), topic, author,
+date_from/date_to (YYYY-MM-DD or YYYY). Empty result is normal: retry with a
+shorter or differently-worded query, or conclude the library does not cover it.
+This tool retrieves and cites via natural language; it does not verify content.
 """
 
 _SOURCE_TYPES = [
@@ -97,9 +106,11 @@ def build_knowledge_tool(cfg: AppConfig, settings_loader) -> Tool:
             index.close()
         if not hits:
             return (
-                "No passages matched in the knowledge library. Try a shorter "
-                "query with fewer terms, different wording, or a broader "
-                "source_type filter."
+                "No passages matched this query. The library may still contain "
+                "relevant material. If the question could reasonably be answered "
+                "from the library, retry once using a shorter or differently "
+                "worded query and omit unnecessary filters before concluding "
+                "that the library does not cover it."
             )
         return _render_hits(hits, kcfg)
 
@@ -111,7 +122,13 @@ def build_knowledge_tool(cfg: AppConfig, settings_loader) -> Tool:
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "Natural-language query (a few words to a sentence).",
+                    "description": (
+                        "Focused natural-language search query for the owner's "
+                        "knowledge library. Include the important names, topics, "
+                        "titles, concepts, or phrases from the user's question. "
+                        "When searching for something the user vaguely remembers, "
+                        "use the distinctive details they provided."
+                    ),
                 },
                 "source_type": {
                     "type": "string",
