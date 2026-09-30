@@ -16,6 +16,25 @@ CHUNK_SIZE = DISCORD_MAX - 100  # headroom for error lines
 _SENTINEL = object()
 
 
+def _chunk_text(text: str, size: int = CHUNK_SIZE) -> list[str]:
+    """Split *text* into chunks of at most *size* chars, preferring newlines/spaces."""
+    text = (text or "").strip()
+    if not text:
+        return []
+    chunks: list[str] = []
+    while len(text) > size:
+        cut = text.rfind("\n", 0, size)
+        if cut < size // 2:
+            cut = text.rfind(" ", 0, size)
+        if cut < size // 2:
+            cut = size
+        chunks.append(text[:cut].rstrip())
+        text = text[cut:].lstrip()
+    if text:
+        chunks.append(text)
+    return chunks
+
+
 async def stream_to_channel(channel, events, chunk_size: int = CHUNK_SIZE, edit_interval: float = 0.25) -> str:
     """Feed a ChatManager.run() event stream into a Discord channel.
 
@@ -209,6 +228,36 @@ class DiscordBot:
         if loop is not None and loop.is_running():
             asyncio.run_coroutine_threadsafe(client.close(), loop)
         log.info("discord bot stopping")
+
+    def send_to_session(self, session_id: str, text: str) -> bool:
+        """Push *text* to the Discord channel bound to *session_id*.
+
+        Returns True when a send was dispatched. No-op (False) when Discord is
+        not running or the session is not a Discord session. Safe to call from
+        any thread (it hops onto the client's running event loop).
+        """
+        client = self._client
+        if client is None:
+            return False
+        loop = getattr(client, "_gremlin_loop", None)
+        if loop is None or not loop.is_running():
+            return False
+        channel_id = None
+        for key, sid in self.session_map.items():
+            if sid == session_id:
+                channel_id = int(key)
+                break
+        if channel_id is None:
+            return False
+        asyncio.run_coroutine_threadsafe(self._send_channel(client, channel_id, text), loop)
+        return True
+
+    async def _send_channel(self, client, channel_id: int, text: str) -> None:
+        channel = await client.get_channel(channel_id)
+        if channel is None:
+            return
+        for chunk in _chunk_text(text):
+            await channel.send(chunk)
 
 
 # -- the bot -----------------------------------------------------------------

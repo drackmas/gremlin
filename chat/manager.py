@@ -421,6 +421,11 @@ class ChatManager:
             if self._active_runs.get(session_id) is token:
                 del self._active_runs[session_id]
 
+    def is_busy(self, session_id: str) -> bool:
+        """True when a generation is actively running for *session_id*."""
+        with self._active_lock:
+            return session_id in self._active_runs
+
     def abort(self, session_id: str) -> bool:
         """Cooperatively cancel this session's active generation (Stop button).
 

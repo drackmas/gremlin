@@ -128,6 +128,13 @@ def create_app(cfg: AppConfig | None = None) -> Flask:
         except ValueError as e:
             log.warning("discord bot not started at boot: %s", e)
 
+    # --- transcription monitor (announce finished background jobs) ----------
+    from tools.transcribe_monitor import TranscribeMonitor
+
+    transcribe_monitor = TranscribeMonitor(cfg, manager, sessions, settings.load, discord_bot)
+    app.extensions["gremlin_transcribe_monitor"] = transcribe_monitor
+    transcribe_monitor.start()
+
     # --- pages ----------------------------------------------------------
     @app.get("/")
     def index():

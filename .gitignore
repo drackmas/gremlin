@@ -10,6 +10,7 @@ models/stt/*
 library/*
 models/embed/
 data/knowledge/*
+data/transcribe_jobs/
 data/gremlin.log
 !data/knowledge/eval/
 data/knowledge/eval/*

@@ -106,6 +106,16 @@ class AppConfig:
         return self.root / "models"
 
     @property
+    def files_dir(self) -> Path:
+        """Personal work area (``files/``) — owner-curated, gitignored."""
+        return self.root / "files"
+
+    @property
+    def transcribe_jobs_dir(self) -> Path:
+        """Job state files for the background audio transcription tool."""
+        return self.data_dir / "transcribe_jobs"
+
+    @property
     def knowledge_source_dir(self) -> Path:
         """Dedicated source folder for the knowledge library (``library/``).
 
@@ -165,6 +175,7 @@ def ensure_dirs(cfg: AppConfig) -> None:
         cfg.generated_tools_dir,
         cfg.piper_dir,
         cfg.stt_dir,
+        cfg.transcribe_jobs_dir,
         cfg.skills_dir,
         cfg.transcripts_dir,
         cfg.videos_dir,
