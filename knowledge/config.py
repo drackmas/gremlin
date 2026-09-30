@@ -37,6 +37,7 @@ class KnowledgeConfig:
     ocr_lang: str = "eng"
     ocr_dpi: int = 200
     ocr_min_text_chars: int = 40  # below this, a page is image-only -> OCR
+    tessdata_prefix: Path | None = None  # TESSDATA_PREFIX for tesseract; None = system default
 
     # --- audio / video transcription (faster-whisper, local, CPU) --------------
     transcribe_model: str = "small"

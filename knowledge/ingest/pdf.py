@@ -9,6 +9,7 @@ Pages are separated by ``<!--page:N-->`` (1-based) for chunking/citations.
 """
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import tempfile
@@ -21,7 +22,7 @@ from ..metadata import derive_metadata
 from .models import IngestError, ParsedDoc, doc_id_for, sha256_of
 
 
-def _ocr_page(page, dpi: int, lang: str) -> str:
+def _ocr_page(page, dpi: int, lang: str, tessdata_prefix: Path | None = None) -> str:
     """Render one page to PNG and OCR it with the tesseract CLI."""
     if not shutil.which("tesseract"):
         raise IngestError(
@@ -33,11 +34,15 @@ def _ocr_page(page, dpi: int, lang: str) -> str:
         f.write(png)
         img = Path(f.name)
     try:
+        env = dict(os.environ)
+        if tessdata_prefix is not None:
+            env["TESSDATA_PREFIX"] = str(tessdata_prefix)
         proc = subprocess.run(
             ["tesseract", str(img), "stdout", "--dpi", str(dpi), "-l", lang],
             capture_output=True,
             text=True,
             timeout=600,
+            env=env,
         )
         if proc.returncode != 0:
             raise IngestError(
@@ -67,7 +72,7 @@ def parse_pdf_file(path: Path, source_root: Path, cfg: KnowledgeConfig) -> Parse
             if len(text.strip()) >= cfg.ocr_min_text_chars:
                 parts.append(f"<!--page:{n}-->\n{text.strip()}")
             else:
-                ocr = _ocr_page(page, cfg.ocr_dpi, cfg.ocr_lang)
+                ocr = _ocr_page(page, cfg.ocr_dpi, cfg.ocr_lang, cfg.tessdata_prefix)
                 parts.append(f"<!--page:{n}-->\n{ocr.strip()}")
                 ocr_pages.append(n)
     if ocr_pages and len(ocr_pages) == page_count:

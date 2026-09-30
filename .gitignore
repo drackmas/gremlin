@@ -14,3 +14,4 @@ data/gremlin.log
 !data/knowledge/eval/
 data/knowledge/eval/*
 !data/knowledge/eval/questions.json
+# models/tessdata/

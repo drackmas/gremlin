@@ -203,6 +203,7 @@ def main() -> int:
         root=cfg.knowledge_dir,
         source_dir=cfg.knowledge_source_dir,
         models_dir=cfg.models_dir,
+        tessdata_prefix=cfg.models_dir / "tessdata",
     )
     report = sync(kcfg, force="--force" in sys.argv[1:])
     print(report.details())
