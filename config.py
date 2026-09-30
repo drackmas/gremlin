@@ -81,6 +81,14 @@ class AppConfig:
     @property
     def transcripts_dir(self) -> Path:
         return self.root / "files" / "transcripts"
+
+    @property
+    def videos_dir(self) -> Path:
+        return self.root / "files" / "videos"
+
+    @property
+    def audio_dir(self) -> Path:
+        return self.root / "files" / "audio"
     @property
     def generated_tools_dir(self) -> Path:
         return self.root / "data" / "generated_tools"
@@ -159,6 +167,8 @@ def ensure_dirs(cfg: AppConfig) -> None:
         cfg.stt_dir,
         cfg.skills_dir,
         cfg.transcripts_dir,
+        cfg.videos_dir,
+        cfg.audio_dir,
         cfg.knowledge_source_dir,
         cfg.knowledge_dir,
         cfg.knowledge_dir / "markdown",
