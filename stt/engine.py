@@ -37,7 +37,7 @@ SAMPLE_RATE = 16_000
 MIN_AUDIO_MS = 200
 
 #: Utterances longer than this (seconds) are rejected.
-MAX_AUDIO_S = 30
+MAX_AUDIO_S = 300
 
 #: Sample rates accepted for numpy waveforms (resampled to 16 kHz).
 SUPPORTED_SAMPLE_RATES = (8_000, 11_025, 16_000, 22_050, 24_000, 32_000, 44_100, 48_000)
