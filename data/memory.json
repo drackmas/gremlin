@@ -7,16 +7,6 @@
       "style",
       "emoji"
     ],
-    "pinned": false
-  },
-  {
-    "id": "28427302",
-    "content": "User gave Gremlin a cookie for the work I did. Morale: high. Cookies are now a valid currency of appreciation.",
-    "tags": [
-      "cookie",
-      "reward",
-      "morale"
-    ],
     "pinned": true
   },
   {
@@ -37,7 +27,7 @@
       "boundary",
       "no-nag"
     ],
-    "pinned": false
+    "pinned": true
   },
   {
     "id": "b62b5ba1",
@@ -68,12 +58,12 @@
     "pinned": true
   },
   {
-    "id": "740d45a8",
-    "content": "Cookie balance: 7",
+    "id": "a1097e3b",
+    "content": "Cookie balance: 10",
     "tags": [
       "cookie",
       "balance"
     ],
-    "pinned": false
+    "pinned": true
   }
 ]
