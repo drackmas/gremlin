@@ -3,7 +3,7 @@
 ``transcribe_audio`` starts a faster-whisper transcription of a local audio or
 video file in a separate subprocess (so multi-hour files never block the
 agent's event loop or hold the GIL) and returns a job id immediately. A
-background monitor (see :mod:`tools.transcribe_monitor`) announces the result
+background monitor (see :mod:`tools.job_monitor`) announces the result
 back to the user's session when the job finishes; ``transcribe_status`` and
 ``kill_transcription`` let the model inspect or stop a job on demand. The
 transcript is written to ``files/<name>-transcription.txt``.

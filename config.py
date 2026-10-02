@@ -116,6 +116,11 @@ class AppConfig:
         return self.data_dir / "transcribe_jobs"
 
     @property
+    def download_jobs_dir(self) -> Path:
+        """Job state files for the background YouTube download tools."""
+        return self.data_dir / "download_jobs"
+
+    @property
     def knowledge_source_dir(self) -> Path:
         """Dedicated source folder for the knowledge library (``library/``).
 
@@ -176,6 +181,7 @@ def ensure_dirs(cfg: AppConfig) -> None:
         cfg.piper_dir,
         cfg.stt_dir,
         cfg.transcribe_jobs_dir,
+        cfg.download_jobs_dir,
         cfg.skills_dir,
         cfg.transcripts_dir,
         cfg.videos_dir,

@@ -80,6 +80,11 @@ def main(cfg=None, backend=None) -> int:
     memory = MemoryStore(cfg.data_dir / "memory.json")
     registry = build_registry(cfg, skills, memory, settings.load)
     manager = ChatManager(cfg, sessions, registry, skills, backend=backend, memory=memory)
+
+    from tools.job_monitor import JobMonitor
+
+    job_monitor = JobMonitor(cfg, manager, sessions, settings.load)
+    job_monitor.start()
     s = sessions.create("terminal")
 
     p = _Paint(sys.stdout.isatty() and not os.environ.get("NO_COLOR"))

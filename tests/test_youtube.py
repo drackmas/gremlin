@@ -12,11 +12,17 @@ from tools import build_registry
 from tools.sanitize import BANNER
 from tools.youtube import (
     YoutubeError,
+    _download_opts,
     _pick_subtitle,
     _parse_vtt,
     build_youtube_tools,
+    download_audio,
+    download_status,
+    download_video,
     fetch_transcript,
     fetch_video_info,
+    kill_download,
+    run_download,
 )
 
 
@@ -198,7 +204,7 @@ def test_transcript_saved_to_files(stubbed, tmp_path, monkeypatch):
     assert f"Saved to: {dest.relative_to(tmp_path)}" in out
 
 
-# --- downloads --------------------------------------------------------------
+# --- downloads (background jobs) -------------------------------------------
 
 @pytest.fixture
 def fake_download(monkeypatch):
@@ -231,38 +237,140 @@ def fake_download(monkeypatch):
     return ext
 
 
-def test_download_audio_opts_accepted_by_ytdlp(stubbed, fake_download, tmp_path, monkeypatch):
+def test_run_download_audio_opts_accepted_by_ytdlp(stubbed, fake_download, tmp_path):
     """Regression: yt-dlp requires ``postprocessors`` as a list of dicts;
     the audio download opts must be accepted by the real constructor."""
     from config import AppConfig
 
-    from tools.youtube import download_audio
-
     fake_download["value"] = "mp3"
-    monkeypatch.setattr(stubbed, "_extract", lambda url: _info(
-        manual={}, auto={}, upload_date="20050423"))
     cfg = AppConfig(root=tmp_path)
-
-    out = download_audio("https://youtu.be/x", cfg)
-
-    assert out.startswith(BANNER)
-    saved = tmp_path / "files" / "audio" / "tester" / "2005-04-23_Test Video.mp3"
-    assert saved.is_file()
-    assert f"Saved to: {saved.relative_to(tmp_path)}" in out
+    dest = cfg.audio_dir / "tester"
+    result = run_download("https://youtu.be/x", dest, "2005-04-23_Test Video", _download_opts("audio"))
+    assert result.is_file() and result.suffix == ".mp3"
 
 
-def test_download_video_opts_accepted_by_ytdlp(stubbed, fake_download, tmp_path, monkeypatch):
+def test_run_download_video_opts_accepted_by_ytdlp(stubbed, fake_download, tmp_path):
     from config import AppConfig
 
-    from tools.youtube import download_video
-
-    monkeypatch.setattr(stubbed, "_extract", lambda url: _info(
-        manual={}, auto={}, upload_date="20050423"))
     cfg = AppConfig(root=tmp_path)
+    dest = cfg.videos_dir / "tester"
+    result = run_download("https://youtu.be/x", dest, "2005-04-23_Test Video", _download_opts("video"))
+    assert result.is_file() and result.suffix == ".mp4"
+
+
+class _FakeProc:
+    pid = 4321
+
+
+def _popen_recorder(monkeypatch, y):
+    calls = []
+
+    def fake_popen(argv, **kw):
+        calls.append((argv, kw))
+        return _FakeProc()
+
+    monkeypatch.setattr(y.subprocess, "Popen", fake_popen)
+    return calls
+
+
+def test_download_audio_starts_job(stubbed, cfg, monkeypatch):
+    import json
+
+    y = stubbed
+    calls = _popen_recorder(monkeypatch, y)
+    monkeypatch.setattr(y, "_extract", lambda url: _info(manual={}, auto={}, upload_date="20050423"))
+
+    out = download_audio("https://youtu.be/x", cfg)
+    assert out.startswith(BANNER)
+    data = json.loads(out[out.index("{"):])
+    assert data["status"] == "running"
+    assert data["kind"] == "audio"
+    assert data["output_path"].endswith(".mp3")
+    state = json.loads((cfg.download_jobs_dir / f"{data['job_id']}.json").read_text())
+    assert state["pid"] == 4321
+    assert state["notified"] is False
+    assert state["output_path"] == data["output_path"]
+    argv, kw = calls[0]
+    assert argv[1:3] == ["-m", "tools.download_worker"]
+    assert argv[3] == str(cfg.download_jobs_dir / f"{data['job_id']}.json")
+    assert kw["cwd"] == str(cfg.root)
+
+
+def test_download_video_starts_job(stubbed, cfg, monkeypatch):
+    import json
+
+    y = stubbed
+    calls = _popen_recorder(monkeypatch, y)
+    monkeypatch.setattr(y, "_extract", lambda url: _info(manual={}, auto={}, upload_date="20050423"))
 
     out = download_video("https://youtu.be/x", cfg)
-
     assert out.startswith(BANNER)
-    saved = tmp_path / "files" / "videos" / "tester" / "2005-04-23_Test Video.mp4"
-    assert saved.is_file()
-    assert f"Saved to: {saved.relative_to(tmp_path)}" in out
+    data = json.loads(out[out.index("{"):])
+    assert data["status"] == "running"
+    assert data["kind"] == "video"
+    assert data["output_path"].endswith(".mp4")
+    state = json.loads((cfg.download_jobs_dir / f"{data['job_id']}.json").read_text())
+    assert state["kind"] == "video"
+    assert state["stem"] == "2005-04-23_Test Video"
+    assert calls[0][0][1:3] == ["-m", "tools.download_worker"]
+
+
+def _write_state(cfg, job_id, **overrides):
+    import json
+    import time
+
+    state = {
+        "id": job_id,
+        "kind": "audio",
+        "session_id": "sess-1",
+        "url": "https://youtu.be/x",
+        "title": "Test Video",
+        "channel": "tester",
+        "output_path": "/x/2005-04-23_Test Video.mp3",
+        "dest_dir": "/x",
+        "stem": "2005-04-23_Test Video",
+        "status": "running",
+        "started_at": time.time(),
+        "pid": None,
+        "progress_pct": 0.0,
+        "error": None,
+        "finished_at": None,
+        "notified": False,
+    }
+    state.update(overrides)
+    cfg.download_jobs_dir.mkdir(parents=True, exist_ok=True)
+    (cfg.download_jobs_dir / f"{job_id}.json").write_text(json.dumps(state))
+    return state
+
+
+def test_download_status_running_and_terminal(cfg):
+    import json
+
+    _write_state(cfg, "j1", status="running", progress_pct=42.5)
+    data = json.loads(download_status(cfg, "j1"))
+    assert data["status"] == "running"
+    assert "42%" in data["progress"]
+
+    _write_state(cfg, "j1", status="done", error=None)
+    data = json.loads(download_status(cfg, "j1"))
+    assert data["status"] == "done"
+
+    assert "unknown job id" in download_status(cfg, "nope")
+
+
+def test_kill_download_dead_pid_marks_killed(cfg):
+    import json
+
+    _write_state(cfg, "j2", status="running", pid=99999999)
+    data = json.loads(kill_download(cfg, "j2"))
+    assert data["status"] == "killed"
+    state = json.loads((cfg.download_jobs_dir / "j2.json").read_text())
+    assert state["status"] == "killed"
+
+
+def test_kill_download_not_running(cfg):
+    import json
+
+    _write_state(cfg, "j3", status="done", pid=99999999)
+    data = json.loads(kill_download(cfg, "j3"))
+    assert "not running" in data["note"]

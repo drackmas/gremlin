@@ -10,6 +10,8 @@ const state = {
   sidebar: null,
   n_ctx: null,
   lastPrompt: null,
+  renderedMsgId: null, // id of the last server message already in the DOM
+  pollBusy: false,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -385,7 +387,9 @@ async function selectSession(id) {
     toast(`Could not load session: ${e.message}`);
     return;
   }
-  renderMessages(session.messages || []);
+  const msgs = session.messages || [];
+  renderMessages(msgs);
+  state.renderedMsgId = msgs.length ? (msgs[msgs.length - 1].id || null) : null;
   state.lastPrompt = session.last_usage && typeof session.last_usage.prompt_tokens === "number"
     ? session.last_usage.prompt_tokens
     : null;
@@ -544,6 +548,56 @@ function renderMessages(messages) {
   }
   for (const m of messages) appendMessage(m, container);
   container.scrollTop = container.scrollHeight;
+}
+
+/* ---------------- server-side message polling ----------------
+ * The chat UI only sees messages while a turn streams. Messages written by
+ * the server on its own (background job completion replies, Discord bridge)
+ * are picked up by polling the active session and appending what's new.
+ */
+
+// Point the poll cursor at the last server-persisted message without
+// re-rendering (used right after a turn ends: the DOM already shows it).
+async function syncRenderedId() {
+  if (!state.activeId) return;
+  try {
+    const session = await api(`/api/sessions/${state.activeId}`);
+    if (session.id !== state.activeId) return; // switched sessions mid-flight
+    const msgs = session.messages || [];
+    state.renderedMsgId = msgs.length ? (msgs[msgs.length - 1].id || null) : null;
+  } catch (_) {
+    // best-effort; the next poll re-renders from scratch if the cursor is stale
+  }
+}
+
+async function pollActiveSession() {
+  if (!state.activeId || state.streaming || state.pollBusy) return;
+  state.pollBusy = true;
+  try {
+    const session = await api(`/api/sessions/${state.activeId}`);
+    if (session.id !== state.activeId) return; // switched sessions mid-flight
+    const msgs = session.messages || [];
+    if (!msgs.length) return;
+    const lastId = msgs[msgs.length - 1].id || null;
+    if (lastId === state.renderedMsgId) return;
+    // If the cursor no longer exists server-side (compaction rewrote history)
+    // the incremental view is invalid: render the whole thing again.
+    const idx = state.renderedMsgId
+      ? msgs.findIndex((m) => m.id === state.renderedMsgId)
+      : -1;
+    const container = $("messages");
+    if (idx === -1) {
+      renderMessages(msgs);
+    } else {
+      for (const m of msgs.slice(idx + 1)) appendMessage(m, container);
+      container.scrollTop = container.scrollHeight;
+    }
+    state.renderedMsgId = lastId;
+  } catch (_) {
+    // best-effort; retry on the next tick
+  } finally {
+    state.pollBusy = false;
+  }
 }
 
 /* ---------------- streaming chat ---------------- */
@@ -752,6 +806,7 @@ async function sendMessage() {
   setStreamingUI(false);
   input.placeholder = "Message Gremlin…  (Enter to send, Shift+Enter for newline)";
   input.focus();
+  syncRenderedId(); // align the poll cursor with what the server persisted
 }
 
 /* ---------------- boot ---------------- */
@@ -841,4 +896,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else if (state.sessions.length) {
     selectSession(state.sessions[0].id);
   }
+  setInterval(pollActiveSession, 4000);
 });

@@ -29,7 +29,7 @@ graph TB
         GR[grep.py<br/>grep_files, find_files]
         SH[shell.py<br/>run_command]
         WB[web.py<br/>web_search, web_fetch]
-        YT[youtube.py<br/>youtube_transcript, youtube_video_info,<br/>youtube_download_video, youtube_download_audio]
+        YT[youtube.py<br/>youtube_transcript, youtube_video_info,<br/>youtube_download_video, youtube_download_audio,<br/>download_status, kill_download]
         GV[grav_mcp.py<br/>grav_mcp]
         ST[skill_tool.py<br/>load_skill]
         PL[plan.py<br/>plan]
@@ -135,8 +135,13 @@ All tools are registered in `ToolRegistry` (`tools/registry.py`) at startup by `
 | `web_fetch` | `tools/web.py` | Fetch a URL and extract readable text (HTML stripped, sanitized). |
 | `youtube_transcript` | `tools/youtube.py` | Fetch a YouTube video's English transcript via `yt-dlp` (manual subtitles preferred, auto captions otherwise). Saved under `files/transcripts/<channel>/<video name>.txt`; up to 24 KB returned to the model (sanitized). |
 | `youtube_video_info` | `tools/youtube.py` | Fetch a YouTube video's title, uploader, duration, view count and description via `yt-dlp` (sanitized). |
-| `youtube_download_video` | `tools/youtube.py` | Download a YouTube video as an mp4 at ~360p to `files/videos/<channel>/<video name>.mp4` via `yt-dlp` (sanitized). |
-| `youtube_download_audio` | `tools/youtube.py` | Download a YouTube video's audio as a 128 kbps mp3 to `files/audio/<channel>/<video name>.mp3` via `yt-dlp` + `ffmpeg` (sanitized). |
+| `youtube_download_video` | `tools/youtube.py` | Start a background download of a YouTube video as an mp4 at ~360p to `files/videos/<channel>/<video name>.mp4` via `yt-dlp`. Returns a job id immediately; Gremlin tells the user when the download is done (sanitized). |
+| `youtube_download_audio` | `tools/youtube.py` | Start a background download of a YouTube video's audio as a 128 kbps mp3 to `files/audio/<channel>/<video name>.mp3` via `yt-dlp` + `ffmpeg`. Returns a job id immediately; Gremlin tells the user when the download is done (sanitized). |
+| `download_status` | `tools/youtube.py` | Check the progress or terminal result of a download job by `job_id`. |
+| `kill_download` | `tools/youtube.py` | Stop a running download job by `job_id` (SIGTERM to its worker). |
+| `transcribe_audio` | `tools/transcribe.py` | Transcribe a local audio/video file to `files/<name>-transcription.txt` with faster-whisper, as a background job. `model` (`turbo`/`large-v3`), `language`, `overwrite`. Returns a job id immediately; Gremlin tells the user when the transcript is done. |
+| `transcribe_status` | `tools/transcribe.py` | Check a transcription job's live progress (offset/ETA) by `job_id`. |
+| `kill_transcription` | `tools/transcribe.py` | Stop a running transcription job by `job_id` (the partial transcript is kept). |
 | `grav_mcp` | `tools/grav_mcp.py` | Talk to the local Grav CMS via the Grav MCP server (`grav-mcp` Node package). One general-purpose proxy tool: `action` is `list_tools` (brief index of the remote tools), `describe_tool` (one tool's full parameter schema), `call_tool` (`tool_name` + free-form `arguments`), `list_resources`, or `read_resource` (`uri`). Large-payload escape hatches: `arguments_file` (read arguments from a JSON file) and `result_to_file` (write the full untruncated result to a file). Spawns/reuses the server over stdio (default, `npx -y grav-mcp`) or HTTP (`GRAV_MCP_TRANSPORT`); credentials come from `.env` (`GRAV_API_URL`, `GRAV_API_KEY`) and are never logged. See *Skills* (`grav_cms`). |
 | `plan` | `tools/plan.py`, `planning/store.py` | Persistent planning for substantial coding / self-refactoring: `create` a plan (goal, phases, tasks, dependencies) after inspecting the code, execute incrementally (`start`, `progress`, `test`, `done`, `skip`, `block`, `reset`), `revise` when results invalidate it, `checkpoint` git before self-modifying changes, `render` a human-readable `plan.md`, `finish`/`abandon`. Authoritative state in `plan.json` at the project root; a compact summary is injected into the system prompt every turn, so it survives compaction and restarts. |
 | `load_skill` | `tools/skill_tool.py` | Read the full `SKILL.md` instructions for a named skill. The model calls this before doing a job that matches a skill. |
@@ -149,6 +154,25 @@ All tools are registered in `ToolRegistry` (`tools/registry.py`) at startup by `
 | `create_skill` | `tools/meta.py` | Write a new `skills/<slug>/SKILL.md` (instructions only). See *Self-extension*. |
 | `create_tool` | `tools/meta.py` | Write + register a new executable tool from Python source. See *Self-extension*. |
 | `search_knowledge` | `knowledge/` | Search the owner's personal knowledge library (books, transcripts, documents, transcribed audio/video) and return ranked passages with clean citations. **Gated**: only registered/visible when the `knowledge_enabled` setting is ON (default OFF — behavior identical to before). Hybrid vector + BM25 with reciprocal-rank fusion, filters (`source_type`, `topic`, `author`, `date_from`/`date_to`), a per-hit parent-context budget, and a total result budget. See *Knowledge library*. |
+
+### Background jobs (transcription & downloads)
+
+Long-running media work (transcriptions, YouTube downloads) runs in detached
+worker subprocesses (`tools/transcribe_worker.py`,
+`tools/download_worker.py`) so it never blocks the model loop or dies with an
+aborted turn. Each job's state (status, progress, output path, `notified`)
+is a JSON file under `data/transcribe_jobs/` or `data/download_jobs/`. A
+daemon monitor (`tools/job_monitor.py`, started by both `app.py` and
+`cli.py`) polls every 3 s and, when a job reaches a terminal status
+(done / error / killed), runs a short completion turn in the job's session so
+the user gets a natural "it's done / it failed / it was stopped" reply —
+persisted to the session and pushed to the bound Discord channel when
+applicable. The monitor waits for a busy session (it never cancels an
+in-progress user turn) and marks each job `notified` so it is announced
+exactly once. It also sweeps "running" jobs whose worker process died
+(crash, OOM, reboot) and reports them as errors, so nothing hangs silently.
+The web UI polls the active session every 4 s and appends server-written
+messages, so these replies appear without a reload.
 
 ### Self-extension (meta tools)
 
@@ -267,7 +291,11 @@ gremlin/
 │   ├── grep.py             # grep_files, find_files (sandboxed)
 │   ├── shell.py            # run_command (sandboxed, allow-listable)
 │   ├── web.py              # web_search, web_fetch (sanitized)
-│   ├── youtube.py          # youtube_transcript, youtube_video_info, youtube_download_video/audio (sanitized)
+│   ├── youtube.py          # 6 tools: transcript, video_info, download_video/audio (jobs), download_status, kill_download (sanitized)
+│   ├── download_worker.py  # Detached worker for download jobs (python -m tools.download_worker)
+│   ├── transcribe.py       # transcribe_audio, transcribe_status, kill_transcription (job API)
+│   ├── transcribe_worker.py  # Detached faster-whisper worker (python -m tools.transcribe_worker)
+│   ├── job_monitor.py      # JobMonitor daemon: announces finished transcribe/download jobs to their session
 │   ├── grav_mcp.py         # grav_mcp (Grav CMS via the Grav MCP server; stdio/HTTP)
 │   ├── task.py             # defined but NOT registered (see Limitations)
 │   ├── plan.py             # plan (persistent plan.json state machine)
