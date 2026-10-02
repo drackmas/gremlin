@@ -509,8 +509,16 @@ class PlanStore:
     # -- lifecycle ----------------------------------------------------------
 
     def create(self, goal: str, phases_in: list[Any], notes: list[str] | None = None) -> Plan:
-        """Create a new plan. An existing ACTIVE plan blocks creation."""
-        existing = self.load()
+        """Create a new plan. An existing ACTIVE plan blocks creation.
+
+        A corrupt/unreadable leftover plan.json is treated as "no plan" and
+        overwritten: the model's only recovery path for it is action=create.
+        """
+        try:
+            existing = self.load()
+        except PlanError as e:
+            log.warning("discarding unreadable plan.json on create: %s", e)
+            existing = None
         if existing is not None and existing.status == PLAN_ACTIVE:
             raise PlanError("an active plan already exists; revise it (action=revise) or abandon it first")
         goal = (goal or "").strip()

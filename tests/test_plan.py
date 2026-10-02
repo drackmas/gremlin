@@ -94,6 +94,27 @@ def test_load_invalid_status_raises(tmp_path):
         PlanStore(path).load()
 
 
+def test_create_overwrites_corrupt_plan(tmp_path):
+    """A corrupt leftover plan.json must not dead-end action=create, which is
+    the model's only recovery path for it."""
+    path = tmp_path / "plan.json"
+    path.write_text("not json", encoding="utf-8")
+    store = PlanStore(path)
+    plan = store.create("fresh start", SAMPLE)
+    assert plan.status == PLAN_ACTIVE
+    reloaded = store.load()
+    assert reloaded.goal == "fresh start"
+    assert [t.id for p in reloaded.phases for t in p.tasks] == ["t1", "t2", "t3", "t4", "t5"]
+
+
+def test_create_blocked_by_active_plan(tmp_path):
+    store = make_store(tmp_path)
+    create_plan(store)
+    with pytest.raises(PlanError, match="active plan already exists"):
+        store.create("another goal", SAMPLE)
+
+
+
 def test_roundtrip_preserves_all_fields(tmp_path):
     store = make_store(tmp_path)
     create_plan(store)

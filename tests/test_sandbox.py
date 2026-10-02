@@ -326,6 +326,41 @@ def test_edit_insert_missing_file(reg):
     assert "not found" in out
 
 
+# --- edit_file: per-action required args -----------------------------------
+
+
+def test_edit_str_replace_missing_args(reg, cfg):
+    (cfg.root / "a.txt").write_text("x")
+    out, ok = reg.execute("edit_file", {"path": "a.txt", "action": "str_replace"})
+    assert ok is False
+    assert "action=str_replace requires: old_str, new_str" in out
+
+
+def test_edit_str_replace_empty_old_str_rejected(reg, cfg):
+    (cfg.root / "a.txt").write_text("x")
+    out, ok = reg.execute(
+        "edit_file", {"path": "a.txt", "action": "str_replace", "old_str": "", "new_str": "y"}
+    )
+    assert ok is False
+    assert "non-empty" in out
+    assert (cfg.root / "a.txt").read_text() == "x"
+
+
+def test_edit_create_missing_content(reg):
+    out, ok = reg.execute("edit_file", {"path": "new.txt", "action": "create"})
+    assert ok is False
+    assert "action=create requires: content" in out
+
+
+def test_edit_insert_missing_text(reg, cfg):
+    (cfg.root / "a.txt").write_text("x\n")
+    out, ok = reg.execute("edit_file", {"path": "a.txt", "action": "insert", "line": 1})
+    assert ok is False
+    assert "action=insert requires: text" in out
+    assert (cfg.root / "a.txt").read_text() == "x\n"
+
+
+
 # --- read_file: line range -------------------------------------------------
 
 

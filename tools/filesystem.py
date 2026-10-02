@@ -44,8 +44,13 @@ def build_fs_tools(cfg, read_limit: int) -> list[Tool]:
         p = _resolve(root, path)
 
         if action == "str_replace":
-            old_str = args["old_str"]
-            new_str = args["new_str"]
+            old_str = args.get("old_str")
+            new_str = args.get("new_str")
+            missing = [a for a, v in (("old_str", old_str), ("new_str", new_str)) if v is None]
+            if missing:
+                raise SandboxError(f"action=str_replace requires: {', '.join(missing)}")
+            if not old_str:
+                raise SandboxError("old_str must be a non-empty string")
             if not p.exists():
                 raise SandboxError(f"file not found: {path}")
             if not p.is_file():
@@ -63,7 +68,9 @@ def build_fs_tools(cfg, read_limit: int) -> list[Tool]:
             return f"replaced {len(old_str)} chars with {len(new_str)} chars in {path}"
 
         elif action == "create":
-            content = args["content"]
+            content = args.get("content")
+            if content is None:
+                raise SandboxError("action=create requires: content")
             if p.is_dir():
                 raise SandboxError(f"not a file: {path}")
             try:
@@ -74,7 +81,9 @@ def build_fs_tools(cfg, read_limit: int) -> list[Tool]:
 
         elif action == "insert":
             line = args.get("line", 1)
-            text = args["text"]
+            text = args.get("text")
+            if text is None:
+                raise SandboxError("action=insert requires: text")
             if not p.exists():
                 raise SandboxError(f"file not found: {path}")
             if p.is_dir():

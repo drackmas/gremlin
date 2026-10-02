@@ -39,6 +39,11 @@ def build_plan_tool(cfg: AppConfig) -> Tool:
     def plan(args: dict) -> str:
         action = args["action"]
 
+        def _require(*names: str) -> None:
+            missing = [n for n in names if not args.get(n)]
+            if missing:
+                raise PlanError(f"action={action} requires: {', '.join(missing)}")
+
         if action == "create":
             p = store.create(args.get("goal", ""), args.get("phases") or [], args.get("notes"))
             n_tasks = sum(len(ph.tasks) for ph in p.phases)
@@ -48,31 +53,38 @@ def build_plan_tool(cfg: AppConfig) -> Tool:
             return render_plan(store.require())
 
         if action == "start":
+            _require("task_id")
             store.start(args["task_id"], args.get("note"))
             return f"{args['task_id']} -> in_progress"
 
         if action == "done":
+            _require("task_id")
             p = store.complete(args["task_id"], args.get("note"))
             done, total, pct = plan_progress(p)
             return f"{args['task_id']} -> done ({done}/{total}, {pct}%)"
 
         if action == "progress":
+            _require("task_id", "pct")
             store.set_progress(args["task_id"], int(args["pct"]), args.get("note"))
             return f"{args['task_id']} progress: {max(0, min(100, int(args['pct'])))}%"
 
         if action == "block":
+            _require("task_id")
             store.block(args["task_id"], args.get("note", ""))
             return f"{args['task_id']} -> blocked: {args.get('note', '').strip()}"
 
         if action == "skip":
+            _require("task_id")
             store.skip(args["task_id"], args.get("note"))
             return f"{args['task_id']} -> skipped"
 
         if action == "reset":
+            _require("task_id")
             store.reset(args["task_id"])
             return f"{args['task_id']} -> pending"
 
         if action == "test":
+            _require("task_id")
             store.record_test(args["task_id"], args.get("command", ""), bool(args.get("ok")), args.get("summary", ""))
             verdict = "ok" if args.get("ok") else "FAILED"
             return f"{args['task_id']} test recorded: `{args.get('command', '')}` {verdict}"

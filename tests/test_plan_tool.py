@@ -81,6 +81,58 @@ def test_plan_create_view_roundtrip(cfg):
     assert "t1 wire up module [pending]" in view
 
 
+
+def _seed_leftover_plan(cfg, status: str) -> None:
+    """Persist a leftover plan.json with a given status plus a stale
+    plan.json.lock (as a killed process would leave behind)."""
+    store = PlanStore(cfg.root / "plan.json")
+    plan = store.create("stale goal", SAMPLE_PHASES)
+    plan.status = status
+    store.save(plan)
+    (cfg.root / "plan.json.lock").write_text("", encoding="utf-8")
+
+
+def test_plan_create_after_active_leftover_is_recoverable(cfg):
+    """Leftover ACTIVE plan blocks create, but the error tells the agent how
+    to recover: abandon, then create. The stale .lock file must not interfere."""
+    _seed_leftover_plan(cfg, "active")
+    registry = build_registry(cfg)
+
+    result, ok = registry.execute("plan", {"action": "create", "goal": "new goal", "phases": SAMPLE_PHASES})
+    assert not ok
+    assert "active plan already exists" in result
+    assert "abandon" in result
+    # stale plan untouched by the rejected create
+    assert PlanStore(cfg.root / "plan.json").load().goal == "stale goal"
+
+    result, ok = registry.execute("plan", {"action": "abandon", "reason": "stale leftover"})
+    assert ok and "abandoned" in result
+
+    result, ok = registry.execute("plan", {"action": "create", "goal": "new goal", "phases": SAMPLE_PHASES})
+    assert ok and "plan created" in result
+    assert PlanStore(cfg.root / "plan.json").load().goal == "new goal"
+
+
+def test_plan_create_replaces_completed_leftover(cfg):
+    _seed_leftover_plan(cfg, "completed")
+    registry = build_registry(cfg)
+    result, ok = registry.execute("plan", {"action": "create", "goal": "new goal", "phases": SAMPLE_PHASES})
+    assert ok and "plan created" in result
+    assert PlanStore(cfg.root / "plan.json").load().goal == "new goal"
+
+
+def test_plan_create_replaces_corrupt_leftover(cfg):
+    """Corrupt leftover plan.json + stale lock: create must recover instead of
+    looping on 'recreate it with action=create'."""
+    cfg.root.joinpath("plan.json").write_text("{{{{ not json", encoding="utf-8")
+    (cfg.root / "plan.json.lock").write_text("", encoding="utf-8")
+    registry = build_registry(cfg)
+    result, ok = registry.execute("plan", {"action": "create", "goal": "new goal", "phases": SAMPLE_PHASES})
+    assert ok and "plan created" in result
+    reloaded = PlanStore(cfg.root / "plan.json").load()
+    assert reloaded.goal == "new goal"
+
+
 def test_plan_tool_execution_cycle(cfg):
     registry = build_registry(cfg)
     registry.execute("plan", {"action": "create", "goal": "g", "phases": SAMPLE_PHASES})
@@ -123,6 +175,28 @@ def test_plan_tool_unknown_action_and_args(cfg):
     assert not ok and "unknown task" in result
     result, ok = registry.execute("plan", {"action": "view"})
     assert ok and "plan: g" in result
+
+
+def test_plan_missing_task_id_is_actionable_error(cfg):
+    """A model that omits task_id must get a clear, recoverable error, not a
+    bare KeyError."""
+    registry = build_registry(cfg)
+    for action in ("start", "done", "block", "skip", "reset"):
+        result, ok = registry.execute("plan", {"action": action})
+        assert not ok
+        assert f"action={action} requires: task_id" in result
+        assert "KeyError" not in result
+
+
+def test_plan_progress_requires_pct(cfg):
+    registry = build_registry(cfg)
+    registry.execute("plan", {"action": "create", "goal": "g", "phases": SAMPLE_PHASES})
+    result, ok = registry.execute("plan", {"action": "progress", "task_id": "t1"})
+    assert not ok
+    assert "action=progress requires: pct" in result
+    result, ok = registry.execute("plan", {"action": "progress", "task_id": "t1", "pct": 40})
+    assert ok and "40%" in result
+
 
 
 def test_plan_revise_and_render(cfg):
@@ -227,6 +301,97 @@ def test_agent_loop_executes_plan_end_to_end(cfg):
     assert plan.status == "completed"
     assert plan.phases[0].tasks[0].status == "done"
     assert plan.phases[0].tasks[0].test is not None and plan.phases[0].tasks[0].test.ok
+
+
+CHECK = 'python -B -c "import calc; assert calc.add(2, 3) == 5"'
+
+
+def test_agent_loop_plans_edits_runs_and_finishes(cfg):
+    """Full agentic cycle in one user turn: plan -> edit_file (create,
+    str_replace, insert) -> run_command (fail, fix, pass) -> read_file ->
+    record test -> finish. Every tool result must flow back to the model."""
+    backend = FakeBackend(
+        [
+            [
+                ModelEvent("tool_call", tool_call_id="c1", name="plan",
+                           arguments={"action": "create", "goal": "add calc.add",
+                                      "phases": [
+                                          {"title": "Implement", "tasks": [{"title": "write calc.py"}]},
+                                          {"title": "Verify", "tasks": [{"title": "make check pass", "depends_on": ["t1"]}]},
+                                      ]}),
+                ModelEvent("done", finish_reason="tool_calls"),
+            ],
+            [
+                ModelEvent("tool_call", tool_call_id="c2", name="plan", arguments={"action": "start", "task_id": "t1"}),
+                ModelEvent("tool_call", tool_call_id="c3", name="edit_file", arguments={
+                    "path": "calc.py", "action": "create",
+                    "content": "def add(a, b):\n    return a - b\n"}),
+                ModelEvent("tool_call", tool_call_id="c4", name="run_command",
+                           arguments={"command": CHECK}),
+                ModelEvent("done", finish_reason="tool_calls"),
+            ],
+            [
+                # the model saw the assertion failure and fixes the operator
+                ModelEvent("tool_call", tool_call_id="c5", name="edit_file", arguments={
+                    "path": "calc.py", "action": "str_replace",
+                    "old_str": "return a - b", "new_str": "return a + b"}),
+                ModelEvent("tool_call", tool_call_id="c6", name="run_command",
+                           arguments={"command": CHECK}),
+                ModelEvent("done", finish_reason="tool_calls"),
+            ],
+            [
+                ModelEvent("tool_call", tool_call_id="c7", name="plan", arguments={
+                    "action": "test", "task_id": "t1", "command": CHECK, "ok": True,
+                    "summary": "assertion passes"}),
+                ModelEvent("tool_call", tool_call_id="c8", name="plan", arguments={"action": "done", "task_id": "t1"}),
+                ModelEvent("tool_call", tool_call_id="c9", name="plan", arguments={"action": "start", "task_id": "t2"}),
+                ModelEvent("done", finish_reason="tool_calls"),
+            ],
+            [
+                ModelEvent("tool_call", tool_call_id="c10", name="edit_file", arguments={
+                    "path": "calc.py", "action": "insert", "line": 1,
+                    "text": '"""Tiny calculator."""'}),
+                ModelEvent("tool_call", tool_call_id="c11", name="read_file", arguments={"path": "calc.py"}),
+                ModelEvent("done", finish_reason="tool_calls"),
+            ],
+            [
+                ModelEvent("tool_call", tool_call_id="c12", name="plan", arguments={"action": "done", "task_id": "t2"}),
+                ModelEvent("tool_call", tool_call_id="c13", name="plan", arguments={"action": "finish"}),
+                ModelEvent("done", finish_reason="tool_calls"),
+            ],
+            [ModelEvent("text", text="calc.add is done and verified."), ModelEvent("done")],
+        ]
+    )
+    sessions, manager = make_manager(cfg, backend)
+    s = sessions.create("t")
+    events = list(manager.run(s["id"], "implement calc.add and make the check pass", SETTINGS))
+
+    tool_events = [e for e in events if e["type"] == "tool_call"]
+    assert len(tool_events) == 13
+    assert all(e["status"] == "ok" for e in tool_events)
+    assert events[-1]["type"] == "done" and events[-1]["stop_reason"] == "completed"
+
+    # the failing check was reported with exit code 1, the fixed one with 0
+    assert "exit code: 1" in tool_events[3]["result"]
+    assert "AssertionError" in tool_events[3]["result"]
+    assert "exit code: 0" in tool_events[5]["result"]
+    # the model received the failing result in its next prompt (loop integrity):
+    # calls[2] is the turn that follows the c2/c3/c4 batch
+    third_call_msgs = backend.calls[2]["messages"]
+    tool_msgs = [m for m in third_call_msgs if m.get("role") == "tool"]
+    assert any("exit code: 1" in m["content"] for m in tool_msgs)
+
+    # the file on disk reflects create + str_replace + insert
+    source = (cfg.root / "calc.py").read_text(encoding="utf-8")
+    assert source == '"""Tiny calculator."""\ndef add(a, b):\n    return a + b\n'
+
+    # plan state: completed, t1 done with a passing test record, t2 done
+    plan = PlanStore(cfg.root / "plan.json").load()
+    assert plan.status == "completed"
+    assert plan.phases[0].tasks[0].status == "done"
+    assert plan.phases[0].tasks[0].test is not None and plan.phases[0].tasks[0].test.ok
+    assert plan.phases[1].tasks[0].status == "done"
+
 
 
 def test_plan_visible_in_next_turn_system_prompt(cfg):
