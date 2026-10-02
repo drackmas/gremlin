@@ -17,8 +17,8 @@ what is said) using the `youtube_transcript` and `youtube_video_info` tools.
 
 ## Workflow
 
-1. Call `youtube_transcript` with the video `url` (and `lang` if the user
-   wants a specific subtitle language; default is `en`).
+1. Call `youtube_transcript` with the video `url`. The tool fetches
+   English subtitles only (it has no language parameter).
    - Manual subtitles are used when the video has them; otherwise
      auto-generated captions are used.
    - The result starts with the video title, transcript source, and a
@@ -28,9 +28,11 @@ what is said) using the `youtube_transcript` and `youtube_video_info` tools.
 2. Long transcripts are truncated at ~24 KB in the tool result. If the answer
    depends on content beyond the truncation point, read the saved file
    (`Saved to:` path) with the filesystem tools instead of guessing.
-3. If the call returns `ERROR: no subtitles for language 'X'. Available: ...`,
-   retry with one of the available language codes, or tell the user the video
-   has no subtitles.
+3. If the call returns `ERROR: no English subtitles found. Available: ...`,
+   the video has no English subtitles (the tool supports English only). Tell
+   the user, list the available languages from the error, and offer to
+   download the audio (`youtube_download_audio`) and transcribe it locally
+   with `transcribe_audio` instead.
 4. For summaries: produce a structured summary (main points, key claims,
    conclusion) and cite approximate phrasing from the transcript for important
    statements. Distinguish clearly between what the speaker said and your own
@@ -42,4 +44,5 @@ what is said) using the `youtube_transcript` and `youtube_video_info` tools.
 
 - Summaries: 5-15 bullet points unless the user asks for more/less.
 - Always state the video title you worked from.
-- If the transcript is in another language than requested, mention that.
+- If the transcript is garbled or clearly not English, say so instead of
+  guessing at the content.

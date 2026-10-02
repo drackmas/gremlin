@@ -30,6 +30,7 @@ log = logging.getLogger("gremlin.tools.youtube")
 
 TRANSCRIPT_LIMIT = 24 * 1024  # max chars returned to the model
 LANG = "en"  # only English is ever requested
+SOCKET_TIMEOUT = 30  # seconds; bounds every yt-dlp network operation
 
 
 class YoutubeError(ToolExecutionError):
@@ -40,10 +41,10 @@ def _ydl_opts() -> dict[str, Any]:
     return {
         "skip_download": True,
         "quiet": True,
-        "no_warnings": True,
         "noplaylist": True,
         # Prefer VTT when available; we only parse text-based formats.
         "subtitlesformat": "vtt/best",
+        "socket_timeout": SOCKET_TIMEOUT,
     }
 
 
@@ -316,6 +317,16 @@ def fetch_video_info(url: str) -> str:
     )
 
 
+def _cleanup_partial(dest_dir: Path, stem: str) -> None:
+    """Remove yt-dlp partial/temp files left behind after a failed download."""
+    for pattern in (f"{stem}.*.part", f"{stem}.*.ytdl", f"{stem}.part", f"{stem}.ytdl"):
+        for f in dest_dir.glob(pattern):
+            try:
+                f.unlink()
+            except OSError:
+                log.warning("could not remove partial download: %s", f)
+
+
 def _download_media(url: str, dest_dir: Path, stem: str, extra_opts: dict) -> Path:
     """Download media using yt-dlp, returning the final file path."""
     import yt_dlp
@@ -327,6 +338,7 @@ def _download_media(url: str, dest_dir: Path, stem: str, extra_opts: dict) -> Pa
         "quiet": True,
         "no_warnings": True,
         "noprogress": True,
+        "socket_timeout": SOCKET_TIMEOUT,
     }
     opts.update(extra_opts)
 
@@ -334,12 +346,14 @@ def _download_media(url: str, dest_dir: Path, stem: str, extra_opts: dict) -> Pa
         with yt_dlp.YoutubeDL(opts) as ydl:
             ydl.extract_info(url, download=True)
     except Exception as e:
+        _cleanup_partial(dest_dir, stem)
         raise YoutubeError(f"yt-dlp could not download {url}: {e}") from e
 
     for f in sorted(dest_dir.iterdir()):
         if f.stem == stem and f.is_file():
             return f
 
+    _cleanup_partial(dest_dir, stem)
     raise YoutubeError(f"downloaded file not found in {dest_dir}")
 
 
@@ -362,7 +376,7 @@ def download_video(url: str, cfg: AppConfig) -> str:
     size_mb = result.stat().st_size / (1024 * 1024)
     rel = result.relative_to(cfg.root)
 
-    return (
+    return sanitize_untrusted(
         f"Video: {title}\n"
         f"Channel: {channel}\n"
         f"Saved to: {rel}\n"
@@ -384,13 +398,14 @@ def download_audio(url: str, cfg: AppConfig) -> str:
 
     result = _download_media(url, dest_dir, stem, {
         "format": "bestaudio/best",
-        "postprocessors": {
-            "when": "post_process",
-            "add_chapters": False,
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "128",
-        },
+        # yt-dlp requires postprocessors as a *list* of option dicts.
+        "postprocessors": [
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "128",
+            },
+        ],
     })
 
     secs = info.get("duration") or 0
@@ -405,7 +420,7 @@ def download_audio(url: str, cfg: AppConfig) -> str:
     size_mb = result.stat().st_size / (1024 * 1024)
     rel = result.relative_to(cfg.root)
 
-    return (
+    return sanitize_untrusted(
         f"Video: {title}\n"
         f"Channel: {channel}\n"
         f"Saved to: {rel}\n"

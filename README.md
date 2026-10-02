@@ -29,7 +29,7 @@ graph TB
         GR[grep.py<br/>grep_files, find_files]
         SH[shell.py<br/>run_command]
         WB[web.py<br/>web_search, web_fetch]
-        YT[youtube.py<br/>youtube_transcript,<br/>youtube_video_info]
+        YT[youtube.py<br/>youtube_transcript, youtube_video_info,<br/>youtube_download_video, youtube_download_audio]
         GV[grav_mcp.py<br/>grav_mcp]
         ST[skill_tool.py<br/>load_skill]
         PL[plan.py<br/>plan]
@@ -135,6 +135,8 @@ All tools are registered in `ToolRegistry` (`tools/registry.py`) at startup by `
 | `web_fetch` | `tools/web.py` | Fetch a URL and extract readable text (HTML stripped, sanitized). |
 | `youtube_transcript` | `tools/youtube.py` | Fetch a YouTube video's English transcript via `yt-dlp` (manual subtitles preferred, auto captions otherwise). Saved under `files/transcripts/<channel>/<video name>.txt`; up to 24 KB returned to the model (sanitized). |
 | `youtube_video_info` | `tools/youtube.py` | Fetch a YouTube video's title, uploader, duration, view count and description via `yt-dlp` (sanitized). |
+| `youtube_download_video` | `tools/youtube.py` | Download a YouTube video as an mp4 at ~360p to `files/videos/<channel>/<video name>.mp4` via `yt-dlp` (sanitized). |
+| `youtube_download_audio` | `tools/youtube.py` | Download a YouTube video's audio as a 128 kbps mp3 to `files/audio/<channel>/<video name>.mp3` via `yt-dlp` + `ffmpeg` (sanitized). |
 | `grav_mcp` | `tools/grav_mcp.py` | Talk to the local Grav CMS via the Grav MCP server (`grav-mcp` Node package). One general-purpose proxy tool: `action` is `list_tools` (brief index of the remote tools), `describe_tool` (one tool's full parameter schema), `call_tool` (`tool_name` + free-form `arguments`), `list_resources`, or `read_resource` (`uri`). Large-payload escape hatches: `arguments_file` (read arguments from a JSON file) and `result_to_file` (write the full untruncated result to a file). Spawns/reuses the server over stdio (default, `npx -y grav-mcp`) or HTTP (`GRAV_MCP_TRANSPORT`); credentials come from `.env` (`GRAV_API_URL`, `GRAV_API_KEY`) and are never logged. See *Skills* (`grav_cms`). |
 | `plan` | `tools/plan.py`, `planning/store.py` | Persistent planning for substantial coding / self-refactoring: `create` a plan (goal, phases, tasks, dependencies) after inspecting the code, execute incrementally (`start`, `progress`, `test`, `done`, `skip`, `block`, `reset`), `revise` when results invalidate it, `checkpoint` git before self-modifying changes, `render` a human-readable `plan.md`, `finish`/`abandon`. Authoritative state in `plan.json` at the project root; a compact summary is injected into the system prompt every turn, so it survives compaction and restarts. |
 | `load_skill` | `tools/skill_tool.py` | Read the full `SKILL.md` instructions for a named skill. The model calls this before doing a job that matches a skill. |
@@ -265,7 +267,7 @@ gremlin/
 │   ├── grep.py             # grep_files, find_files (sandboxed)
 │   ├── shell.py            # run_command (sandboxed, allow-listable)
 │   ├── web.py              # web_search, web_fetch (sanitized)
-│   ├── youtube.py          # youtube_transcript, youtube_video_info (sanitized)
+│   ├── youtube.py          # youtube_transcript, youtube_video_info, youtube_download_video/audio (sanitized)
 │   ├── grav_mcp.py         # grav_mcp (Grav CMS via the Grav MCP server; stdio/HTTP)
 │   ├── task.py             # defined but NOT registered (see Limitations)
 │   ├── plan.py             # plan (persistent plan.json state machine)

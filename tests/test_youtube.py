@@ -7,7 +7,7 @@ Network calls are stubbed: ``_extract`` is monkeypatched per test and
 from __future__ import annotations
 
 import pytest
-
+from pathlib import Path
 from tools import build_registry
 from tools.sanitize import BANNER
 from tools.youtube import (
@@ -196,3 +196,73 @@ def test_transcript_saved_to_files(stubbed, tmp_path, monkeypatch):
     assert dest.read_text(encoding="utf-8").startswith("Video: Test Video")
     assert "Uploaded: 2005-04-23" in dest.read_text(encoding="utf-8")
     assert f"Saved to: {dest.relative_to(tmp_path)}" in out
+
+
+# --- downloads --------------------------------------------------------------
+
+@pytest.fixture
+def fake_download(monkeypatch):
+    """Patch ``yt_dlp.YoutubeDL`` so downloads write a fake media file,
+    while the REAL constructor still runs on the exact opts the tool
+    builds (a malformed ``postprocessors`` value raises in
+    ``YoutubeDL.__init__`` before any download is attempted)."""
+    import yt_dlp
+
+    real_ytdl = yt_dlp.YoutubeDL
+    ext = {"value": "mp4"}
+
+    class FakeDL:
+        def __init__(self, opts):
+            self._outtmpl = opts.get("outtmpl")  # before real ctor normalizes it
+            real_ytdl(opts)
+            self._opts = opts
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+        def extract_info(self, url, download=False):
+            target = str(self._outtmpl).replace(".%(ext)s", "." + ext["value"])
+            Path(target).write_bytes(b"fake media")
+            return {}
+
+    monkeypatch.setattr("yt_dlp.YoutubeDL", FakeDL)
+    return ext
+
+
+def test_download_audio_opts_accepted_by_ytdlp(stubbed, fake_download, tmp_path, monkeypatch):
+    """Regression: yt-dlp requires ``postprocessors`` as a list of dicts;
+    the audio download opts must be accepted by the real constructor."""
+    from config import AppConfig
+
+    from tools.youtube import download_audio
+
+    fake_download["value"] = "mp3"
+    monkeypatch.setattr(stubbed, "_extract", lambda url: _info(
+        manual={}, auto={}, upload_date="20050423"))
+    cfg = AppConfig(root=tmp_path)
+
+    out = download_audio("https://youtu.be/x", cfg)
+
+    assert out.startswith(BANNER)
+    saved = tmp_path / "files" / "audio" / "tester" / "2005-04-23_Test Video.mp3"
+    assert saved.is_file()
+    assert f"Saved to: {saved.relative_to(tmp_path)}" in out
+
+
+def test_download_video_opts_accepted_by_ytdlp(stubbed, fake_download, tmp_path, monkeypatch):
+    from config import AppConfig
+
+    from tools.youtube import download_video
+
+    monkeypatch.setattr(stubbed, "_extract", lambda url: _info(
+        manual={}, auto={}, upload_date="20050423"))
+    cfg = AppConfig(root=tmp_path)
+
+    out = download_video("https://youtu.be/x", cfg)
+
+    assert out.startswith(BANNER)
+    saved = tmp_path / "files" / "videos" / "tester" / "2005-04-23_Test Video.mp4"
+    assert saved.is_file()
+    assert f"Saved to: {saved.relative_to(tmp_path)}" in out
