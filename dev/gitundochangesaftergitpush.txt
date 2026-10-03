@@ -1,0 +1,5 @@
+git reset --hard HEAD
+this restores changes since last push.
+
+git clean -fd
+deletes untracked files and folders
