@@ -3,3 +3,6 @@ this restores changes since last push.
 
 git clean -fd
 deletes untracked files and folders
+
+
+git restore . does not remove files you created after the push.
