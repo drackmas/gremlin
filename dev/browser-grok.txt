@@ -1,0 +1,124 @@
+You are working on the Gremlin repository:
+https://github.com/drackmas/gremlin
+
+Add a first-class, general-purpose browser capability so Gremlin can operate a real browser from natural-language instructions. The user must never need to write Python, Playwright, Selenium, CSS selectors, XPath, or site-specific scripts.
+
+Examples of what must work:
+- "Go to Facebook and post 'Hello from Gremlin.'"
+- "Go to X and post this message."
+- "Open this site, find the September invoice, and download it."
+- "Open my webmail and find the latest email from John."
+
+Gremlin must reason about the page and drive the browser itself.
+
+ARCHITECTURE (non-negotiable)
+Gremlin stays the primary agent. Do NOT wrap Browser Use as a second autonomous agent.
+
+Correct flow:
+User → Gremlin Agent → Browser Skill → Browser Tool → Playwright → real browser
+
+Wrong flow (forbid):
+Gremlin → Browser Use Agent → another LLM → browser
+
+Treat https://github.com/browser-use/browser-use only as a reference for ideas and patterns. Study it, adapt useful concepts, but implement a clean Gremlin-native tool + skill that fits the existing ToolRegistry and skill system.
+
+PROCESS
+1. Inspect Gremlin thoroughly first: agent loop, ToolRegistry, how tools take args/return results, how skills are defined/loaded, config/deps, tests, and where a browser tool + skill should live. Run existing tests for a baseline. Do not assume architecture from filenames alone.
+2. Inspect Browser Use for Playwright lifecycle, contexts, persistent profiles, auth/session, pages/tabs, navigation, DOM/a11y snapshots, element refs, click/type/keys/scroll/hover/select, screenshots, downloads/uploads, waiting, recovery, and error handling. Take only what is useful; prefer a smaller native implementation over copying large chunks.
+3. Briefly document the design (files to add/change, tool + skill integration, Playwright management, sessions, snapshots, element refs, screenshots, tabs, auth, human intervention, errors). Then implement it. Do not stop at a proposal.
+
+BROWSER ENGINE
+- Use Playwright (Chromium/Chrome first; leave room for other browsers later).
+- Support headed (user can see the browser) and headless.
+- Real browser, not a simulated one.
+
+BROWSER TOOL
+Follow existing Gremlin tool conventions. Expose at least:
+- Navigation: open/goto, back, forward, reload, wait for navigation
+- Inspection: current URL, title, page text, compact LLM-friendly snapshot, interactive elements, a11y info, screenshot
+- Interaction: click, double-click, type, clear, press keys, select, check/uncheck, hover, drag (where practical), scroll
+- Tabs: list, open, switch, close
+- Files: upload, handle downloads
+- Waiting: wait, wait for element/state/navigation/page change
+- State: persistent profile/session, contexts, session reuse
+
+PAGE SNAPSHOTS (critical)
+Never dump raw HTML. Produce a compact, LLM-friendly representation that includes URL, title, relevant visible text, interactive elements with roles/names/state/refs, and useful structure. Example shape:
+
+PAGE: X
+URL: https://x.com/home
+Interactive elements:
+[1] Home — link
+[2] Explore — link
+[6] Post — button
+[7] Search — textbox
+
+Keep snapshots small enough for repeated agent steps.
+
+ELEMENT REFERENCES
+Model interacts via refs from the snapshot (e.g. click(element_ref=6)), never by inventing CSS/XPath. Refs are temporary; if stale, return a clear error telling the agent to take a fresh snapshot.
+
+SEMANTIC + VISUAL
+Primary: semantic/DOM/a11y (role, name, text, labels, state).
+Fallback: screenshots + coordinate clicks only when semantic interaction is insufficient (JS-heavy UIs, canvas, custom controls, virtualized lists). Coordinate interaction must not be the default.
+
+PERSISTENT PROFILES
+Support persistent browser profiles so authenticated sessions survive across runs. User logs in once (including MFA) in the headed browser; later tasks reuse the session. Never expose passwords, cookies, or tokens to the LLM. Never ask the user to paste passwords into chat. Never bypass MFA/CAPTCHA.
+
+HUMAN INTERVENTION
+Pause cleanly when the user must act (login, MFA, CAPTCHA, security checks, permission dialogs). Keep the browser open, let the user finish, then resume. Fit this into Gremlin’s existing architecture; do not invent a separate UI system.
+
+BROWSER SKILL
+Add a general-purpose skill that teaches the agent:
+- when to use the browser
+- inspect before acting; always prefer snapshots + refs
+- refresh snapshot after significant page changes
+- multi-step workflows and dynamic pages
+- recover from stale refs
+- use screenshots only when needed
+- tabs, auth, human intervention
+- verify success after actions
+- recover from errors
+- never assume buttons exist; never rely on brittle selectors
+- treat consequential actions carefully (post, send, purchase, delete, settings change, upload): confirm correct site, account, destination, and content before committing
+
+Do NOT create site-specific skills (Facebook, X, Gmail, etc.). One general browser skill for any website.
+
+CONSEQUENTIAL ACTIONS
+Require verification before irreversible or public actions. Do not perform ambiguous destructive actions. Do not bypass security controls.
+
+ERRORS
+Return structured, actionable errors (page load failed, element not found, ref expired, navigation failed, browser disconnected, download/upload failed, auth required, human intervention needed, CAPTCHA). Prefer messages the agent can recover from, e.g. “Element reference 42 is invalid; page changed — take a fresh snapshot.”
+
+SECURITY
+- No credentials, passwords, cookies, or tokens in snapshots or model context.
+- No logging of auth material.
+- No CAPTCHA/MFA/access-control bypass.
+- Prefer persistent profiles over giving the LLM secrets.
+
+DEPENDENCIES & QUALITY
+- Add Playwright cleanly to project deps and document browser install/setup.
+- Follow existing Gremlin style; keep browser code modular; do not rewrite unrelated code.
+- Prefer robust semantic interaction and reusable abstractions.
+- Avoid large blind copies from Browser Use.
+
+TESTING
+Add tests for: init, navigation, inspection, snapshot generation, element interaction, tabs, persistent profile behavior, error handling. Prefer a local test HTML page. Do not depend on real social accounts or live Facebook/X.
+
+DOCS
+Update docs for: install, enabling/using the browser, persistent profiles, first interactive login, headed vs headless, human intervention, limitations, and simple examples (“Open Facebook and tell me if I’m logged in”, “Go to example.com and find the contact email”).
+
+DELIVERABLES
+Implement the tool and skill. Run tests, fix issues, do a simple end-to-end test on a safe local/test site.
+
+Finally report:
+- What was implemented
+- Files added/modified
+- Dependencies added
+- How to install/run
+- How persistent profiles and the skill work
+- Example user commands
+- Tests run and results
+- Known limitations / remaining work
+
+The result must feel like a native Gremlin capability, not a bolted-on Browser Use wrapper.
