@@ -1,0 +1,18 @@
+{
+  "id": "924d5b802438",
+  "kind": "audio",
+  "session_id": "4029dc0cb9b44e61826dd03af19b50b9",
+  "url": "https://www.youtube.com/watch?v=mIxlk_k8cZ8",
+  "title": "What Does the Bible Say About God? Jesus?  - Mandela Effect",
+  "channel": "EYA Censored | Supernatural Bible Changes",
+  "output_path": "/home/dracmas/python/gremlin/files/audio/EYA Censored _ Supernatural Bible Changes/2026-04-26_What Does the Bible Say About God_ Jesus_ - Mandela Effect.mp3",
+  "dest_dir": "/home/dracmas/python/gremlin/files/audio/EYA Censored _ Supernatural Bible Changes",
+  "stem": "2026-04-26_What Does the Bible Say About God_ Jesus_ - Mandela Effect",
+  "status": "error",
+  "started_at": 1791119307.7601848,
+  "pid": 3209383,
+  "progress_pct": 0.0,
+  "error": "yt-dlp could not download https://www.youtube.com/watch?v=mIxlk_k8cZ8: ERROR: unable to download video data: HTTP Error 403: Forbidden",
+  "finished_at": 1791119309.7553728,
+  "notified": true
+}
