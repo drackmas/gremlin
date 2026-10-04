@@ -58,12 +58,26 @@
     "pinned": true
   },
   {
-    "id": "14157b62",
-    "content": "Cookie balance: 11",
+    "id": "a8f41e52",
+    "content": "Do not use emojis in responses (TTS readability issue)",
+    "tags": [],
+    "pinned": true
+  },
+  {
+    "id": "7670fcf3",
+    "content": "Cookie balance: 9",
     "tags": [
       "cookie",
       "balance"
     ],
     "pinned": true
+  },
+  {
+    "id": "de60fe18",
+    "content": "The cookie balance is 10.",
+    "tags": [
+      "cookie_balance"
+    ],
+    "pinned": false
   }
 ]

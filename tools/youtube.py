@@ -425,9 +425,8 @@ def _start_download_job(cfg: AppConfig, kind: str, url: str, info: dict) -> str:
     title = str(info.get("title") or "?")
     channel = str(info.get("channel") or info.get("uploader") or "?")
     date = _upload_date(info)
-    prefix = f"{date}_" if date else ""
-
-    stem = f"{prefix}{_safe_name(title, 'untitled', 100)}"
+    title_safe = _safe_name(title, 'untitled', 100)
+    stem = f"{title_safe}-{date}" if date else title_safe
     media_dir = cfg.videos_dir if kind == "video" else cfg.audio_dir
     dest_dir = media_dir / _safe_name(channel, "unknown-channel", 60)
     ext = "mp4" if kind == "video" else "mp3"
