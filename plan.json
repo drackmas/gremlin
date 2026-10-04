@@ -1,0 +1,76 @@
+{
+  "goal": "Create a new custom tool `youtube_transcript_formatted` that saves YouTube transcripts using the user's preferred naming convention: `YYYY-MM-DD_Title-transcription.txt`.",
+  "version": 1,
+  "revision": 0,
+  "status": "active",
+  "created": "2026-10-04T12:09:32.450690+00:00",
+  "updated": "2026-10-04T12:09:32.450728+00:00",
+  "notes": [
+    "The existing `youtube_transcript` tool saves files in a different format.",
+    "The goal is to achieve consistency with audio transcription filenames.",
+    "I will implement this by creating a new tool that fetches metadata and transcript directly."
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "title": "Research & Analysis",
+      "tasks": [
+        {
+          "id": "t1",
+          "title": "Research the existing youtube_transcript tool implementation (if possible) or identify necessary libraries for metadata and transcripts.",
+          "status": "pending",
+          "depends_on": [],
+          "progress": 0,
+          "notes": [],
+          "test": null
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Implementation & Testing",
+      "tasks": [
+        {
+          "id": "t2",
+          "title": "Write the Python code for the new tool using youtube_transcript_api and pytube (or similar) to get metadata and text.",
+          "status": "pending",
+          "depends_on": [
+            "t1"
+          ],
+          "progress": 0,
+          "notes": [],
+          "test": null
+        },
+        {
+          "id": "t3",
+          "title": "Test the tool with a known YouTube URL to verify filename and content.",
+          "status": "pending",
+          "depends_on": [
+            "t2"
+          ],
+          "progress": 0,
+          "notes": [],
+          "test": null
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Deployment",
+      "tasks": [
+        {
+          "id": "t4",
+          "title": "Final verification and instruction documentation.",
+          "status": "pending",
+          "depends_on": [
+            "t2"
+          ],
+          "progress": 0,
+          "notes": [],
+          "test": null
+        }
+      ]
+    }
+  ],
+  "checkpoints": []
+}
