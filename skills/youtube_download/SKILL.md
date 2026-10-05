@@ -34,9 +34,11 @@ want. If they ask for multiple formats, call each tool in turn.
 3. Only if the user explicitly asks "is it done yet?": call `download_status`
    with the `job_id` and relay the progress line.
 4. To stop it: call `kill_download` with the `job_id`.
-5. Once the completion notice arrives, name the saved file and offer natural
-   next steps (e.g. transcribe the audio, ingest it into the knowledge
-   library, summarize it).
+5. Once the completion notice arrives, name the saved file. If the user's
+   request included further steps (e.g. transcribe the audio, ingest it into
+   the knowledge library, summarize it), do them now without asking for
+   permission. Only if the request is fully satisfied, offer one or two
+   optional next steps.
 
 ## Rules
 

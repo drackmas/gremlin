@@ -325,6 +325,14 @@ def summarize_plan(plan: Plan) -> str:
         f"goal: {plan.goal}",
         f"status: {plan.status} | revision: {plan.revision} | progress: {done}/{total} ({pct}%)",
     ]
+    # Active plan: explicit autonomy directive so completion of one step does not
+    # degenerate into asking the user for permission to continue (priority rank 1).
+    if plan.status == PLAN_ACTIVE:
+        lines.append(
+            "EXECUTION: this plan is active - proceed to the next eligible task "
+            "immediately without asking the user for permission; report to the user "
+            "only when the whole plan is complete or a genuine blocker is hit."
+        )
     # Current task (in_progress) — the authoritative "what to work on now" signal.
     in_progress = [t for p in plan.phases for t in p.tasks if t.status == TASK_IN_PROGRESS]
     if in_progress:

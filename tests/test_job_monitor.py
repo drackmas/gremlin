@@ -7,7 +7,9 @@ import os
 import time
 import uuid
 
+from planning.store import PlanStore
 from sessions import SessionManager
+
 from tools.job_monitor import DEAD_GRACE_SEC, JobMonitor
 
 
@@ -129,6 +131,67 @@ def test_download_done_notified_names_output(cfg):
     assert "download" in trigger
     state = json.loads(_state_path(cfg, "download", "d1").read_text())
     assert state["notified"] is True
+
+
+def _make_plan(cfg):
+    store = PlanStore(cfg.root / "plan.json")
+    return store.create(
+        "download then summarize",
+        [
+            {"title": "fetch", "tasks": [{"title": "download video"}]},
+            {"title": "digest", "tasks": [{"title": "summarize", "depends_on": ["t1"]}]},
+        ],
+    )
+
+
+def test_download_done_continues_active_plan(cfg):
+    """A finished job must not break the autonomous loop: with an active plan
+    the trigger must tell the model to continue the plan, not to ask permission
+    or offer next steps."""
+    monitor, manager, sessions = _make(cfg)
+    _make_plan(cfg)
+    sid = sessions.create("plan test")["id"]
+    _write_job(cfg, "download", _download_job(sid))
+
+    monitor._scan()
+
+    assert len(manager.turns) == 1
+    trigger = manager.turns[0][1]
+    assert "plan is still active" in trigger
+    assert "Do not ask the user for permission" in trigger
+    assert "offer one or two optional next steps" not in trigger
+
+
+def test_download_done_offers_steps_without_plan(cfg):
+    """No active plan: the trigger keeps the conversational guidance but only
+    offers next steps once the user's request is fully satisfied."""
+    monitor, manager, sessions = _make(cfg)
+    sid = sessions.create("dl test")["id"]
+    _write_job(cfg, "download", _download_job(sid))
+
+    monitor._scan()
+
+    assert len(manager.turns) == 1
+    trigger = manager.turns[0][1]
+    assert "Do not ask the user for permission" not in trigger
+    assert "fully satisfied" in trigger
+    assert "offer one or two optional next steps" in trigger
+
+
+def test_download_failed_reports_blocker_with_active_plan(cfg):
+    """A failed job under an active plan is a genuine blocker: the trigger must
+    route it back to the plan and the user, not into offer-retry chatter."""
+    monitor, manager, sessions = _make(cfg)
+    _make_plan(cfg)
+    sid = sessions.create("fail test")["id"]
+    _write_job(cfg, "download", _download_job(sid, status="error", error="boom"))
+
+    monitor._scan()
+
+    assert len(manager.turns) == 1
+    trigger = manager.turns[0][1]
+    assert "plan is still active" in trigger
+    assert "record the block with the plan tool" in trigger
 
 
 def test_dead_worker_marked_error_and_notified(cfg):

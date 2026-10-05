@@ -576,3 +576,16 @@ def test_summarize_shows_current_and_next_eligible(tmp_path):
     assert "CURRENT:" not in text  # nothing in_progress
     assert "t2 write unit tests" in text
     assert "t4 cleanup" in text
+
+
+def test_summarize_execution_directive_only_when_active(tmp_path):
+    """Rank-1 autonomy: while the plan is active the system-prompt summary must
+    tell the model to keep executing without asking permission; once the plan
+    reaches a final state the directive must disappear."""
+    store = make_store(tmp_path)
+    create_plan(store)
+    assert "EXECUTION: this plan is active" in store.summarize()
+    assert "without asking the user for permission" in store.summarize()
+
+    store.abandon("user changed their mind")
+    assert "EXECUTION:" not in store.summarize()

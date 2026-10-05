@@ -38,5 +38,7 @@ the user automatically when it finishes — you do not need to wait or poll.
 - If a tool returns `ERROR:`, relay the message and suggest a fix (check the
   file path, confirm the file is readable, pass `overwrite=true`, or try a
   different model).
-- Once the transcript exists, offer natural next steps: summarize it, extract
-  key points or quotes, translate it, or save a copy somewhere.
+- Once the transcript exists, the user's remaining request takes priority: if
+  they also asked to summarize it, extract key points or quotes, translate it,
+  or save a copy, do that now without asking. Only if the request is fully
+  satisfied, offer one or two optional next steps.

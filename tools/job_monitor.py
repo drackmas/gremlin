@@ -26,6 +26,7 @@ import time
 from pathlib import Path
 
 from config import AppConfig
+from planning.store import PLAN_ACTIVE, PlanError, PlanStore, plan_progress
 from utils import atomic_write_text
 
 log = logging.getLogger("gremlin.jobs")
@@ -44,6 +45,7 @@ TERMINAL = ("done", "error", "killed")
 class JobMonitor:
     def __init__(self, cfg: AppConfig, manager, sessions, load_settings, discord_bot=None):
         self.cfg = cfg
+        self.plans = PlanStore(Path(cfg.root) / "plan.json")
         self.manager = manager
         self.sessions = sessions
         self.load_settings = load_settings
@@ -165,31 +167,72 @@ class JobMonitor:
             self._stop.wait(2.0)
         return True
 
+    def _active_plan(self) -> dict | None:
+        """``{'remaining': n, 'total': m}`` when a usable plan is active; None
+        when there is no active plan (missing, finished, or corrupt plan.json)."""
+        try:
+            plan = self.plans.load()
+        except PlanError:
+            return None
+        if plan is None or plan.status != PLAN_ACTIVE:
+            return None
+        done, total, _ = plan_progress(plan)
+        return {"remaining": total - done, "total": total}
+
     def _trigger(self, kind: str, job: dict) -> str:
         jid = job.get("id")
         out = job.get("output_path", "(unknown path)")
+        plan = self._active_plan()
         if kind == "download":
             what = "video" if job.get("kind") == "video" else "audio"
             size = job.get("size_bytes")
             size_str = f" ({size / (1024 * 1024):.1f} MB)" if size else ""
             if job.get("status") == "done":
-                return (
+                base = (
                     f"[gremlin-internal:download-complete] A download job you started has finished. "
                     f"Job {jid} ({what} download); file saved to {out}{size_str}. "
-                    "Reply to the user briefly and naturally: confirm the download is done, name the "
-                    "file, and offer one or two next steps (e.g. transcribe the audio, ingest it into "
-                    "the knowledge library). Do not mention this internal note."
+                )
+                if plan is not None:
+                    return base + (
+                        f"The user's plan is still active ({plan['remaining']} of {plan['total']} task(s) left). "
+                        "Continue it immediately: if this result feeds the next plan step, do that step now "
+                        "and update the plan tool as you go. Do not ask the user for permission to continue "
+                        "and do not offer next steps. Report to the user only on a genuine blocker or when "
+                        "the whole plan is complete. Do not mention this internal note."
+                    )
+                return base + (
+                    "Reply to the user briefly and naturally: confirm the download is done, name the file. "
+                    "If the user's request included further steps (e.g. summarize it), do them now without "
+                    "asking. Only if the request is fully satisfied, offer one or two optional next steps "
+                    "(e.g. transcribe the audio, ingest it into the knowledge library). Do not mention this "
+                    "internal note."
                 )
             if job.get("status") == "error":
-                return (
+                base = (
                     f"[gremlin-internal:download-failed] A download job you started FAILED. "
                     f"Job {jid} ({what} download); error: {job.get('error', 'unknown')}. "
+                )
+                if plan is not None:
+                    return base + (
+                        "The user's plan is still active. This failure may block a plan step: if a task "
+                        "depends on this output, record the block with the plan tool, then report the "
+                        "failure to the user with the reason. Do not mention this internal note."
+                    )
+                return base + (
                     "Reply to the user briefly: the download failed, say why, and offer to retry or "
                     "suggest a fix (check the URL, check the connection). Do not mention this internal note."
                 )
-            return (
+            base = (
                 f"[gremlin-internal:download-stopped] A download job you started was stopped. "
                 f"Job {jid} ({what} download); no complete file was produced. "
+            )
+            if plan is not None:
+                return base + (
+                    "The user's plan is still active, but no complete file was produced: if a plan step "
+                    "depends on it, record the block with the plan tool and report the stop to the user. "
+                    "Do not mention this internal note."
+                )
+            return base + (
                 "Reply to the user briefly: the download was stopped. Offer to restart it. "
                 "Do not mention this internal note."
             )
@@ -197,23 +240,50 @@ class JobMonitor:
         dur = job.get("duration_sec") or 0.0
         model = job.get("model", "")
         if job.get("status") == "done":
-            return (
+            base = (
                 f"[gremlin-internal:transcription-complete] A transcription job you started has finished. "
                 f"Job {jid} (model {model}); transcript saved to {out} (source duration ~{dur:.0f}s). "
-                "Reply to the user briefly and naturally: confirm it's done, name the transcript file, "
-                "and offer one or two next steps (e.g. summarize it, pull out quotes, save it elsewhere). "
-                "Do not mention this internal note."
+            )
+            if plan is not None:
+                return base + (
+                    f"The user's plan is still active ({plan['remaining']} of {plan['total']} task(s) left). "
+                    "Continue it immediately: if this result feeds the next plan step (e.g. summarize the "
+                    "transcript), do that step now and update the plan tool as you go. Do not ask the user "
+                    "for permission to continue and do not offer next steps. Report to the user only on a "
+                    "genuine blocker or when the whole plan is complete. Do not mention this internal note."
+                )
+            return base + (
+                "Reply to the user briefly and naturally: confirm it's done, name the transcript file. "
+                "If the user's request included further steps (e.g. summarize it, pull out quotes), do "
+                "them now without asking. Only if the request is fully satisfied, offer one or two "
+                "optional next steps (e.g. save it elsewhere). Do not mention this internal note."
             )
         if job.get("status") == "error":
-            return (
+            base = (
                 f"[gremlin-internal:transcription-failed] A transcription job you started FAILED. "
                 f"Job {jid}; error: {job.get('error', 'unknown')}. "
+            )
+            if plan is not None:
+                return base + (
+                    "The user's plan is still active. This failure may block a plan step: if a task "
+                    "depends on this transcript, record the block with the plan tool, then report the "
+                    "failure to the user with the reason. Do not mention this internal note."
+                )
+            return base + (
                 "Reply to the user briefly: the transcription failed, say why, and offer to retry or try a "
                 "different model. Do not mention this internal note."
             )
-        return (
+        base = (
             f"[gremlin-internal:transcription-stopped] A transcription job you started was stopped. "
             f"Job {jid}; partial transcript saved at {out}. "
+        )
+        if plan is not None:
+            return base + (
+                "The user's plan is still active, but only a partial transcript was produced: if a plan "
+                "step depends on the full transcript, record the block with the plan tool and report the "
+                "stop to the user. Do not mention this internal note."
+            )
+        return base + (
             "Reply to the user briefly: the transcription was stopped, and the partial transcript is saved "
             "at that path. Offer next steps. Do not mention this internal note."
         )
