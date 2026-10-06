@@ -71,13 +71,5 @@
       "balance"
     ],
     "pinned": true
-  },
-  {
-    "id": "de60fe18",
-    "content": "The cookie balance is 10.",
-    "tags": [
-      "cookie_balance"
-    ],
-    "pinned": false
   }
 ]

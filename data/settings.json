@@ -16,7 +16,7 @@
   "stt_volume_threshold": 30,
   "stt_silence_duration_ms": 3000,
   "shell_allowlist": [],
-  "max_tool_calls": 100,
+  "max_tool_calls": 500,
   "max_context_tokens": 131786,
   "context_window_turns": 10,
   "compaction_threshold": 0.65,
