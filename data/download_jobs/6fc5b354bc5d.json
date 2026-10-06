@@ -1,0 +1,18 @@
+{
+  "id": "6fc5b354bc5d",
+  "kind": "audio",
+  "session_id": "c1a76f5661764eb98ab5cb8f55f7c43a",
+  "url": "https://www.youtube.com/watch?v=zFL1g5GxKBk",
+  "title": "Call-in Show: ICE WARFARE | BOARD OF PEACE | GAZA | BIBLE CHANGES",
+  "channel": "EYA Censored | Supernatural Bible Changes",
+  "output_path": "/home/dracmas/python/gremlin/files/audio/EYA Censored _ Supernatural Bible Changes/2026-01-26_Call-in Show_ ICE WARFARE _ BOARD OF PEACE _ GAZA _ BIBLE CHANGES.mp3",
+  "dest_dir": "/home/dracmas/python/gremlin/files/audio/EYA Censored _ Supernatural Bible Changes",
+  "stem": "2026-01-26_Call-in Show_ ICE WARFARE _ BOARD OF PEACE _ GAZA _ BIBLE CHANGES",
+  "status": "error",
+  "started_at": 1791281563.649083,
+  "pid": 4001554,
+  "progress_pct": 0.0,
+  "error": "yt-dlp could not download https://www.youtube.com/watch?v=zFL1g5GxKBk: ERROR: unable to download video data: HTTP Error 403: Forbidden",
+  "finished_at": 1791281566.2695508,
+  "notified": true
+}

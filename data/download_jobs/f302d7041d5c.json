@@ -1,0 +1,19 @@
+{
+  "id": "f302d7041d5c",
+  "kind": "audio",
+  "session_id": "c1a76f5661764eb98ab5cb8f55f7c43a",
+  "url": "https://www.youtube.com/watch?v=MUphiKbbYsw",
+  "title": "Call-in Show | Discerning the Times | Supernatural Bible Changes | Mandela Effect",
+  "channel": "EYA Censored | Supernatural Bible Changes",
+  "output_path": "/home/dracmas/python/gremlin/files/audio/EYA Censored _ Supernatural Bible Changes/2026-02-15_Call-in Show _ Discerning the Times _ Supernatural Bible Changes _ Mandela Effect.mp3",
+  "dest_dir": "/home/dracmas/python/gremlin/files/audio/EYA Censored _ Supernatural Bible Changes",
+  "stem": "2026-02-15_Call-in Show _ Discerning the Times _ Supernatural Bible Changes _ Mandela Effect",
+  "status": "done",
+  "started_at": 1791281269.6116974,
+  "pid": 3989311,
+  "progress_pct": 100.0,
+  "error": null,
+  "finished_at": 1791281320.6985197,
+  "notified": true,
+  "size_bytes": 129539372
+}

@@ -1,0 +1,19 @@
+{
+  "id": "84dd21c50801",
+  "kind": "audio",
+  "session_id": "c1a76f5661764eb98ab5cb8f55f7c43a",
+  "url": "https://www.youtube.com/watch?v=WMJ3Ha9Fkdc",
+  "title": "Call-in Show: We See, We Hear and We Know Jesus, the Word",
+  "channel": "EYA Censored | Supernatural Bible Changes",
+  "output_path": "/home/dracmas/python/gremlin/files/audio/EYA Censored _ Supernatural Bible Changes/2026-01-17_Call-in Show_ We See, We Hear and We Know Jesus, the Word.mp3",
+  "dest_dir": "/home/dracmas/python/gremlin/files/audio/EYA Censored _ Supernatural Bible Changes",
+  "stem": "2026-01-17_Call-in Show_ We See, We Hear and We Know Jesus, the Word",
+  "status": "done",
+  "started_at": 1791284125.064,
+  "pid": 4056767,
+  "progress_pct": 100.0,
+  "error": null,
+  "finished_at": 1791284354.9214373,
+  "notified": true,
+  "size_bytes": 246600620
+}

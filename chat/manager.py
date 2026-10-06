@@ -12,6 +12,7 @@ as server-sent events:
 
 from __future__ import annotations
 
+import json
 import logging
 import threading
 import uuid
@@ -197,6 +198,24 @@ class ChatManager:
         runs to completion -- it cannot be safely killed mid-execution -- and
         its result is discarded along with the rest of the turn.
         """
+        # Collapse consecutive duplicate tool calls (same name + arguments) in one
+        # turn. Models sometimes repeat an identical call in a loop (e.g. polling a
+        # background job's status); executing it once yields the same result as N
+        # times, but N identical results flood the context and can push the request
+        # past the model's window.
+        if len(turn_tools) >= 2:
+            deduped: list[dict] = []
+            collapsed = 0
+            for t in turn_tools:
+                sig = (t["name"], json.dumps(t.get("arguments", {}), sort_keys=True))
+                if deduped and (deduped[-1]["name"], json.dumps(deduped[-1].get("arguments", {}), sort_keys=True)) == sig:
+                    collapsed += 1
+                    continue
+                deduped.append(t)
+            if collapsed:
+                log.warning("collapsing %d duplicate tool call(s) in one turn", collapsed)
+                turn_tools = deduped
+
         # Record the assistant's tool-call message.
         api_messages.append(
             {

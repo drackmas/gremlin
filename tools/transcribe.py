@@ -133,8 +133,8 @@ def build_transcribe_tool(cfg: AppConfig) -> list[Tool]:
             "status": "running",
             "model": model,
             "output_path": str(out_path),
-            "note": "Transcription started in the background. I'll let you know when it's done "
-                    "(use transcribe_status to check on it).",
+            "note": "Transcription started in the background. I'll tell the user the moment "
+                    "it finishes - do not poll transcribe_status in a loop to wait for it.",
         })
 
     # ---- transcribe_status -----------------------------------------------
@@ -155,7 +155,10 @@ def build_transcribe_tool(cfg: AppConfig) -> list[Tool]:
             else:
                 line = "running: warming up (model loading / decoding)"
             return json.dumps({"job_id": job["id"], "status": status, "progress": line,
-                               "output_path": job.get("output_path")})
+                               "output_path": job.get("output_path"),
+                               "note": "Still running. Do NOT call transcribe_status again to wait - "
+                                       "I will tell the user automatically the moment it finishes. "
+                                       "Continue with other work or end your turn."})
         return json.dumps({
             "job_id": job["id"], "status": status,
             "output_path": job.get("output_path"), "error": job.get("error"),
@@ -212,7 +215,13 @@ def build_transcribe_tool(cfg: AppConfig) -> list[Tool]:
         ),
         Tool(
             name="transcribe_status",
-            description="Check progress or result of a transcription job started by transcribe_audio.",
+            description=(
+                "Check progress or result of a transcription job started by "
+                "transcribe_audio. Call it at most once per job - do NOT poll "
+                "it in a loop to wait. Gremlin tells the user automatically when "
+                "the transcription completes, so if this returns 'running', stop "
+                "checking and continue other work or end your turn."
+            ),
             parameters={
                 "type": "object",
                 "properties": {

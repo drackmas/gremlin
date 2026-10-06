@@ -1,0 +1,19 @@
+{
+  "id": "bfef15026131",
+  "kind": "audio",
+  "session_id": "c1a76f5661764eb98ab5cb8f55f7c43a",
+  "url": "https://www.youtube.com/watch?v=zFL1g5GxKBk",
+  "title": "Call-in Show: ICE WARFARE | BOARD OF PEACE | GAZA | BIBLE CHANGES",
+  "channel": "EYA Censored | Supernatural Bible Changes",
+  "output_path": "/home/dracmas/python/gremlin/files/audio/EYA Censored _ Supernatural Bible Changes/2026-01-26_Call-in Show_ ICE WARFARE _ BOARD OF PEACE _ GAZA _ BIBLE CHANGES.mp3",
+  "dest_dir": "/home/dracmas/python/gremlin/files/audio/EYA Censored _ Supernatural Bible Changes",
+  "stem": "2026-01-26_Call-in Show_ ICE WARFARE _ BOARD OF PEACE _ GAZA _ BIBLE CHANGES",
+  "status": "done",
+  "started_at": 1791281698.133681,
+  "pid": 4003449,
+  "progress_pct": 100.0,
+  "error": null,
+  "finished_at": 1791281778.2577481,
+  "notified": true,
+  "size_bytes": 207142700
+}

@@ -1,0 +1,54 @@
+{
+  "goal": "Download audio and transcript for a YouTube video and summarize the transcript.",
+  "version": 1,
+  "revision": 0,
+  "status": "active",
+  "created": "2026-10-06T10:55:23.794541+00:00",
+  "updated": "2026-10-06T10:55:23.794573+00:00",
+  "notes": [
+    "1. Download mp3 for https://www.youtube.com/watch?v=WMJ3Ha9Fkdc",
+    "2. Download transcript for https://www.youtube.com/watch?v=WMJ3Ha9Fkdc",
+    "3. Use Transcript Summarizer for transcript",
+    "4. Report when done"
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "title": "YouTube Video Processing",
+      "tasks": [
+        {
+          "id": "t1",
+          "title": "Download MP3 audio",
+          "status": "pending",
+          "depends_on": [],
+          "progress": 0,
+          "notes": [],
+          "test": null
+        },
+        {
+          "id": "t2",
+          "title": "Download transcript",
+          "status": "pending",
+          "depends_on": [
+            "t1"
+          ],
+          "progress": 0,
+          "notes": [],
+          "test": null
+        },
+        {
+          "id": "t3",
+          "title": "Summarize transcript using transcript_summarizer",
+          "status": "pending",
+          "depends_on": [
+            "t2"
+          ],
+          "progress": 0,
+          "notes": [],
+          "test": null
+        }
+      ]
+    }
+  ],
+  "checkpoints": []
+}
