@@ -170,7 +170,7 @@ def build_phases(phases_in: list[Any]) -> list[Phase]:
         for t in p.tasks:
             for d in t.depends_on:
                 if d not in all_ids:
-                    raise PlanError(f"task {t.id} depends on unknown task: {d}")
+                    raise PlanError(f"task {t.id} depends on unknown task: {d}. Valid task ids: {', '.join(sorted(all_ids))}")
     _check_cycles(phases)
     return phases
 

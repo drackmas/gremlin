@@ -1,0 +1,79 @@
+{
+  "goal": "Download mp3 audio + transcript for YouTube video MUphiKbbYsw, run the Transcript Summarizer skill on the transcript, then report the summary and file locations.",
+  "version": 1,
+  "revision": 0,
+  "status": "completed",
+  "created": "2026-10-06T06:08:14.240162+00:00",
+  "updated": "2026-10-06T07:34:22.317196+00:00",
+  "notes": [],
+  "phases": [
+    {
+      "id": "p1",
+      "title": "Downloads",
+      "tasks": [
+        {
+          "id": "t1",
+          "title": "Download mp3 audio from the video",
+          "status": "done",
+          "depends_on": [],
+          "progress": 100,
+          "notes": [
+            "mp3 saved to files/audio/EYA Censored _ Supernatural Bible Changes/2026-02-15_Call-in Show _ Discerning the Times _ Supernatural Bible Changes _ Mandela Effect.mp3"
+          ],
+          "test": null
+        },
+        {
+          "id": "t2",
+          "title": "Download transcript for the video",
+          "status": "done",
+          "depends_on": [],
+          "progress": 100,
+          "notes": [
+            "Transcript saved to files/2026-02-15_Call-in Show _ Discerning the Times _ Supernatural Bible Changes _ Mandela Effect-transcription.txt"
+          ],
+          "test": null
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Analysis",
+      "tasks": [
+        {
+          "id": "t3",
+          "title": "Run Transcript Summarizer skill on the transcript",
+          "status": "done",
+          "depends_on": [
+            "t2"
+          ],
+          "progress": 100,
+          "notes": [
+            "Exhaustive analysis written to files/2026-02-15_Call-in Show _ Discerning the Times _ Supernatural Bible Changes _ Mandela Effect-transcription-analysis.txt (151574 bytes)"
+          ],
+          "test": null
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Reporting",
+      "tasks": [
+        {
+          "id": "t4",
+          "title": "Report completion with summary and file locations",
+          "status": "done",
+          "depends_on": [
+            "t1",
+            "t3"
+          ],
+          "progress": 100,
+          "notes": [
+            "All three deliverables verified on disk; completion reported to user."
+          ],
+          "test": null
+        }
+      ]
+    }
+  ],
+  "checkpoints": []
+}

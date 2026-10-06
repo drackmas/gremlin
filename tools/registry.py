@@ -45,11 +45,12 @@ _TYPE_MAP = {
 
 
 class ToolExecutionError(Exception):
-    """Base for all tool-handler execution failures.
+    """Base for expected tool-handler execution failures.
 
-    The registry's :meth: catches this (and any
-    other exception) and converts it to a structured ERROR: ...
-    string so the model can recover.
+    The registry catches this (and :class:`ToolError`) and converts it to a
+    structured ``ERROR: ...`` string so the model can recover; such failures
+    are logged at WARNING without a traceback. Any other exception escaping a
+    handler is an unexpected bug and is logged with a full traceback.
     """
 
 
@@ -212,6 +213,9 @@ class ToolRegistry:
                 result = json.dumps(result, ensure_ascii=False)
             log.info("tool ok: %s", name)
             return result, True
-        except Exception as e:  # handler failure -> structured error for model
+        except (ToolExecutionError, ToolError) as e:  # expected failure -> structured error for model
+            log.warning("tool %s failed: %s", name, e)
+            return f"ERROR: {type(e).__name__}: {e}", False
+        except Exception as e:  # unexpected handler bug -> full traceback
             log.exception("tool failed: %s", name)
             return f"ERROR: {type(e).__name__}: {e}", False

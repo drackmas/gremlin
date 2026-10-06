@@ -13,7 +13,7 @@ from __future__ import annotations
 from config import AppConfig
 from planning.store import PlanError, PlanStore, plan_progress, render_plan
 
-from .registry import Tool
+from .registry import Tool, ToolExecutionError
 
 ACTIONS = [
     "create",
@@ -111,6 +111,12 @@ def build_plan_tool(cfg: AppConfig) -> Tool:
 
         raise PlanError(f"unknown action: {action}")
 
+    def plan_tool(args: dict) -> str:
+        try:
+            return plan(args)
+        except PlanError as e:
+            raise ToolExecutionError(str(e)) from e
+
     return Tool(
         name="plan",
         description=(
@@ -180,5 +186,5 @@ def build_plan_tool(cfg: AppConfig) -> Tool:
             },
             "required": ["action"],
         },
-        handler=plan,
+        handler=plan_tool,
     )

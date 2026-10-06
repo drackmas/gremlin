@@ -40,7 +40,7 @@ from mcp.client.session import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
 from mcp.client.streamable_http import streamable_http_client
 
-from .registry import Tool
+from .registry import Tool, ToolExecutionError
 from config import AppConfig
 
 log = logging.getLogger("gremlin.tools.grav_mcp")
@@ -55,7 +55,7 @@ DESC_HEAD_CHARS = 200         # cap per-item description in resource listings
 BRIEF_DESC_CHARS = 100        # cap per-tool description in the brief tool index
 
 
-class GravError(Exception):
+class GravError(ToolExecutionError):
     """Raised for bad arguments, missing config, or remote MCP failures.
 
     The registry turns this into a structured ``ERROR:`` string so the model
