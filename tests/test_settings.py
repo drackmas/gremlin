@@ -80,6 +80,20 @@ def test_max_tool_calls_non_int_rejected(client):
     assert res.status_code == 400
 
 
+def test_knowledge_k_saved(client):
+    res = client.post("/api/settings", json={"knowledge_k": 8})
+    assert res.status_code == 200
+    assert res.get_json()["knowledge_k"] == 8
+    # reload from disk
+    again = client.get("/api/settings").get_json()
+    assert again["knowledge_k"] == 8
+
+
+def test_knowledge_k_out_of_range_rejected(client):
+    for bad in (0, 21, "5", None, True):
+        res = client.post("/api/settings", json={"knowledge_k": bad})
+        assert res.status_code == 400, bad
+
 def test_unknown_keys_ignored(client):
     res = client.post("/api/settings", json={"theme": "darkly", "bogus": 123})
     assert res.status_code == 200

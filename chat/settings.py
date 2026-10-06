@@ -85,6 +85,8 @@ class SettingsStore:
                     raise SettingsError(f"{key} must be a positive integer")
                 if key == "stt_silence_duration_ms" and not (100 <= value <= 10_000):
                     raise SettingsError(f"{key} must be between 100 and 10000 milliseconds")
+                if key == "knowledge_k" and not (1 <= value <= 20):
+                    raise SettingsError(f"{key} must be between 1 and 20")
             elif isinstance(default, float):
                 if isinstance(value, bool) or not isinstance(value, (int, float)):
                     raise SettingsError(f"{key} must be a number")

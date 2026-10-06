@@ -258,7 +258,7 @@ Local RAG over a dedicated library: drop files into `library/` (the personal wor
 - **Metadata for plain text.** Filename first (`manners-of-women-1908-ch3.txt` → title + year), then an optional `<same-name>.txt.meta` sidecar (`author:`, `date:`, `topic:` lines) as the escape hatch. Greppable from the folder alone.
 - **Human review gate.** After every sync, sample chunks per source type are rewritten to `data/knowledge/samples/` for review before trusting the index.
 - **Eval.** `data/knowledge/eval/questions.json` holds the draft question set (grows with the library); `python -m knowledge.eval` prints recall@k overall and per topic, and saves a timestamped results file. Store choice (sqlite-vec vs. numpy) was settled by `python -m knowledge.benchmark` at the plan's 250k target.
-- **Settings.** Two controls: the **Knowledge** toggle (`knowledge_enabled`, default OFF — when OFF the tool is not exposed to Gremlin at all, and behavior is identical to before) and the **Sync library** button, which runs the exact same code path as `python -m knowledge.sync` and shows the report inline. The gate is checked at dispatch time, so the toggle takes effect immediately without a restart.
+- **Settings.** Three controls: the **Knowledge** toggle (`knowledge_enabled`, default OFF — when OFF the tool is not exposed to Gremlin at all, and behavior is identical to before), a **Hits per search** number (`knowledge_k`, default 5, 1–20) that sets the default hit count for `search_knowledge` calls, and the **Sync library** button, which runs the exact same code path as `python -m knowledge.sync` and shows the report inline. The gate is checked at dispatch time, so the toggle takes effect immediately without a restart.
 
 ## File map
 

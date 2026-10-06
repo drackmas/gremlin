@@ -41,6 +41,21 @@ _SOURCE_TYPES = [
 ]
 
 
+def _effective_k(settings_loader, explicit: int | None) -> int | None:
+    """k to pass to ``search``: an explicit tool arg wins, then the owner's
+    live ``knowledge_k`` setting. ``None`` lets ``search`` fall back to the
+    built-in default (it also clamps any value to ``[1, max_k]``)."""
+    k = explicit
+    if k is None:
+        try:
+            k = settings_loader().get("knowledge_k")
+        except Exception:
+            k = None
+    if k is None or isinstance(k, bool) or not isinstance(k, int):
+        return None
+    return k
+
+
 def _render_hits(hits, cfg: KnowledgeConfig) -> str:
     """Render hits; drop lowest-ranked COMPLETE hits to fit the budget
     (never cut a hit in half)."""
@@ -97,7 +112,7 @@ def build_knowledge_tool(cfg: AppConfig, settings_loader) -> Tool:
                 author=args.get("author"),
                 date_from=args.get("date_from"),
                 date_to=args.get("date_to"),
-                k=args.get("k"),
+                k=_effective_k(settings_loader, args.get("k")),
                 embedder=Embedder(kcfg),
             )
         except Exception as e:
@@ -155,7 +170,7 @@ def build_knowledge_tool(cfg: AppConfig, settings_loader) -> Tool:
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 20,
-                    "description": "Number of hits to return (default 5, max 20).",
+                    "description": "Number of hits to return (default from the Hits per search setting, max 20).",
                 },
             },
             "required": ["query"],

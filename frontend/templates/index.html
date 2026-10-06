@@ -100,6 +100,13 @@
           </div>
           <div class="card-body border-top py-2 d-flex align-items-center justify-content-between gap-2">
             <div class="text-body-secondary small">
+              Hits per search — passages <code>search_knowledge</code> returns by default (1&ndash;20).
+            </div>
+            <input id="set-knowledge-hits" type="number" min="1" max="20" value="5"
+                   class="form-control form-control-sm" style="width: 5rem">
+          </div>
+          <div class="card-body border-top py-2 d-flex align-items-center justify-content-between gap-2">
+            <div class="text-body-secondary small">
               Re-index from the files in <code>library/</code>.
               Runs only when you click it.
             </div>

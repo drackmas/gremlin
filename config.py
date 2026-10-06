@@ -147,6 +147,7 @@ class AppConfig:
         "piper_voice": DEFAULT_VOICE,  # Piper voice id (see tts.VOICES); picked in settings
         "stt_enabled": False,  # transcribe microphone input to text (toggle in settings)
         "knowledge_enabled": False,  # expose search_knowledge to Gremlin (toggle in settings)
+        "knowledge_k": 5,  # default hits returned per search_knowledge query (1-20, number in settings)
         "stt_mode": "hold",  # "hold" (press-and-hold) | "continuous" (always listening)
         "stt_engine": "whisper",  # "whisper" (faster-whisper) | "parakeet" (onnx-asr)
         "stt_model": DEFAULT_STT_MODEL,  # model id (see stt.MODELS)

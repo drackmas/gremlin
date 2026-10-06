@@ -67,6 +67,7 @@ function applySettings(s) {
   $("set-shell-allowlist").value = (s.shell_allowlist || []).join(", ");
   $("set-discord").checked = !!s.discord_enabled;
   $("set-knowledge").checked = !!s.knowledge_enabled;
+  $("set-knowledge-hits").value = s.knowledge_k ?? 5;
   const tokStatus = $("set-discord-token-status");
   if (tokStatus) tokStatus.textContent = s.discord_token_set ? "Token is configured." : "No token configured yet.";
   setAppearanceActive(s.appearance);
@@ -201,6 +202,7 @@ function collectSettings() {
   const s = {
     show_thinking: $("set-thinking").checked,
     knowledge_enabled: $("set-knowledge").checked,
+    knowledge_k: parseInt($("set-knowledge-hits").value, 10),
     appearance: currentAppearance(),
     theme: $("set-theme").value,
     base_url: $("set-base-url").value.trim(),

@@ -10,6 +10,7 @@
   "piper_voice": "en_GB-alba-medium",
   "stt_enabled": true,
   "knowledge_enabled": true,
+  "knowledge_k": 5,
   "stt_mode": "continuous",
   "stt_engine": "whisper",
   "stt_model": "turbo",

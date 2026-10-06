@@ -263,3 +263,26 @@ def test_tool_off_returns_error(app_cfg):
     result, ok = registry.execute("search_knowledge", {"query": "anything"})
     assert not ok
     assert "disabled" in result
+
+
+def test_tool_default_k_from_setting(app_cfg, seeded):
+    from tools import build_registry
+
+    store = SettingsStore(app_cfg)
+    store.save({"knowledge_enabled": True, "knowledge_k": 1})
+    registry = build_registry(app_cfg, None, None, lambda: store.load())
+    result, ok = registry.execute(
+        "search_knowledge", {"query": "disposable index embeddings"}
+    )
+    assert ok
+    # the setting (not the built-in default of 5) limits the hits
+    assert "[1]" in result
+    assert "[2]" not in result
+
+    store.save({"knowledge_k": 2})
+    result, ok = registry.execute(
+        "search_knowledge", {"query": "disposable index embeddings"}
+    )
+    assert ok
+    # both search legs rank both docs, so k=2 surfaces the second hit
+    assert "[2]" in result
