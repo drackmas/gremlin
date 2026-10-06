@@ -63,6 +63,14 @@ def build_system_prompt(skill_index: list[dict], tools: list | None = None, iden
         for s in skill_index:
             desc = f": {s['description']}" if s.get("description") else ""
             lines.append(f"- {s['name']}{desc}")
+        lines.append(
+            "Skill execution: after load_skill returns the instructions, execute them step by step "
+            "using your tools. The returned text IS the task for that step — do not create a plan "
+            "for it, do not deliberate about what the instructions mean, and do not ask permission "
+            "to proceed. Follow each numbered step in order. When a skill references a tool by name, "
+            "use your tool with that same name. After the final step, confirm the result and move "
+            "to the next plan step."
+        )
         parts.append("\n".join(lines))
     if tools:
         lines = [
